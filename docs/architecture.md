@@ -206,6 +206,8 @@ Login (including magic links), password recovery, two-factor verification, initi
 
 Task forms use V1 controls and dialogs. The rich-text description editor remains an isolated PrimeReact Editor with V1 styling until a shared rich-text component is available. Task board previews and loading states live in Storybook.
 
+Schedule overview, create/edit forms and details use the light V1 workspace. The schedule table adapts the shared DataTable to server filtering, sorting and pagination; containers retain tRPC mutations and Formik submission. Delivery health uses compact metrics with the shared Radix-based HelpPopover. The timeline retains its existing PrimeReact Chart wrapper around Chart.js with V1 colors. Schedule forms, populated details and help popovers have independent Storybook previews; regression tests mock network mutations.
+
 ### Two-factor enrollment
 
 BetterAuth's `twoFactorOptions` requires a verified TOTP code before enabling two-factor sign-in. Starting or abandoning setup must leave password sign-in available. The Prisma `TwoFactor` model includes the installed plugin's failed-attempt counter and lockout timestamp; apply database migrations and regenerate Prisma when upgrading the plugin. `pnpm --filter @next-phish/next-app test:auth` exercises pending, rejected, storage-failed and successful enrollment against an isolated in-memory BetterAuth instance; it never changes real accounts.

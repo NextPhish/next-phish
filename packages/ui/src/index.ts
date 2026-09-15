@@ -16,6 +16,7 @@ export {
 export { Card, CardHeader, CardBody, CardFooter } from "./molecules/card";
 export { EmptyState } from "./molecules/empty-state";
 export { MetricCard } from "./molecules/metric-card";
+export { HelpPopover } from "./molecules/help-popover";
 export { PageHeader } from "./molecules/page-header";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./molecules/tabs";
 export { Dialog, DialogClose, type DialogProps } from "./molecules/dialog";

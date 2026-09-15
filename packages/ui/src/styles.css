@@ -1229,4 +1229,36 @@
     margin: 5px 0;
     background: var(--np-border);
   }
+  .np-help-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    color: var(--np-muted);
+    cursor: pointer;
+  }
+  .np-help-trigger:hover {
+    background: var(--np-tint);
+    color: var(--np-primary);
+  }
+  .np-help-trigger:focus-visible {
+    outline: 2px solid var(--np-primary);
+    outline-offset: 2px;
+  }
+  .np-help-content {
+    z-index: 80;
+    width: 280px;
+    max-width: var(--radix-popover-content-available-width);
+    padding: 14px 16px;
+    border: 1px solid var(--np-border);
+    border-radius: 10px;
+    background: white;
+    color: var(--np-ink);
+    font-size: 13px;
+    line-height: 1.6;
+    box-shadow: 0 8px 28px rgb(25 34 53 / 14%);
+  }
 }

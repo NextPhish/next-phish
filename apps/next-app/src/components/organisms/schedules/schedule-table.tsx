@@ -1,16 +1,32 @@
 "use client";
 
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Badge } from "primereact/badge";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
-import { AppDataTable } from "@/src/components/molecules/data-table";
-import type {
-  DataTableAction,
-  DataTableColumn,
-  DataTableFilter,
-} from "@/src/components/molecules/data-table";
-import { useDataTable } from "@/src/hooks/use-data-table";
-import { useLocale } from "@/src/lib/i18n";
+import {
+  Copy,
+  EllipsisVertical,
+  Eye,
+  Pencil,
+  Play,
+  Trash2,
+  X,
+} from "lucide-react";
+import {
+  Badge,
+  Button,
+  DataTable,
+  Dialog,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  FormMessage,
+  useDataTableState,
+  type ColumnDef,
+} from "@next-phish/ui";
+import { useLocale, useTranslation } from "@/src/lib/i18n";
+import { uiTableLabels } from "@/src/lib/ui-table-labels";
 import { trpc } from "@/src/lib/trpc";
 
 export type ScheduleRow = {
@@ -26,244 +42,361 @@ export type ScheduleRow = {
   _count: { campaigns: number };
 };
 
-function formatLabel(value: string): string {
-  return value
-    .toLowerCase()
-    .replaceAll("_", " ")
-    .replace(/^./, (letter) => letter.toUpperCase());
+type Confirmation = { type: "closed" } | { type: "delete"; row: ScheduleRow };
+const statuses = [
+  "DRAFT",
+  "SCHEDULED",
+  "RUNNING",
+  "COMPLETED",
+  "CANCELLED",
+] as const;
+const types = ["ONE_TIME", "RECURRING"] as const;
+function statusTone(status: ScheduleRow["status"]) {
+  return status === "RUNNING"
+    ? ("success" as const)
+    : status === "SCHEDULED"
+      ? ("info" as const)
+      : status === "CANCELLED"
+        ? ("danger" as const)
+        : status === "DRAFT"
+          ? ("warning" as const)
+          : ("neutral" as const);
+}
+function getRowId(row: ScheduleRow) {
+  return row.id;
 }
 
-function statusSeverity(status: ScheduleRow["status"]) {
-  if (status === "RUNNING") return "success" as const;
-  if (status === "SCHEDULED") return "info" as const;
-  if (status === "CANCELLED") return "danger" as const;
-  if (status === "DRAFT") return "warning" as const;
-  return "secondary" as const;
-}
-
-interface ScheduleTableProps {
-  onChanged: () => void;
-}
-
-export function ScheduleTable({ onChanged }: ScheduleTableProps) {
+export function ScheduleTable({ onChanged }: { onChanged: () => void }) {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslation();
   const utils = trpc.useUtils();
-  const { setSearch, setSorts, setFilterValues, setPage, buildQueryInput } =
-    useDataTable();
-  const queryInput = buildQueryInput(["name", "type", "status", "startsAt"]);
-  const { data, isLoading } = trpc.campaign.listSchedules.useQuery(queryInput);
+  const { state, onStateChange } = useDataTableState();
+  const [debouncedSearch, setDebouncedSearch] = useState(state.search);
+  const [confirmation, setConfirmation] = useReducer(
+    (_: Confirmation, next: Confirmation) => next,
+    { type: "closed" },
+  );
+  const [mutationError, setMutationError] = useReducer(
+    (_: string, next: string) => next,
+    "",
+  );
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(state.search), 300);
+    return () => clearTimeout(timeout);
+  }, [state.search]);
+
+  const allowedSorts = new Set(["name", "type", "status", "startsAt"]);
+  const sort = state.sorting.flatMap(({ id, desc }) =>
+    allowedSorts.has(id)
+      ? [
+          {
+            field: id as "name" | "type" | "status" | "startsAt",
+            order: desc ? ("desc" as const) : ("asc" as const),
+          },
+        ]
+      : [],
+  );
+  const queryFilters = Object.fromEntries(
+    Object.entries(state.filters)
+      .filter(([, value]) => typeof value === "string" && value !== "")
+      .map(([field, value]) => [field, String(value)]),
+  );
+  const queryInput = {
+    search: debouncedSearch || undefined,
+    limit: state.pagination.pageSize,
+    offset: state.pagination.pageIndex * state.pagination.pageSize,
+    sort: sort.length ? sort : undefined,
+    filters: Object.keys(queryFilters).length ? queryFilters : undefined,
+  };
+  const { data, isLoading, error, refetch } =
+    trpc.campaign.listSchedules.useQuery(queryInput);
+  const rows = (data?.rows ?? []) as ScheduleRow[];
+  async function refresh() {
+    setMutationError("");
+    await utils.campaign.listSchedules.invalidate();
+    onChanged();
+  }
+  const mutationFailed = () => setMutationError(t("scheduleUi.actionError"));
   const cancel = trpc.campaign.cancelSchedule.useMutation({
-    onSuccess: async () => {
-      await utils.campaign.listSchedules.invalidate();
-      onChanged();
-    },
+    onSuccess: refresh,
+    onError: mutationFailed,
   });
   const duplicate = trpc.campaign.duplicateSchedule.useMutation({
-    onSuccess: async () => {
-      await utils.campaign.listSchedules.invalidate();
-      onChanged();
-    },
+    onSuccess: refresh,
+    onError: mutationFailed,
   });
   const activate = trpc.campaign.activateSchedule.useMutation({
-    onSuccess: async () => {
-      await utils.campaign.listSchedules.invalidate();
-      onChanged();
-    },
+    onSuccess: refresh,
+    onError: mutationFailed,
   });
-  const deleteSchedule = trpc.campaign.deleteSchedule.useMutation({
+  const remove = trpc.campaign.deleteSchedule.useMutation({
     onSuccess: async () => {
-      await utils.campaign.listSchedules.invalidate();
-      onChanged();
+      setConfirmation({ type: "closed" });
+      await refresh();
     },
+    onError: mutationFailed,
   });
-  const rows = (data?.rows ?? []) as ScheduleRow[];
+  const actionPending =
+    cancel.isPending || duplicate.isPending || activate.isPending;
 
-  const columns: DataTableColumn<ScheduleRow>[] = [
-    {
-      field: "name",
-      header: "Name",
-      sortable: true,
-      body: (schedule) => (
-        <button
-          type="button"
-          className="font-medium text-white hover:text-brand-blue"
-          onClick={() => router.push(`/schedule/${schedule.id}`)}
-        >
-          {schedule.name}
-        </button>
-      ),
-    },
-    {
-      field: "type",
-      header: "Type",
-      sortable: true,
-      body: (schedule) => (
-        <Badge
-          value={formatLabel(schedule.type)}
-          severity={schedule.type === "RECURRING" ? "info" : "secondary"}
-        />
-      ),
-    },
-    {
-      field: "status",
-      header: "Status",
-      sortable: true,
-      body: (schedule) => (
-        <Badge
-          value={formatLabel(schedule.status)}
-          severity={statusSeverity(schedule.status)}
-        />
-      ),
-    },
-    {
-      field: "frequency",
-      header: "Cadence",
-      body: (schedule) =>
-        schedule.frequency ? formatLabel(schedule.frequency) : "One time",
-    },
-    {
-      field: "sources",
-      header: "Campaign source",
-      body: (schedule) => (
-        <div className="max-w-64 text-sm">
-          <p className="truncate text-zinc-200">
-            {schedule.sources.map(({ campaign }) => campaign.name).join(", ")}
-          </p>
-          <p className="text-xs text-zinc-500">
-            {schedule._count.campaigns} generated campaign
-            {schedule._count.campaigns === 1 ? "" : "s"}
-          </p>
-        </div>
-      ),
-    },
-    {
-      field: "targetGroup",
-      header: "Audience",
-      body: (schedule) =>
-        schedule.targetGroup ? (
-          <div className="text-sm">
-            <p className="text-zinc-200">{schedule.targetGroup.name}</p>
-            <p className="text-xs text-zinc-500">
-              {schedule.targetGroup._count.users} recipients
+  const columns = useMemo<ColumnDef<ScheduleRow>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: t("scheduleUi.name"),
+        cell: ({ row }) => (
+          <button
+            type="button"
+            className="font-semibold text-[var(--np-ink)] hover:text-[var(--np-primary)]"
+            onClick={() => router.push(`/schedule/${row.original.id}`)}
+          >
+            {row.original.name}
+          </button>
+        ),
+      },
+      {
+        accessorKey: "type",
+        header: t("scheduleUi.type"),
+        cell: ({ row }) => (
+          <Badge tone={row.original.type === "RECURRING" ? "info" : "neutral"}>
+            {t(`scheduleUi.types.${row.original.type}`)}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: t("scheduleUi.status"),
+        cell: ({ row }) => (
+          <Badge tone={statusTone(row.original.status)}>
+            {t(`scheduleUi.statuses.${row.original.status}`)}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "frequency",
+        header: t("scheduleUi.cadence"),
+        enableSorting: false,
+        cell: ({ row }) =>
+          row.original.frequency
+            ? t(`scheduleUi.options.${row.original.frequency}`)
+            : t("scheduleUi.oneTime"),
+      },
+      {
+        id: "sources",
+        header: t("scheduleUi.campaignSource"),
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className="max-w-64 text-sm">
+            <p className="truncate text-[var(--np-ink)]">
+              {row.original.sources
+                .map(({ campaign }) => campaign.name)
+                .join(", ")}
+            </p>
+            <p className="text-xs text-[var(--np-muted)]">
+              {t("scheduleUi.generatedCampaigns", {
+                count: row.original._count.campaigns,
+              })}
             </p>
           </div>
-        ) : (
-          <span className="text-zinc-500">Inherited</span>
         ),
-    },
-    {
-      field: "startsAt",
-      header: "Starts",
-      sortable: true,
-      body: (schedule) =>
-        new Date(schedule.startsAt).toLocaleString(locale, {
-          dateStyle: "medium",
-          timeStyle: "short",
-          timeZone: schedule.targetTimezone,
-        }),
-    },
-  ];
-
-  const filters: DataTableFilter[] = [
-    {
-      field: "type",
-      label: "Type",
-      type: "select",
-      options: ["ONE_TIME", "RECURRING"].map((value) => ({
-        label: formatLabel(value),
-        value,
-      })),
-    },
-    {
-      field: "status",
-      label: "Status",
-      type: "select",
-      options: ["DRAFT", "SCHEDULED", "RUNNING", "COMPLETED", "CANCELLED"].map(
-        (value) => ({ label: formatLabel(value), value }),
-      ),
-    },
-  ];
-
-  const actions: DataTableAction<ScheduleRow>[] = [
-    {
-      label: "View details",
-      icon: "pi pi-eye",
-      onClick: (schedule) => router.push(`/schedule/${schedule.id}`),
-    },
-    {
-      label: "Edit schedule",
-      icon: "pi pi-pencil",
-      visible: (schedule) =>
-        !["COMPLETED", "CANCELLED"].includes(schedule.status),
-      onClick: (schedule) => router.push(`/schedule/${schedule.id}/edit`),
-    },
-    {
-      label: "Activate schedule",
-      icon: "pi pi-play",
-      visible: (schedule) => schedule.status === "DRAFT",
-      onClick: (schedule) => activate.mutate({ id: schedule.id }),
-    },
-    {
-      label: "Duplicate",
-      icon: "pi pi-copy",
-      onClick: (schedule) => duplicate.mutate({ id: schedule.id }),
-    },
-    {
-      label: "Cancel schedule",
-      icon: "pi pi-times",
-      severity: "danger",
-      visible: (schedule) =>
-        !["COMPLETED", "CANCELLED"].includes(schedule.status),
-      onClick: (schedule) => cancel.mutate({ id: schedule.id }),
-    },
-    {
-      label: "Delete schedule",
-      icon: "pi pi-trash",
-      severity: "danger",
-      onClick: (schedule) =>
-        confirmDialog({
-          header: "Delete schedule",
-          message:
-            "Deleting this schedule stops all future executions, completes its active campaigns, and cancels all unsent recipients. Generated campaigns remain available in the Campaigns list. This cannot be undone.",
-          icon: "pi pi-exclamation-triangle",
-          accept: () => deleteSchedule.mutate({ id: schedule.id }),
-        }),
-    },
-  ];
+      },
+      {
+        id: "targetGroup",
+        header: t("scheduleUi.audience"),
+        enableSorting: false,
+        cell: ({ row }) =>
+          row.original.targetGroup ? (
+            <div className="text-sm">
+              <p>{row.original.targetGroup.name}</p>
+              <p className="text-xs text-[var(--np-muted)]">
+                {t("scheduleUi.recipients", {
+                  count: row.original.targetGroup._count.users,
+                })}
+              </p>
+            </div>
+          ) : (
+            <span className="text-[var(--np-muted)]">
+              {t("scheduleUi.inherited")}
+            </span>
+          ),
+      },
+      {
+        accessorKey: "startsAt",
+        header: t("scheduleUi.starts"),
+        cell: ({ row }) =>
+          new Date(row.original.startsAt).toLocaleString(locale, {
+            dateStyle: "medium",
+            timeStyle: "short",
+            timeZone: row.original.targetTimezone,
+          }),
+      },
+      {
+        id: "actions",
+        header: t("tableUi.actions"),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const schedule = row.original;
+          const canChange = !["COMPLETED", "CANCELLED"].includes(
+            schedule.status,
+          );
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`${t("tableUi.actions")}: ${schedule.name}`}
+                >
+                  <EllipsisVertical size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() => router.push(`/schedule/${schedule.id}`)}
+                >
+                  <Eye size={16} />
+                  {t("scheduleUi.viewDetails")}
+                </DropdownMenuItem>
+                {canChange && (
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      router.push(`/schedule/${schedule.id}/edit`)
+                    }
+                  >
+                    <Pencil size={16} />
+                    {t("scheduleUi.edit")}
+                  </DropdownMenuItem>
+                )}
+                {schedule.status === "DRAFT" && (
+                  <DropdownMenuItem
+                    disabled={actionPending}
+                    onSelect={() => activate.mutate({ id: schedule.id })}
+                  >
+                    <Play size={16} />
+                    {t("scheduleUi.activate")}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  disabled={actionPending}
+                  onSelect={() => duplicate.mutate({ id: schedule.id })}
+                >
+                  <Copy size={16} />
+                  {t("scheduleUi.duplicate")}
+                </DropdownMenuItem>
+                {canChange && (
+                  <DropdownMenuItem
+                    disabled={actionPending}
+                    onSelect={() => cancel.mutate({ id: schedule.id })}
+                  >
+                    <X size={16} />
+                    {t("scheduleUi.cancelSchedule")}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-700"
+                  onSelect={() =>
+                    setConfirmation({ type: "delete", row: schedule })
+                  }
+                >
+                  <Trash2 size={16} />
+                  {t("scheduleUi.delete")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    [actionPending, activate, cancel, duplicate, locale, router, t],
+  );
 
   return (
     <section aria-labelledby="schedule-table-heading">
       <div className="mb-4">
         <h2
           id="schedule-table-heading"
-          className="text-lg font-semibold text-white"
+          className="text-lg font-semibold text-[var(--np-ink)]"
         >
-          Schedule database
+          {t("scheduleUi.title")}
         </h2>
-        <p className="mt-1 text-sm text-zinc-400">
-          Search, filter, and manage all campaign schedules.
+        <p className="mt-1 text-sm text-[var(--np-muted)]">
+          {t("scheduleUi.subtitle")}
         </p>
       </div>
-      <AppDataTable
+      <DataTable
+        mode="server"
         data={rows}
         total={data?.total ?? 0}
         columns={columns}
-        dataKey="id"
+        getRowId={getRowId}
+        caption={t("scheduleUi.title")}
+        state={state}
+        onStateChange={onStateChange}
         loading={isLoading}
-        searchPlaceholder="Search schedules"
-        filters={filters}
-        actions={actions}
-        onSearch={setSearch}
-        onSort={setSorts}
-        onFilter={setFilterValues}
-        onPage={(offset, limit) => setPage({ offset: offset * limit, limit })}
+        error={error ? t("scheduleUi.loadError") : undefined}
+        onRetry={() => void refetch()}
+        labels={{ ...uiTableLabels(t), search: t("scheduleUi.search") }}
+        filters={[
+          {
+            field: "type",
+            label: t("scheduleUi.type"),
+            type: "select",
+            options: types.map((value) => ({
+              label: t(`scheduleUi.types.${value}`),
+              value,
+            })),
+          },
+          {
+            field: "status",
+            label: t("scheduleUi.status"),
+            type: "select",
+            options: statuses.map((value) => ({
+              label: t(`scheduleUi.statuses.${value}`),
+              value,
+            })),
+          },
+        ]}
       />
-      <ConfirmDialog
-        className="max-w-md"
-        draggable={false}
-        dismissableMask={true}
-      />
+      {mutationError && (
+        <div className="mt-3">
+          <FormMessage variant="error">{mutationError}</FormMessage>
+        </div>
+      )}
+      <Dialog
+        open={confirmation.type === "delete"}
+        onOpenChange={(open) => {
+          if (!open && !remove.isPending) setConfirmation({ type: "closed" });
+        }}
+        title={t("scheduleUi.deleteTitle")}
+        description={t("scheduleUi.deleteDescription")}
+        closeLabel={t("common.cancel")}
+        dismissible={!remove.isPending}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              disabled={remove.isPending}
+              onClick={() => setConfirmation({ type: "closed" })}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="danger"
+              loading={remove.isPending}
+              onClick={() => {
+                if (confirmation.type === "delete")
+                  remove.mutate({ id: confirmation.row.id });
+              }}
+            >
+              {t("scheduleUi.delete")}
+            </Button>
+          </>
+        }
+      >
+        {null}
+      </Dialog>
     </section>
   );
 }

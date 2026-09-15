@@ -16,6 +16,7 @@ import {
   Skeleton as UiSkeleton,
 } from "@next-phish/ui";
 import { trpc } from "@/src/lib/trpc";
+import { useTranslation } from "@/src/lib/i18n/client";
 
 const DAY_MS = 86_400_000;
 
@@ -58,6 +59,7 @@ export function ScheduleTimeline({
   labels,
 }: ScheduleTimelineProps = {}) {
   const router = useRouter();
+  const t = useTranslation();
   const range = useMemo(() => {
     const startsAt = new Date();
     startsAt.setHours(0, 0, 0, 0);
@@ -128,7 +130,7 @@ export function ScheduleTimeline({
       labels: rows.map((row) => row.label),
       datasets: [
         {
-          label: "Timeline",
+          label: labels?.title ?? "Timeline",
           data: rows.map((row) => [row.start.getTime(), row.end.getTime()]),
           backgroundColor: rows.map((row) =>
             row.kind === "schedule"
@@ -155,7 +157,7 @@ export function ScheduleTimeline({
         },
       ],
     }),
-    [rows, variant],
+    [rows, variant, labels?.title],
   );
 
   const options = useMemo<ChartOptions<"bar">>(
@@ -184,7 +186,7 @@ export function ScheduleTimeline({
                 row.kind === "schedule"
                   ? (labels?.schedules ?? "Schedule")
                   : (labels?.campaigns ?? "Campaign");
-              return `${kindLabel} · ${row.status} · ${mediumDateFormatter.format(row.start)} – ${mediumDateFormatter.format(row.end)}`;
+              return `${kindLabel} · ${t(`scheduleUi.values.${row.status}`)} · ${mediumDateFormatter.format(row.start)} – ${mediumDateFormatter.format(row.end)}`;
             },
           },
         },
@@ -228,6 +230,7 @@ export function ScheduleTimeline({
       rows,
       shortDateFormatter,
       variant,
+      t,
     ],
   );
 

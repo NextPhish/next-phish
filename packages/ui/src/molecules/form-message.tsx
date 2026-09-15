@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 export interface FormMessageProps {
@@ -46,7 +48,12 @@ export function FormErrorSummary({
       <ul>
         {errors.map(({ id, message }) => (
           <li key={id}>
-            <a href={`#${id}`}>{message}</a>
+            <a
+              href={`#${id}`}
+              onClick={() => document.getElementById(id)?.focus()}
+            >
+              {message}
+            </a>
           </li>
         ))}
       </ul>

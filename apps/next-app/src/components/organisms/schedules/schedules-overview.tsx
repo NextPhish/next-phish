@@ -1,44 +1,47 @@
 "use client";
-
 import { useRouter } from "next/navigation";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Button } from "primereact/button";
+import { PageHeader, Button } from "@next-phish/ui";
+import { Plus } from "lucide-react";
 import { trpc } from "@/src/lib/trpc";
+import { useLocale, useTranslation } from "@/src/lib/i18n";
 import { ScheduleTable } from "./schedule-table";
 import { ScheduleTimeline } from "./schedule-timeline";
 import { ExecutionOperations } from "./execution-operations";
-
+import styles from "./schedule-overview.module.css";
 export function SchedulesOverview() {
   const router = useRouter();
   const utils = trpc.useUtils();
-
+  const t = useTranslation();
+  const locale = useLocale();
   return (
-    <div className="space-y-8 px-6 py-8">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <BreadCrumb
-            home={{ icon: "pi pi-home", url: "/" }}
-            model={[{ label: "Schedule" }]}
-          />
-          <h1 className="mt-2 text-2xl font-semibold text-white">Schedule</h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Plan, track, and manage campaign delivery.
-          </p>
-        </div>
-        <Button
-          type="button"
-          size="small"
-          label="New schedule"
-          icon="pi pi-plus"
-          onClick={() => router.push("/schedule/new")}
-        />
-      </header>
-
+    <div className={styles.overview}>
+      <PageHeader
+        title={t("scheduleUi.overviewTitle")}
+        description={t("scheduleUi.overviewDescription")}
+        actions={
+          <Button onClick={() => router.push("/schedule/new")}>
+            <Plus size={16} aria-hidden="true" />
+            {t("scheduleUi.newSchedule")}
+          </Button>
+        }
+      />
       <ExecutionOperations />
       <ScheduleTable
         onChanged={() => utils.campaign.getScheduleTimeline.invalidate()}
       />
-      <ScheduleTimeline />
+      <ScheduleTimeline
+        variant="v1"
+        locale={locale}
+        labels={{
+          title: t("dashboard.timelineTitle"),
+          description: t("dashboard.timelineDescription"),
+          range: t("dashboard.nextThreeMonths"),
+          schedules: t("dashboard.timelineSchedules"),
+          campaigns: t("dashboard.timelineCampaigns"),
+          empty: t("dashboard.timelineEmpty"),
+          error: t("dashboard.timelineError"),
+        }}
+      />
     </div>
   );
 }

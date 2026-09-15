@@ -70,7 +70,11 @@ export function AppShell({
   return (
     <div
       className={
-        pathname === "/" || pathname === "/profile" || pathname === "/tasks"
+        pathname === "/" ||
+        pathname === "/profile" ||
+        pathname === "/tasks" ||
+        pathname === "/schedule" ||
+        pathname.startsWith("/schedule/")
           ? styles.v1Boundary
           : styles.legacyBoundary
       }

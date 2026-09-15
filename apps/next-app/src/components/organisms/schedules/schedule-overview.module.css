@@ -1,0 +1,78 @@
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  min-width: 0;
+}
+.sectionHeading {
+  margin-bottom: 16px;
+}
+.overview > :global(.np-page-header) {
+  margin-bottom: 0;
+}
+.sectionHeading h2 {
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--np-ink);
+}
+.sectionHeading p {
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--np-muted);
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.metricBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  height: 100%;
+}
+.metricLabel {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--np-muted);
+}
+.metricLabel svg {
+  flex-shrink: 0;
+}
+.metricBody strong {
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--np-ink);
+  font-variant-numeric: tabular-nums;
+}
+.metricBody .warning {
+  color: #9b610b;
+}
+.metricDetail {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--np-muted);
+}
+.metricSkeleton {
+  height: 124px;
+  border-radius: 12px;
+}
+@media (max-width: 1000px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 360px) {
+  .metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .overview {
+    gap: 22px;
+  }
+}

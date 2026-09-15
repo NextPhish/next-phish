@@ -1,0 +1,103 @@
+.page {
+  padding: 0;
+  max-width: 1120px;
+  margin: 0 auto;
+  color: #172033;
+}
+.form,
+.skeleton {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+.section {
+  padding: 1.5rem;
+  border: 1px solid #dfe3ec;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 4%);
+}
+.section header {
+  margin-bottom: 1.25rem;
+}
+.section h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.section header p,
+.empty {
+  margin: 0.3rem 0 0;
+  color: #626d80;
+  font-size: 0.875rem;
+}
+.grid,
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.grid3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.wide {
+  grid-column: 1/-1;
+}
+.checkRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #dfe3ec;
+  border-radius: 0.75rem;
+  background: #f8f9fc;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.checkRow small {
+  display: block;
+  margin-top: 0.2rem;
+  color: #626d80;
+  font-weight: 400;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.reviewList {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+}
+.reviewList div {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 1rem;
+}
+.reviewList dt {
+  color: #626d80;
+}
+.reviewList dd {
+  margin: 0;
+  font-weight: 600;
+}
+.skeleton > * {
+  border-radius: 1rem;
+}
+@media (max-width: 720px) {
+  .grid,
+  .grid3 {
+    grid-template-columns: 1fr;
+  }
+  .actions {
+    flex-direction: column-reverse;
+  }
+  .actions > * {
+    width: 100%;
+  }
+  .reviewList div {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
