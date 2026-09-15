@@ -83,7 +83,14 @@
     "setupPage": "Create a landing page",
     "setupSendingProfile": "Configure a sending profile",
     "setupCampaign": "Create your first campaign",
-    "loadError": "The dashboard could not be loaded. Please try again."
+    "loadError": "The dashboard could not be loaded. Please try again.",
+    "timelineTitle": "Three-month timeline",
+    "timelineDescription": "Upcoming schedules and running campaigns. Select a bar to open it.",
+    "nextThreeMonths": "Next 3 months",
+    "timelineSchedules": "Schedules",
+    "timelineCampaigns": "Campaigns",
+    "timelineEmpty": "No schedules or running campaigns in the next three months.",
+    "timelineError": "The timeline could not be loaded."
   },
   "nav": {
     "planning": "Planning",
@@ -103,7 +110,11 @@
     "collapseSidebar": "Collapse sidebar",
     "closeSidebar": "Close sidebar",
     "newOrganization": "New organization",
-    "selectOrganization": "Select organization"
+    "selectOrganization": "Select organization",
+    "mainNavigation": "Main navigation",
+    "openSidebar": "Open navigation",
+    "skipToContent": "Skip to content",
+    "workspace": "Workspace"
   },
   "notFound": {
     "title": "Page not found",

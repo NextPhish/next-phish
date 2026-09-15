@@ -12,18 +12,22 @@ export interface OnboardingValues {
 export function OnboardingPresentation({
   error,
   slugStatus = "idle",
+  onCancel,
 }: {
   error: string;
   slugStatus?: SlugStatus;
+  onCancel?: () => void;
 }) {
   const t = useTranslation();
   const { values, errors, touched, isSubmitting, setValues } =
     useFormikContext<OnboardingValues>();
   return (
     <div className={styles.content}>
-      <FormMessage variant="info" title={t("onboarding.infoTitle")}>
-        {t("onboarding.infoBody")}
-      </FormMessage>
+      {!onCancel && (
+        <FormMessage variant="info" title={t("onboarding.infoTitle")}>
+          {t("onboarding.infoBody")}
+        </FormMessage>
+      )}
       <Form noValidate className={styles.form}>
         <FormField
           id="organization-name"
@@ -108,15 +112,28 @@ export function OnboardingPresentation({
           </div>
         )}
         {error && <FormMessage variant="error">{error}</FormMessage>}
-        <Button
-          type="submit"
-          loading={isSubmitting}
-          disabled={
-            isSubmitting || slugStatus === "taken" || slugStatus === "checking"
-          }
-        >
-          {t("onboarding.createOrganization")}
-        </Button>
+        <div className={onCancel ? styles.dialogActions : styles.actions}>
+          {onCancel && (
+            <Button
+              variant="secondary"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              {t("common.cancel")}
+            </Button>
+          )}
+          <Button
+            type="submit"
+            loading={isSubmitting}
+            disabled={
+              isSubmitting ||
+              slugStatus === "taken" ||
+              slugStatus === "checking"
+            }
+          >
+            {t(onCancel ? "common.create" : "onboarding.createOrganization")}
+          </Button>
+        </div>
       </Form>
     </div>
   );

@@ -62,3 +62,11 @@ export {
   AuthLayoutSkeleton,
   type AuthLayoutProps,
 } from "./templates/auth-layout";
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "./molecules/dropdown-menu";

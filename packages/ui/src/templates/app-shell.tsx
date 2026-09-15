@@ -32,6 +32,7 @@ export interface AppShellProps {
   brand?: ReactNode;
   linkComponent?: ElementType;
   labels?: { navigation: string; open: string; close: string; skip: string };
+  navigationKey?: string;
 }
 export function AppShell({
   children,
@@ -49,18 +50,10 @@ export function AppShell({
     close: "Close navigation",
     skip: "Skip to content",
   },
+  navigationKey,
 }: AppShellProps) {
-  const [open, setOpen] = useState(false);
   const mainId = useId();
-  useEffect(() => {
-    const query = window.matchMedia("(min-width: 1024px)");
-    const closeOnDesktop = () => {
-      if (query.matches) setOpen(false);
-    };
-    query.addEventListener("change", closeOnDesktop);
-    return () => query.removeEventListener("change", closeOnDesktop);
-  }, []);
-  const contents = (
+  const contents = (onNavigate?: () => void) => (
     <>
       <div className="np-brand">
         <span className="np-brand-mark">
@@ -79,7 +72,7 @@ export function AppShell({
                 href={item.href}
                 aria-current={activeItem === item.id ? "page" : undefined}
                 className="np-nav-link"
-                onClick={() => setOpen(false)}
+                onClick={onNavigate}
               >
                 <span aria-hidden="true">{item.icon}</span>
                 {item.label}
@@ -99,43 +92,14 @@ export function AppShell({
       <a className="np-skip" href={`#${mainId}`}>
         {labels.skip}
       </a>
-      <aside className="np-sidebar np-sidebar-desktop">{contents}</aside>
+      <aside className="np-sidebar np-sidebar-desktop">{contents()}</aside>
       <div className="np-workspace">
         <header className="np-topbar">
-          <Dialog.Root open={open} onOpenChange={setOpen}>
-            <Dialog.Trigger asChild>
-              <Button
-                variant="ghost"
-                className="np-mobile-toggle"
-                aria-label={labels.open}
-              >
-                <Menu size={21} aria-hidden="true" />
-              </Button>
-            </Dialog.Trigger>
-            <Dialog.Portal>
-              <div className="np-theme">
-                <Dialog.Overlay className="np-overlay" />
-                <Dialog.Content
-                  className="np-sidebar np-sidebar-mobile"
-                  aria-describedby={undefined}
-                >
-                  <Dialog.Title className="np-sr-only">
-                    {labels.navigation}
-                  </Dialog.Title>
-                  <Dialog.Close asChild>
-                    <Button
-                      variant="ghost"
-                      className="np-drawer-close"
-                      aria-label={labels.close}
-                    >
-                      <X size={20} aria-hidden="true" />
-                    </Button>
-                  </Dialog.Close>
-                  {contents}
-                </Dialog.Content>
-              </div>
-            </Dialog.Portal>
-          </Dialog.Root>
+          <MobileNavigation
+            key={navigationKey}
+            labels={labels}
+            contents={contents}
+          />
           <div className="np-breadcrumb">{breadcrumb}</div>
           <div className="np-header-actions">{headerActions}</div>
         </header>
@@ -144,5 +108,59 @@ export function AppShell({
         </main>
       </div>
     </div>
+  );
+}
+
+function MobileNavigation({
+  labels,
+  contents,
+}: {
+  labels: NonNullable<AppShellProps["labels"]>;
+  contents: (onNavigate: () => void) => ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      if (query.matches) setOpen(false);
+    };
+    query.addEventListener("change", closeOnDesktop);
+    return () => query.removeEventListener("change", closeOnDesktop);
+  }, []);
+  return (
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger asChild>
+        <Button
+          variant="ghost"
+          className="np-mobile-toggle"
+          aria-label={labels.open}
+        >
+          <Menu size={21} aria-hidden="true" />
+        </Button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <div className="np-theme">
+          <Dialog.Overlay className="np-overlay" />
+          <Dialog.Content
+            className="np-sidebar np-sidebar-mobile"
+            aria-describedby={undefined}
+          >
+            <Dialog.Title className="np-sr-only">
+              {labels.navigation}
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <Button
+                variant="ghost"
+                className="np-drawer-close"
+                aria-label={labels.close}
+              >
+                <X size={20} aria-hidden="true" />
+              </Button>
+            </Dialog.Close>
+            {contents(() => setOpen(false))}
+          </Dialog.Content>
+        </div>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

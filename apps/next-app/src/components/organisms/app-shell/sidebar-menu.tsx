@@ -1,185 +1,145 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "primereact/menu";
-import { Tooltip } from "primereact/tooltip";
-import type { MenuItem } from "primereact/menuitem";
+import type { NavigationGroup } from "@next-phish/ui";
 import type { OrganizationView } from "@next-phish/backend";
+import {
+  Building2,
+  CalendarDays,
+  CheckSquare2,
+  FileText,
+  Gauge,
+  Mail,
+  Send,
+  Settings,
+  Users,
+  Zap,
+} from "lucide-react";
 import { canManageOrganizations } from "@/src/lib/organization-helpers";
 import { useTranslation } from "@/src/lib/i18n";
 
-interface NavItem {
-  label: string;
-  icon: string;
-  href: string;
-}
-
-interface SidebarMenuProps {
-  collapsed?: boolean;
+interface Options {
   role?: string | null;
-  organizations?: OrganizationView[];
+  organizations: OrganizationView[];
 }
 
-function buildMenuItems(
-  items: NavItem[],
-  pathname: string,
-  collapsed?: boolean,
-): MenuItem[] {
-  return items.map((item) => ({
-    template: () => {
-      const isActive = pathname === item.href;
-      if (collapsed) {
-        return (
-          <>
-            <Tooltip
-              target={`.nav-icon-${item.icon.replace(/\s+/g, "-")}`}
-              content={item.label}
-              position="right"
-            />
-            <Link
-              href={item.href}
-              prefetch={false}
-              className={`nav-icon-${item.icon.replace(/\s+/g, "-")} flex w-full items-center justify-center rounded-lg p-2.5 transition-colors ${
-                isActive
-                  ? "bg-white/10 text-white"
-                  : "text-zinc-300 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <i className={`${item.icon} text-lg`} />
-            </Link>
-          </>
-        );
-      }
-      return (
-        <Link
-          href={item.href}
-          prefetch={false}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-            isActive
-              ? "bg-white/10 text-white"
-              : "text-zinc-300 hover:bg-white/5 hover:text-white"
-          }`}
-        >
-          <i className={`${item.icon} text-base`} />
-          <span>{item.label}</span>
-        </Link>
-      );
-    },
-  }));
-}
-
-function buildGroup(
-  label: string,
-  items: NavItem[],
-  pathname: string,
-  collapsed?: boolean,
-): MenuItem[] {
-  return [
-    ...(collapsed
-      ? []
-      : [
-          {
-            template: () => (
-              <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                {label}
-              </p>
-            ),
-          },
-        ]),
-    ...buildMenuItems(items, pathname, collapsed),
-  ];
-}
-
-const EMPTY_ORGANIZATIONS: OrganizationView[] = [];
-
-export function SidebarMenu({
-  collapsed,
-  role,
-  organizations = EMPTY_ORGANIZATIONS,
-}: SidebarMenuProps) {
+export function useSidebarNavigation({ role, organizations }: Options) {
   const t = useTranslation();
   const pathname = usePathname();
-
-  const dashboardItems: NavItem[] = [
-    { label: t("common.dashboard"), icon: "pi pi-home", href: "/" },
-  ];
-
-  const planningItems: NavItem[] = [
-    { label: t("nav.tasks"), icon: "pi pi-check-square", href: "/tasks" },
-    { label: t("nav.schedule"), icon: "pi pi-calendar", href: "/schedule" },
-  ];
-
-  const simulationItems: NavItem[] = [
-    { label: t("nav.campaigns"), icon: "pi pi-bolt", href: "/campaigns" },
-    { label: t("nav.pages"), icon: "pi pi-file", href: "/pages" },
+  const navigation: NavigationGroup[] = [
     {
-      label: t("nav.emailTemplates"),
-      icon: "pi pi-envelope",
-      href: "/email-templates",
+      id: "overview",
+      items: [
+        {
+          id: "dashboard",
+          label: t("common.dashboard"),
+          href: "/",
+          icon: <Gauge size={18} />,
+        },
+      ],
     },
     {
-      label: t("nav.sendingProfiles"),
-      icon: "pi pi-send",
-      href: "/sending-profiles",
+      id: "planning",
+      label: t("nav.planning"),
+      items: [
+        {
+          id: "tasks",
+          label: t("nav.tasks"),
+          href: "/tasks",
+          icon: <CheckSquare2 size={18} />,
+        },
+        {
+          id: "schedule",
+          label: t("nav.schedule"),
+          href: "/schedule",
+          icon: <CalendarDays size={18} />,
+        },
+      ],
     },
     {
-      label: t("nav.targetGroups"),
-      icon: "pi pi-users",
-      href: "/target-groups",
+      id: "simulations",
+      label: t("nav.simulations"),
+      items: [
+        {
+          id: "campaigns",
+          label: t("nav.campaigns"),
+          href: "/campaigns",
+          icon: <Zap size={18} />,
+        },
+        {
+          id: "pages",
+          label: t("nav.pages"),
+          href: "/pages",
+          icon: <FileText size={18} />,
+        },
+        {
+          id: "email-templates",
+          label: t("nav.emailTemplates"),
+          href: "/email-templates",
+          icon: <Mail size={18} />,
+        },
+        {
+          id: "sending-profiles",
+          label: t("nav.sendingProfiles"),
+          href: "/sending-profiles",
+          icon: <Send size={18} />,
+        },
+        {
+          id: "target-groups",
+          label: t("nav.targetGroups"),
+          href: "/target-groups",
+          icon: <Users size={18} />,
+        },
+      ],
     },
   ];
+  if (canManageOrganizations(organizations))
+    navigation.push({
+      id: "management",
+      label: t("nav.management"),
+      items: [
+        {
+          id: "organizations",
+          label: t("nav.organizations"),
+          href: "/organizations",
+          icon: <Building2 size={18} />,
+        },
+      ],
+    });
+  if (role === "admin")
+    navigation.push({
+      id: "administration",
+      label: t("nav.administration"),
+      items: [
+        {
+          id: "users",
+          label: t("nav.users"),
+          href: "/users",
+          icon: <Users size={18} />,
+        },
+        {
+          id: "settings",
+          label: t("common.settings"),
+          href: "/settings",
+          icon: <Settings size={18} />,
+        },
+      ],
+    });
 
-  const managementItems: NavItem[] = [
-    {
-      label: t("nav.organizations"),
-      icon: "pi pi-building",
-      href: "/organizations",
-    },
-  ];
-
-  const adminItems: NavItem[] = [
-    { label: t("nav.users"), icon: "pi pi-user", href: "/users" },
-    { label: t("common.settings"), icon: "pi pi-cog", href: "/settings" },
-  ];
-
-  const canManageOrgs = canManageOrganizations(organizations);
-
-  const items: MenuItem[] = [
-    ...buildMenuItems(dashboardItems, pathname, collapsed),
-    { separator: true },
-    ...buildGroup(t("nav.planning"), planningItems, pathname, collapsed),
-    { separator: true },
-    ...buildGroup(t("nav.simulations"), simulationItems, pathname, collapsed),
-    ...(canManageOrgs
-      ? [
-          { separator: true },
-          ...buildGroup(
-            t("nav.management"),
-            managementItems,
-            pathname,
-            collapsed,
-          ),
-        ]
-      : []),
-    ...(role === "admin"
-      ? [
-          { separator: true },
-          ...buildGroup(
-            t("nav.administration"),
-            adminItems,
-            pathname,
-            collapsed,
-          ),
-        ]
-      : []),
-  ];
-
-  return (
-    <nav
-      className={`flex-1 overflow-y-auto ${collapsed ? "px-2 py-3" : "px-3 py-4"}`}
-    >
-      <Menu model={items} />
-    </nav>
-  );
+  const active = navigation
+    .flatMap((group) => group.items)
+    .find((item) =>
+      item.href === "/"
+        ? pathname === "/"
+        : pathname === item.href || pathname.startsWith(`${item.href}/`),
+    );
+  return {
+    navigation,
+    activeItem: active?.id ?? "",
+    activeLabel:
+      active?.label ??
+      (pathname === "/profile"
+        ? t("settings.accountTitle")
+        : t("common.dashboard")),
+  };
 }

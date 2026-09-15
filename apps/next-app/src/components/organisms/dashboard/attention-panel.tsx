@@ -1,21 +1,33 @@
 "use client";
 
-import Link from "next/link";
+import type { ElementType } from "react";
+import {
+  AlertTriangle,
+  CircleCheck,
+  CirclePause,
+  MailWarning,
+  MoveRight,
+} from "lucide-react";
+import { Card, CardBody, CardHeader } from "@next-phish/ui";
 import type { OrganizationDashboardView } from "@next-phish/backend";
-import { useTranslation } from "@/src/lib/i18n";
+import { useTranslation } from "../../../lib/i18n";
 
 interface AttentionPanelProps {
   attention: OrganizationDashboardView["attention"];
+  linkComponent?: ElementType;
 }
 
-export function AttentionPanel({ attention }: AttentionPanelProps) {
+export function AttentionPanel({
+  attention,
+  linkComponent: Link = "a",
+}: AttentionPanelProps) {
   const t = useTranslation();
   const items = [
     ...(attention.deliveryDisabled
       ? [
           {
             key: "delivery",
-            icon: "pi pi-pause-circle",
+            icon: CirclePause,
             title: t("dashboard.deliveryDisabled"),
             detail: t("dashboard.deliveryDisabledHint"),
             href: "/organizations",
@@ -26,7 +38,7 @@ export function AttentionPanel({ attention }: AttentionPanelProps) {
       ? [
           {
             key: "broken",
-            icon: "pi pi-exclamation-triangle",
+            icon: AlertTriangle,
             title: t("dashboard.brokenCampaigns", {
               count: attention.brokenCampaigns,
             }),
@@ -39,7 +51,7 @@ export function AttentionPanel({ attention }: AttentionPanelProps) {
       ? [
           {
             key: "failed",
-            icon: "pi pi-envelope",
+            icon: MailWarning,
             title: t("dashboard.failedDeliveries", {
               count: attention.failedDeliveries,
             }),
@@ -51,43 +63,53 @@ export function AttentionPanel({ attention }: AttentionPanelProps) {
   ];
 
   return (
-    <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-lg">
-      <h2 className="text-lg font-semibold text-white">
-        {t("dashboard.requiresAttention")}
-      </h2>
-      <p className="mt-1 text-sm text-zinc-400">
-        {t("dashboard.requiresAttentionHint")}
-      </p>
-
-      {items.length === 0 ? (
-        <div className="mt-5 flex items-center gap-3 rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
-          <i className="pi pi-check-circle text-brand-cyan" />
-          <p className="text-sm text-zinc-300">
-            {t("dashboard.nothingRequiresAttention")}
-          </p>
-        </div>
-      ) : (
-        <ul className="mt-5 space-y-3">
-          {items.map((item) => (
-            <li key={item.key}>
-              <Link
-                href={item.href}
-                className="flex gap-3 rounded-xl border border-amber-400/15 bg-amber-400/5 p-4 transition-colors hover:bg-amber-400/10"
-              >
-                <i className={`${item.icon} mt-0.5 text-amber-400`} />
-                <span>
-                  <span className="block text-sm font-medium text-zinc-100">
-                    {item.title}
+    <Card>
+      <CardHeader
+        title={t("dashboard.requiresAttention")}
+        description={t("dashboard.requiresAttentionHint")}
+      />
+      <CardBody className="pt-0">
+        {items.length === 0 ? (
+          <div className="flex items-start gap-3 rounded-lg border border-[#d9eee3] bg-[#eef8f3] p-4 text-[#176d51]">
+            <CircleCheck
+              className="mt-0.5 shrink-0"
+              size={19}
+              aria-hidden="true"
+            />
+            <p className="text-sm">{t("dashboard.nothingRequiresAttention")}</p>
+          </div>
+        ) : (
+          <ul className="m-0 list-none space-y-3 p-0">
+            {items.map((item) => (
+              <li key={item.key}>
+                <Link
+                  href={item.href}
+                  className="group flex items-start gap-3 rounded-lg border border-[#f1dfc6] bg-[#fff8ed] p-4 text-[#754b18] transition-colors hover:bg-[#fff3df]"
+                >
+                  <item.icon
+                    className="mt-0.5 shrink-0"
+                    size={18}
+                    aria-hidden="true"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold">
+                      {item.title}
+                    </span>
+                    <span className="mt-1 block text-xs leading-5 text-[#806846]">
+                      {item.detail}
+                    </span>
                   </span>
-                  <span className="mt-1 block text-xs leading-5 text-zinc-400">
-                    {item.detail}
-                  </span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+                  <MoveRight
+                    className="mt-1 shrink-0 transition-transform group-hover:translate-x-0.5"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardBody>
+    </Card>
   );
 }

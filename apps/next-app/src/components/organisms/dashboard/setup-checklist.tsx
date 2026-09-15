@@ -1,14 +1,20 @@
 "use client";
 
-import Link from "next/link";
+import type { ElementType } from "react";
+import { Check, ChevronRight } from "lucide-react";
 import type { OrganizationDashboardView } from "@next-phish/backend";
-import { useTranslation } from "@/src/lib/i18n";
+import { Badge, Card, CardBody, CardHeader } from "@next-phish/ui";
+import { useTranslation } from "../../../lib/i18n";
 
 interface SetupChecklistProps {
   readiness: OrganizationDashboardView["readiness"];
+  linkComponent?: ElementType;
 }
 
-export function SetupChecklist({ readiness }: SetupChecklistProps) {
+export function SetupChecklist({
+  readiness,
+  linkComponent: Link = "a",
+}: SetupChecklistProps) {
   const t = useTranslation();
   const items = [
     {
@@ -45,61 +51,61 @@ export function SetupChecklist({ readiness }: SetupChecklistProps) {
   const completed = items.filter((item) => item.complete).length;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-brand-blue/25 bg-brand-dark shadow-xl">
-      <div className="bg-(image:--brand-gradient) p-px">
-        <div className="rounded-t-[15px] bg-brand-dark p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-brand-cyan">
-            {t("dashboard.gettingStarted")}
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">
-            {t("dashboard.prepareFirstCampaign")}
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-            {t("dashboard.prepareFirstCampaignHint")}
-          </p>
+    <Card>
+      <CardHeader
+        title={t("dashboard.prepareFirstCampaign")}
+        description={t("dashboard.prepareFirstCampaignHint")}
+      />
+      <CardBody className="pt-0">
+        <div className="mb-4">
+          <Badge tone="info">
+            {completed} / {items.length} · {t("dashboard.setupProgress")}
+          </Badge>
         </div>
-      </div>
-      <div className="p-6">
-        <div className="mb-5 flex items-center justify-between text-sm">
-          <span className="text-zinc-400">{t("dashboard.setupProgress")}</span>
-          <span className="font-semibold text-brand-cyan">
-            {completed}/{items.length}
-          </span>
-        </div>
-        <div className="mb-6 h-2 overflow-hidden rounded-full bg-white/5">
+        <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-[#eeedf8]">
           <div
-            className="h-full rounded-full bg-(image:--brand-gradient)"
+            className="h-full rounded-full bg-ui-primary transition-[width]"
             style={{ width: `${(completed / items.length) * 100}%` }}
           />
         </div>
-        <ol className="grid gap-3 md:grid-cols-2">
+        <ol className="m-0 list-none p-0">
           {items.map((item, index) => (
-            <li key={item.key}>
+            <li
+              key={item.key}
+              className="border-b border-ui-border last:border-0"
+            >
               <Link
                 href={item.href}
-                className="flex items-center gap-3 rounded-xl border border-white/10 p-4 transition-colors hover:bg-white/5"
+                className="group flex items-center gap-4 py-4 transition-colors hover:text-ui-primary"
               >
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold ${
                     item.complete
-                      ? "bg-brand-cyan/15 text-brand-cyan"
-                      : "bg-white/5 text-zinc-400"
+                      ? "bg-[#e7f5ef] text-[#157657]"
+                      : "bg-ui-tint text-ui-primary"
                   }`}
                 >
-                  {item.complete ? <i className="pi pi-check" /> : index + 1}
+                  {item.complete ? (
+                    <Check size={16} aria-hidden="true" />
+                  ) : (
+                    index + 1
+                  )}
                 </span>
                 <span
-                  className={`text-sm font-medium ${
-                    item.complete ? "text-zinc-400 line-through" : "text-white"
-                  }`}
+                  className={`min-w-0 flex-1 text-sm font-medium ${item.complete ? "text-ui-muted line-through" : ""}`}
                 >
                   {item.label}
                 </span>
+                <ChevronRight
+                  className="shrink-0 text-ui-muted transition-transform group-hover:translate-x-0.5"
+                  size={18}
+                  aria-hidden="true"
+                />
               </Link>
             </li>
           ))}
         </ol>
-      </div>
-    </section>
+      </CardBody>
+    </Card>
   );
 }

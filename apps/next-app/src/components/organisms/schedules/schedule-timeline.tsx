@@ -1,20 +1,23 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Chart } from "primereact/chart";
 import type { ChartData, ChartOptions, TooltipItem } from "chart.js";
 import { Skeleton } from "primereact/skeleton";
+import { CalendarClock } from "lucide-react";
+import {
+  Badge as UiBadge,
+  Card,
+  CardBody,
+  CardHeader,
+  EmptyState,
+  Skeleton as UiSkeleton,
+} from "@next-phish/ui";
 import { trpc } from "@/src/lib/trpc";
 
 const DAY_MS = 86_400_000;
-const mediumDateFormatter = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "medium",
-});
-const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-});
 
 function addMonths(date: Date, months: number): Date {
   const result = new Date(date);
@@ -35,14 +38,41 @@ type TimelineRow = {
   end: Date;
 };
 
-export function ScheduleTimeline() {
+interface ScheduleTimelineProps {
+  variant?: "legacy" | "v1";
+  locale?: string;
+  labels?: {
+    title: string;
+    description: string;
+    range: string;
+    schedules: string;
+    campaigns: string;
+    empty: string;
+    error: string;
+  };
+}
+
+export function ScheduleTimeline({
+  variant = "legacy",
+  locale,
+  labels,
+}: ScheduleTimelineProps = {}) {
   const router = useRouter();
   const range = useMemo(() => {
     const startsAt = new Date();
     startsAt.setHours(0, 0, 0, 0);
     return { startsAt, endsAt: addMonths(startsAt, 3) };
   }, []);
-  const { data, isLoading } = trpc.campaign.getScheduleTimeline.useQuery(range);
+  const { data, isLoading, error } =
+    trpc.campaign.getScheduleTimeline.useQuery(range);
+  const mediumDateFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { dateStyle: "medium" }),
+    [locale],
+  );
+  const shortDateFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }),
+    [locale],
+  );
 
   const rows = useMemo<TimelineRow[]>(() => {
     if (!data) return [];
@@ -102,11 +132,21 @@ export function ScheduleTimeline() {
           data: rows.map((row) => [row.start.getTime(), row.end.getTime()]),
           backgroundColor: rows.map((row) =>
             row.kind === "schedule"
-              ? "rgba(41, 184, 255, 0.78)"
-              : "rgba(21, 229, 212, 0.78)",
+              ? variant === "v1"
+                ? "rgba(109, 96, 220, 0.78)"
+                : "rgba(41, 184, 255, 0.78)"
+              : variant === "v1"
+                ? "rgba(74, 179, 165, 0.78)"
+                : "rgba(21, 229, 212, 0.78)",
           ),
           borderColor: rows.map((row) =>
-            row.kind === "schedule" ? "#29B8FF" : "#15E5D4",
+            row.kind === "schedule"
+              ? variant === "v1"
+                ? "#5146d9"
+                : "#29B8FF"
+              : variant === "v1"
+                ? "#328e81"
+                : "#15E5D4",
           ),
           borderWidth: 1,
           borderRadius: 6,
@@ -115,7 +155,7 @@ export function ScheduleTimeline() {
         },
       ],
     }),
-    [rows],
+    [rows, variant],
   );
 
   const options = useMemo<ChartOptions<"bar">>(
@@ -140,7 +180,11 @@ export function ScheduleTimeline() {
             label: (context: TooltipItem<"bar">) => {
               const row = rows[context.dataIndex];
               if (!row) return "";
-              return `${row.kind === "schedule" ? "Schedule" : "Campaign"} · ${row.status} · ${mediumDateFormatter.format(row.start)} – ${mediumDateFormatter.format(row.end)}`;
+              const kindLabel =
+                row.kind === "schedule"
+                  ? (labels?.schedules ?? "Schedule")
+                  : (labels?.campaigns ?? "Campaign");
+              return `${kindLabel} · ${row.status} · ${mediumDateFormatter.format(row.start)} – ${mediumDateFormatter.format(row.end)}`;
             },
           },
         },
@@ -150,10 +194,20 @@ export function ScheduleTimeline() {
           type: "linear",
           min: range.startsAt.getTime(),
           max: range.endsAt.getTime(),
-          grid: { color: "rgba(255, 255, 255, 0.08)" },
-          border: { color: "rgba(255, 255, 255, 0.12)" },
+          grid: {
+            color:
+              variant === "v1"
+                ? "rgba(25, 34, 53, 0.08)"
+                : "rgba(255, 255, 255, 0.08)",
+          },
+          border: {
+            color:
+              variant === "v1"
+                ? "rgba(25, 34, 53, 0.14)"
+                : "rgba(255, 255, 255, 0.12)",
+          },
           ticks: {
-            color: "#a1a1aa",
+            color: variant === "v1" ? "#626d80" : "#a1a1aa",
             maxTicksLimit: 7,
             callback: (value) =>
               shortDateFormatter.format(new Date(Number(value))),
@@ -162,12 +216,95 @@ export function ScheduleTimeline() {
         y: {
           grid: { display: false },
           border: { display: false },
-          ticks: { color: "#d4d4d8" },
+          ticks: { color: variant === "v1" ? "#39445a" : "#d4d4d8" },
         },
       },
     }),
-    [range, router, rows],
+    [
+      labels,
+      mediumDateFormatter,
+      range,
+      router,
+      rows,
+      shortDateFormatter,
+      variant,
+    ],
   );
+
+  if (variant === "v1" && labels) {
+    return (
+      <Card aria-label={labels.title}>
+        <CardHeader
+          title={labels.title}
+          description={labels.description}
+          action={<UiBadge>{labels.range}</UiBadge>}
+        />
+        <CardBody className="pt-0">
+          <div
+            className="mb-4 flex gap-4 text-xs text-ui-muted"
+            aria-label={`${labels.schedules}, ${labels.campaigns}`}
+          >
+            <span className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-sm bg-ui-primary" />
+              {labels.schedules}
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-sm bg-[#4ab3a5]" />
+              {labels.campaigns}
+            </span>
+          </div>
+          {isLoading ? (
+            <UiSkeleton className="h-72 rounded-lg" />
+          ) : error ? (
+            <EmptyState
+              icon={<CalendarClock size={24} />}
+              title={labels.error}
+            />
+          ) : rows.length ? (
+            <>
+              <div
+                aria-hidden="true"
+                style={{ height: `${Math.max(280, rows.length * 42 + 64)}px` }}
+              >
+                <Chart type="bar" data={chartData} options={options} />
+              </div>
+              <ul className="mt-5 grid gap-2 border-t border-ui-border pt-4 sm:grid-cols-2">
+                {rows.map((row) => (
+                  <li key={`${row.kind}-${row.id}`}>
+                    <Link
+                      href={
+                        row.kind === "schedule"
+                          ? `/schedule/${row.id}`
+                          : `/campaigns/${row.id}`
+                      }
+                      className="block rounded-lg border border-ui-border px-3 py-2 transition-colors hover:border-[#cbc6ef] hover:bg-ui-tint"
+                    >
+                      <span className="block truncate text-sm font-semibold">
+                        {row.label}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-ui-muted">
+                        {row.kind === "schedule"
+                          ? labels.schedules
+                          : labels.campaigns}
+                        {" · "}
+                        {mediumDateFormatter.format(row.start)} –{" "}
+                        {mediumDateFormatter.format(row.end)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <EmptyState
+              icon={<CalendarClock size={24} />}
+              title={labels.empty}
+            />
+          )}
+        </CardBody>
+      </Card>
+    );
+  }
 
   return (
     <section

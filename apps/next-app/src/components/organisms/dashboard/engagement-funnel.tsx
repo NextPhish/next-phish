@@ -1,7 +1,8 @@
 "use client";
 
 import type { OrganizationDashboardView } from "@next-phish/backend";
-import { useTranslation } from "@/src/lib/i18n";
+import { Badge, Card, CardBody, CardHeader } from "@next-phish/ui";
+import { useTranslation } from "../../../lib/i18n";
 
 interface EngagementFunnelProps {
   funnel: OrganizationDashboardView["funnel"];
@@ -10,36 +11,35 @@ interface EngagementFunnelProps {
 export function EngagementFunnel({ funnel }: EngagementFunnelProps) {
   const t = useTranslation();
   const steps = [
-    ["scheduled", t("dashboard.scheduled"), "#64748B"],
-    ["sent", t("charts.sent"), "#29B8FF"],
-    ["opened", t("charts.opened"), "#15E5D4"],
-    ["clicked", t("charts.clicked"), "#5C73FF"],
-    ["submitted", t("charts.submitted"), "#7B5CFF"],
-    ["reported", t("charts.reported"), "#F59E0B"],
+    ["scheduled", t("dashboard.scheduled"), "#8f98a9"],
+    ["sent", t("charts.sent"), "#6d60dc"],
+    ["opened", t("charts.opened"), "#4ab3a5"],
+    ["clicked", t("charts.clicked"), "#8a79e3"],
+    ["submitted", t("charts.submitted"), "#b06fcb"],
+    ["reported", t("charts.reported"), "#c98b3d"],
   ] as const;
   const maximum = Math.max(funnel.scheduled, 1);
 
   return (
-    <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-lg">
-      <h2 className="text-lg font-semibold text-white">
-        {t("dashboard.engagementFunnel")}
-      </h2>
-      <p className="mt-1 text-sm text-zinc-400">
-        {t("dashboard.engagementFunnelHint")}
-      </p>
-      <div className="mt-6 space-y-4">
+    <Card>
+      <CardHeader
+        title={t("dashboard.engagementFunnel")}
+        description={t("dashboard.engagementFunnelHint")}
+        action={<Badge>{t("dashboard.lastThirtyDays")}</Badge>}
+      />
+      <CardBody className="space-y-4 pt-0">
         {steps.map(([field, label, color]) => {
           const value = funnel[field];
           const percentage = Math.round((value / maximum) * 100);
           return (
             <div key={field}>
-              <div className="mb-1.5 flex items-center justify-between text-sm">
-                <span className="font-medium text-zinc-300">{label}</span>
-                <span className="text-zinc-400">
+              <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
+                <span className="font-medium">{label}</span>
+                <span className="text-ui-muted">
                   {value} · {percentage}%
                 </span>
               </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-white/5">
+              <div className="h-2 overflow-hidden rounded-full bg-[#eeedf8]">
                 <div
                   className="h-full min-w-0 rounded-full"
                   style={{
@@ -51,7 +51,7 @@ export function EngagementFunnel({ funnel }: EngagementFunnelProps) {
             </div>
           );
         })}
-      </div>
-    </section>
+      </CardBody>
+    </Card>
   );
 }

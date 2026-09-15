@@ -1,0 +1,4 @@
+@import "../src/styles.css";
+
+/* Application presentations are previewed here without coupling library runtime CSS to the app. */
+@source "../../../apps/next-app/src/components/organisms/dashboard";

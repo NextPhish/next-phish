@@ -1,87 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { Formik, Form } from "formik";
-import { Button } from "primereact/button";
-import { FormField } from "@/src/components/molecules/form-field";
-import { FormMessage } from "@/src/components/atoms/form-message";
-import { createOrganizationSchema } from "@next-phish/shared";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import { SlugField } from "@/src/components/atoms/slug-field";
-import { slugify } from "@/src/lib/slugify";
-import { useTranslation } from "@/src/lib/i18n";
-
-const inputClassName =
-  "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 mb-2";
-
-interface CreateOrgFormValues {
-  name: string;
-  slug: string;
-}
-
-interface CreateOrgFormProps {
-  error: string;
-  isSubmitting: boolean;
-  onSubmit: (values: CreateOrgFormValues) => Promise<void>;
-  onCancel: () => void;
-}
+import { useFormikContext } from "formik";
+import { useSlugAvailability } from "@/src/hooks/use-slug-availability";
+import {
+  OnboardingPresentation,
+  type OnboardingValues,
+} from "../onboarding/presentation";
 
 export function CreateOrgForm({
   error,
-  isSubmitting,
-  onSubmit,
   onCancel,
-}: CreateOrgFormProps) {
-  const t = useTranslation();
-  const [slugStatus, setSlugStatus] = useState<
-    "idle" | "checking" | "available" | "taken"
-  >("idle");
-
+}: {
+  error: string;
+  onCancel: () => void;
+}) {
+  const { values } = useFormikContext<OnboardingValues>();
+  const slugStatus = useSlugAvailability(values.slug);
   return (
-    <Formik<CreateOrgFormValues>
-      initialValues={{ name: "", slug: "" }}
-      validate={toFormikValidation(createOrganizationSchema)}
-      onSubmit={onSubmit}
-    >
-      {({ setFieldValue, values }) => (
-        <Form className="flex flex-col gap-4 mt-5">
-          <FormField
-            name="name"
-            label={t("organizations.organizationName")}
-            placeholder="Acme Security"
-            inputClassName={inputClassName}
-            onChange={(e) => {
-              const newSlug = slugify(e.target.value);
-              if (!values.slug || values.slug === slugify(values.name)) {
-                setFieldValue("slug", newSlug);
-              }
-            }}
-          />
-
-          <SlugField onStatusChange={setSlugStatus} />
-
-          {error && <FormMessage variant="error">{error}</FormMessage>}
-
-          <div className="flex justify-end gap-2">
-            <Button
-              size="small"
-              type="button"
-              label={t("common.cancel")}
-              outlined
-              onClick={onCancel}
-              className="rounded-xl border-white/10 px-4 py-2 text-sm text-zinc-300"
-            />
-            <Button
-              size="small"
-              type="submit"
-              label={t("common.create")}
-              loading={isSubmitting}
-              disabled={isSubmitting || slugStatus === "taken"}
-              className="rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-2 text-sm font-semibold text-white"
-            />
-          </div>
-        </Form>
-      )}
-    </Formik>
+    <OnboardingPresentation
+      error={error}
+      slugStatus={slugStatus}
+      onCancel={onCancel}
+    />
   );
 }

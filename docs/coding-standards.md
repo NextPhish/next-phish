@@ -86,18 +86,18 @@ Currently there are no public-facing pages that need SEO/static generation, so `
 
 Use Next.js `loading.tsx` files to show skeleton UI while server components fetch data. Next.js automatically wraps the page in `<Suspense>` when this file exists.
 
-- Use PrimeReact `Skeleton` component for consistency
+- Use `Skeleton` from `@next-phish/ui` in migrated V1 screens, including table rows and asynchronously loaded lists. Existing PrimeReact screens may retain their skeletons until migration.
 - Match the layout structure of the actual page (same dimensions, spacing)
 - Place `loading.tsx` alongside the `page.tsx` it covers
 
 ```tsx
-import { Skeleton } from "primereact/skeleton";
+import { Skeleton } from "@next-phish/ui";
 
 export default function Loading() {
   return (
-    <div className="p-6">
-      <Skeleton width="40%" height="2rem" className="mb-6" />
-      <Skeleton width="100%" height="200px" borderRadius="1rem" />
+    <div className="np-theme p-6" role="status" aria-label="Loading…">
+      <Skeleton className="mb-6" style={{ width: "40%", height: "2rem" }} />
+      <Skeleton style={{ width: "100%", height: 200, borderRadius: "1rem" }} />
     </div>
   );
 }

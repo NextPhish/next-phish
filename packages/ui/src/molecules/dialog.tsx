@@ -9,6 +9,9 @@ export interface DialogProps extends ComponentProps<typeof Primitive.Root> {
   trigger?: ReactElement;
   footer?: ReactNode;
   closeLabel?: string;
+  onCloseAutoFocus?: ComponentProps<
+    typeof Primitive.Content
+  >["onCloseAutoFocus"];
 }
 export function Dialog({
   title,
@@ -17,6 +20,7 @@ export function Dialog({
   children,
   footer,
   closeLabel = "Close dialog",
+  onCloseAutoFocus,
   ...props
 }: DialogProps) {
   return (
@@ -25,7 +29,10 @@ export function Dialog({
       <Primitive.Portal>
         <div className="np-theme">
           <Primitive.Overlay className="np-overlay" />
-          <Primitive.Content className="np-dialog">
+          <Primitive.Content
+            className="np-dialog"
+            onCloseAutoFocus={onCloseAutoFocus}
+          >
             <div className="np-dialog-header">
               <Primitive.Title>{title}</Primitive.Title>
               <Primitive.Close asChild>
