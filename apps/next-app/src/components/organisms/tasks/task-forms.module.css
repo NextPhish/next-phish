@@ -1,0 +1,93 @@
+.form {
+  display: grid;
+  gap: 1.25rem;
+}
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+.permission {
+  margin: -0.25rem 0 0;
+  color: #626d80;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.checkRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #dfe3ec;
+  border-radius: 0.75rem;
+  background: #f8f9fc;
+}
+.checkRow label {
+  color: #172033;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.checkRow p {
+  margin: 0.2rem 0 0;
+  color: #626d80;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.colorField {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.colorField input[type="color"] {
+  width: 3.5rem;
+  padding: 0.3rem;
+  cursor: pointer;
+}
+.colorField span {
+  color: #465166;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+.richEditor {
+  border-radius: 0.65rem;
+}
+.richEditor[data-invalid="true"] {
+  outline: 1px solid #d92d20;
+}
+.richEditor :global(.p-editor-container) {
+  border: 1px solid #cfd5e1;
+  border-radius: 0.65rem;
+  overflow: hidden;
+  background: #fff;
+}
+.richEditor :global(.p-editor-toolbar) {
+  border: 0;
+  border-bottom: 1px solid #dfe3ec;
+  background: #f8f9fc;
+}
+.richEditor :global(.p-editor-content) {
+  border: 0;
+  color: #172033;
+}
+.richEditor :global(.ql-editor) {
+  font-size: 0.875rem;
+}
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .actions {
+    flex-direction: column-reverse;
+  }
+  .actions > * {
+    width: 100%;
+  }
+}

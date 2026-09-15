@@ -1,0 +1,248 @@
+.root,
+.loading {
+  min-width: 0;
+  flex: 1;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px;
+}
+.search {
+  position: relative;
+  width: min(100%, 320px);
+  flex: 0 0 auto;
+}
+.toolbar :global(.np-filter-builder) {
+  display: contents;
+}
+.toolbar :global(.np-filter-builder-actions) {
+  min-height: 41px;
+}
+.toolbar :global(.np-filter-builder-actions) > button {
+  min-height: 41px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.toolbar :global(.np-active-filters) {
+  flex-basis: 100%;
+  margin-top: 0;
+}
+.search > svg {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 12px;
+  color: var(--np-muted);
+  pointer-events: none;
+}
+.search input {
+  padding-left: 38px;
+}
+.board,
+.skeletonBoard {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+  padding-bottom: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+.column,
+.skeletonColumn {
+  min-width: 220px;
+  flex: 1 0 220px;
+  align-self: flex-start;
+  overflow: hidden;
+  scroll-snap-align: start;
+  box-shadow: none;
+}
+.columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--np-border);
+  background: #fafbfc;
+}
+.columnHeader h2 {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 650;
+}
+.statusDot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px #eef0f5;
+}
+.iconButton {
+  width: 32px;
+  padding-inline: 0;
+}
+.taskList {
+  display: flex;
+  min-height: 126px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: #f7f8fb;
+}
+.emptyColumn {
+  display: flex;
+  width: 100%;
+  min-height: 78px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px dashed #cbd1df;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--np-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.emptyColumn:hover {
+  border-color: var(--np-primary);
+  color: var(--np-primary);
+}
+.taskCard {
+  padding: 14px;
+  border: 1px solid var(--np-border);
+  border-radius: 9px;
+  background: var(--np-surface);
+  box-shadow: 0 2px 7px #18244008;
+}
+.taskContent {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+.taskContent > p {
+  display: -webkit-box;
+  margin-top: 8px;
+  overflow: hidden;
+  color: var(--np-muted);
+  font-size: 13px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.taskTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.taskTitleRow h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 650;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+  color: var(--np-muted);
+  font-size: 12px;
+}
+.meta a,
+.meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.meta a {
+  color: var(--np-primary);
+  font-weight: 600;
+}
+.meta a:hover {
+  text-decoration: underline;
+}
+.meta .overdue {
+  color: var(--np-danger);
+  font-weight: 600;
+}
+.moveControl {
+  display: grid;
+  gap: 6px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid var(--np-border);
+}
+.moveControl label {
+  color: var(--np-muted);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.moveControl button {
+  min-height: 36px;
+}
+.limit {
+  color: var(--np-muted);
+  font-size: 12px;
+}
+.loadingHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.loadingTitle {
+  width: 150px;
+  height: 32px;
+}
+.loadingSubtitle {
+  width: min(360px, 70vw);
+  margin-top: 10px;
+}
+.loadingAction {
+  width: 130px;
+  height: 40px;
+}
+.skeletonColumn {
+  padding: 16px 12px 12px;
+}
+.skeletonColumnTitle {
+  width: 45%;
+  margin: 0 4px 20px;
+}
+.skeletonTask {
+  height: 132px;
+  margin-top: 10px;
+}
+@media (max-width: 640px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search {
+    width: 100%;
+  }
+  .column,
+  .skeletonColumn {
+    width: min(88vw, 320px);
+    max-width: none;
+    flex-basis: min(88vw, 320px);
+    flex-grow: 0;
+  }
+  .loadingAction {
+    display: none;
+  }
+}

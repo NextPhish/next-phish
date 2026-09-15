@@ -1,132 +1,212 @@
 "use client";
 
-import { ErrorMessage, Form, useFormikContext } from "formik";
-import { Button } from "primereact/button";
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
+import {
+  Field,
+  Form,
+  getIn,
+  useFormikContext,
+  type FieldInputProps,
+} from "formik";
 import { Editor } from "primereact/editor";
+import { Button, FormField, FormMessage, Input, Select } from "@next-phish/ui";
 import type { TaskFormValues } from "@next-phish/shared";
 import { useTranslation } from "@/src/lib/i18n/client";
 import { TaskResourcePicker } from "./task-resource-picker";
-import { FormField } from "@/src/components/molecules/form-field";
-import { selectSmall } from "@/src/components/ui/theme-constants";
-
-function toLocalDateTime(value: Date | null | undefined) {
-  if (!value) return null;
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
-}
+import styles from "./task-forms.module.css";
 
 interface Props {
   statuses: Array<{ id: string; name: string }>;
   currentResource?: { id: string; name: string };
+  error?: string;
   onCancel: () => void;
 }
+
 export function TaskFormPresentation({
   statuses,
   currentResource,
+  error,
   onCancel,
 }: Props) {
-  const { isSubmitting, values, setFieldValue, setFieldTouched } =
-    useFormikContext<TaskFormValues>();
+  const {
+    errors,
+    isSubmitting,
+    setFieldTouched,
+    setFieldValue,
+    touched,
+    values,
+  } = useFormikContext<TaskFormValues>();
   const t = useTranslation();
-  const priorityOptions = [
-    { label: t("tasks.low"), value: "LOW" },
-    { label: t("tasks.medium"), value: "MEDIUM" },
-    { label: t("tasks.high"), value: "HIGH" },
-  ];
+  const fieldError = (name: string) =>
+    getIn(touched, name)
+      ? (getIn(errors, name) as string | undefined)
+      : undefined;
+
   return (
-    <Form className="space-y-4">
-      <FormField name="title" label={t("tasks.titleField")} />
-      <div>
-        <p id="task-description-label" className="mb-1 text-sm text-zinc-300">
-          {t("tasks.description")}
-        </p>
-        <Editor
-          id="task-description"
-          value={values.description}
-          onTextChange={(event) =>
-            setFieldValue("description", event.htmlValue ?? "")
-          }
-          onBlur={() => setFieldTouched("description", true)}
-          aria-labelledby="task-description-label"
-          style={{ height: "9rem" }}
-        />
+    <Form
+      noValidate
+      className={styles.form}
+      aria-busy={isSubmitting || undefined}
+    >
+      <FormField
+        id="task-title"
+        label={t("tasks.titleField")}
+        error={fieldError("title")}
+        required
+      >
+        {(control) => (
+          <Field name="title">
+            {({ field }: { field: FieldInputProps<string> }) => (
+              <Input
+                {...control}
+                {...field}
+                disabled={isSubmitting}
+                autoFocus
+              />
+            )}
+          </Field>
+        )}
+      </FormField>
+
+      <FormField
+        id="task-description"
+        label={t("tasks.description")}
+        error={fieldError("description")}
+      >
+        {(control) => (
+          <div
+            className={styles.richEditor}
+            aria-describedby={control["aria-describedby"]}
+            data-invalid={control["aria-invalid"] ? "true" : undefined}
+          >
+            <Editor
+              id={control.id}
+              value={values.description}
+              headerTemplate={
+                <span className="ql-formats">
+                  <button
+                    type="button"
+                    className="ql-bold"
+                    aria-label={t("tasks.formatBold")}
+                    title={t("tasks.formatBold")}
+                  />
+                  <button
+                    type="button"
+                    className="ql-italic"
+                    aria-label={t("tasks.formatItalic")}
+                    title={t("tasks.formatItalic")}
+                  />
+                  <button
+                    type="button"
+                    className="ql-list"
+                    value="ordered"
+                    aria-label={t("tasks.formatOrderedList")}
+                    title={t("tasks.formatOrderedList")}
+                  />
+                  <button
+                    type="button"
+                    className="ql-list"
+                    value="bullet"
+                    aria-label={t("tasks.formatBulletList")}
+                    title={t("tasks.formatBulletList")}
+                  />
+                  <button
+                    type="button"
+                    className="ql-link"
+                    aria-label={t("tasks.formatLink")}
+                    title={t("tasks.formatLink")}
+                  />
+                  <button
+                    type="button"
+                    className="ql-clean"
+                    aria-label={t("tasks.clearFormatting")}
+                    title={t("tasks.clearFormatting")}
+                  />
+                </span>
+              }
+              onTextChange={(event) =>
+                void setFieldValue("description", event.htmlValue ?? "")
+              }
+              onBlur={() => void setFieldTouched("description", true)}
+              readOnly={isSubmitting}
+              style={{ height: "9rem" }}
+            />
+          </div>
+        )}
+      </FormField>
+
+      <div className={styles.grid}>
+        <FormField
+          id="task-status"
+          label={t("tasks.status")}
+          error={fieldError("statusId")}
+          required
+        >
+          {(control) => (
+            <Select
+              {...control}
+              options={statuses.map(({ id, name }) => ({
+                value: id,
+                label: name,
+              }))}
+              value={values.statusId}
+              onValueChange={(value) => void setFieldValue("statusId", value)}
+              onBlur={() => void setFieldTouched("statusId", true)}
+              disabled={isSubmitting}
+            />
+          )}
+        </FormField>
+        <FormField
+          id="task-priority"
+          label={t("tasks.priority")}
+          error={fieldError("priority")}
+          required
+        >
+          {(control) => (
+            <Select
+              {...control}
+              options={[
+                { label: t("tasks.low"), value: "LOW" },
+                { label: t("tasks.medium"), value: "MEDIUM" },
+                { label: t("tasks.high"), value: "HIGH" },
+              ]}
+              value={values.priority}
+              onValueChange={(value) => void setFieldValue("priority", value)}
+              onBlur={() => void setFieldTouched("priority", true)}
+              disabled={isSubmitting}
+            />
+          )}
+        </FormField>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label htmlFor="task-status" className="block text-sm text-zinc-300">
-          {t("tasks.status")}
-          <Dropdown
-            inputId="task-status"
-            aria-label={t("tasks.status")}
-            name="statusId"
-            value={values.statusId}
-            options={statuses}
-            optionLabel="name"
-            optionValue="id"
-            onChange={(event) => setFieldValue("statusId", event.value)}
-            onBlur={() => setFieldTouched("statusId", true)}
-            className="mt-1 w-full"
-            pt={selectSmall}
+
+      <FormField
+        id="task-due"
+        label={t("tasks.dueDate")}
+        error={fieldError("dueAt")}
+      >
+        {(control) => (
+          <Input
+            {...control}
+            name="dueAt"
+            type="datetime-local"
+            value={values.dueAt ?? ""}
+            onChange={(event) =>
+              void setFieldValue("dueAt", event.currentTarget.value || null)
+            }
+            onBlur={() => void setFieldTouched("dueAt", true)}
+            disabled={isSubmitting}
           />
-        </label>
-        <label htmlFor="task-priority" className="block text-sm text-zinc-300">
-          {t("tasks.priority")}
-          <Dropdown
-            inputId="task-priority"
-            aria-label={t("tasks.priority")}
-            name="priority"
-            value={values.priority}
-            options={priorityOptions}
-            onChange={(event) => setFieldValue("priority", event.value)}
-            onBlur={() => setFieldTouched("priority", true)}
-            className="mt-1 w-full"
-            pt={selectSmall}
-          />
-        </label>
-      </div>
-      <div>
-        <label htmlFor="task-due" className="block text-sm text-zinc-300">
-          {t("tasks.dueDate")}
-        </label>
-        <Calendar
-          inputId="task-due"
-          value={values.dueAt ? new Date(values.dueAt) : null}
-          onChange={(event) =>
-            setFieldValue("dueAt", toLocalDateTime(event.value as Date | null))
-          }
-          onBlur={() => setFieldTouched("dueAt", true)}
-          showIcon
-          showTime
-          hourFormat="24"
-          showButtonBar
-          dateFormat="yy-mm-dd"
-          className="mt-1 w-full"
-          inputClassName="text-xs"
-        />
-        <ErrorMessage
-          name="dueAt"
-          component="p"
-          className="mt-1 text-xs text-red-400"
-        />
-      </div>
+        )}
+      </FormField>
+
       <TaskResourcePicker currentResource={currentResource} />
-      <div className="flex justify-end gap-2">
-        <Button
-          type="button"
-          label={t("tasks.cancel")}
-          severity="secondary"
-          size="small"
-          className="h-9 px-3 text-sm"
-          onClick={onCancel}
-        />
-        <Button
-          type="submit"
-          label={t("tasks.saveTask")}
-          size="small"
-          className="h-9 px-3 text-sm"
-          loading={isSubmitting}
-        />
+      {error && <FormMessage variant="error">{error}</FormMessage>}
+      <div className={styles.actions}>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          {t("tasks.cancel")}
+        </Button>
+        <Button type="submit" loading={isSubmitting}>
+          {t("tasks.saveTask")}
+        </Button>
       </div>
     </Form>
   );

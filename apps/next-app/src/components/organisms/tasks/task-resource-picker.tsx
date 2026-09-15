@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ErrorMessage, useFormikContext } from "formik";
-import { Dropdown, type DropdownFilterEvent } from "primereact/dropdown";
+import { getIn, useFormikContext } from "formik";
+import { Autocomplete, FormField, Select } from "@next-phish/ui";
 import type { TaskFormValues, TaskResourceType } from "@next-phish/shared";
 import { trpc } from "@/src/lib/trpc";
 import { useTranslation } from "@/src/lib/i18n/client";
-import { selectSmall } from "@/src/components/ui/theme-constants";
+import styles from "./task-forms.module.css";
 
 interface ResourceOption {
   id: string;
@@ -19,11 +19,18 @@ export function TaskResourcePicker({
   currentResource?: ResourceOption;
 }) {
   const t = useTranslation();
-  const { values, setFieldValue, setFieldTouched } =
-    useFormikContext<TaskFormValues>();
+  const {
+    errors,
+    isSubmitting,
+    setFieldTouched,
+    setFieldValue,
+    touched,
+    values,
+  } = useFormikContext<TaskFormValues>();
   const type = values.relation?.type;
   const [search, setSearch] = useState("");
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(
     () => () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -76,96 +83,97 @@ export function TaskResourcePicker({
     TARGET_GROUP: targetGroup.data?.targetGroups ?? [],
     SENDING_PROFILE: sendingProfile.data?.profiles ?? [],
   };
-  const loading =
-    campaign.isLoading ||
-    schedule.isLoading ||
-    page.isLoading ||
-    emailTemplate.isLoading ||
-    targetGroup.isLoading ||
-    sendingProfile.isLoading;
+  const queries = {
+    CAMPAIGN: campaign,
+    SCHEDULE: schedule,
+    PAGE: page,
+    EMAIL_TEMPLATE: emailTemplate,
+    TARGET_GROUP: targetGroup,
+    SENDING_PROFILE: sendingProfile,
+  };
+  const activeQuery = type ? queries[type] : undefined;
+  const loading = activeQuery?.isLoading ?? false;
   const options = type ? [...(byType[type] ?? [])] : [];
   if (
     currentResource &&
     values.relation?.id === currentResource.id &&
-    !options.some((option) => option.id === currentResource.id)
+    !options.some(({ id }) => id === currentResource.id)
   ) {
     options.unshift(currentResource);
   }
 
-  const typeOptions = [
-    { label: t("tasks.none"), value: null },
-    { label: t("tasks.campaign"), value: "CAMPAIGN" },
-    { label: t("tasks.schedule"), value: "SCHEDULE" },
-    { label: t("tasks.page"), value: "PAGE" },
-    { label: t("tasks.emailTemplate"), value: "EMAIL_TEMPLATE" },
-    { label: t("tasks.targetGroup"), value: "TARGET_GROUP" },
-    { label: t("tasks.sendingProfile"), value: "SENDING_PROFILE" },
-  ];
-  function handleFilter(event: DropdownFilterEvent) {
+  const relationError = getIn(touched, "relation.id")
+    ? (getIn(errors, "relation.id") as string | undefined)
+    : undefined;
+  const changeSearch = (query: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setSearch(event.filter), 300);
-  }
+    timeoutRef.current = setTimeout(() => setSearch(query), 300);
+  };
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <label
-        htmlFor="task-relation-type"
-        className="block text-sm text-zinc-300"
-      >
-        {t("tasks.relatedType")}
-        <Dropdown
-          inputId="task-relation-type"
-          aria-label={t("tasks.relatedType")}
-          value={type ?? null}
-          options={typeOptions}
-          onChange={(event) => {
-            setSearch("");
-            setFieldValue(
-              "relation",
-              event.value ? { type: event.value, id: "" } : null,
-            );
-          }}
-          onBlur={() => setFieldTouched("relation.type", true)}
-          className="mt-1 w-full"
-          pt={selectSmall}
-        />
-      </label>
+    <div className={styles.grid}>
+      <FormField id="task-relation-type" label={t("tasks.relatedType")}>
+        {(control) => (
+          <Select
+            {...control}
+            value={type ?? "NONE"}
+            options={[
+              { label: t("tasks.none"), value: "NONE" },
+              { label: t("tasks.campaign"), value: "CAMPAIGN" },
+              { label: t("tasks.schedule"), value: "SCHEDULE" },
+              { label: t("tasks.page"), value: "PAGE" },
+              { label: t("tasks.emailTemplate"), value: "EMAIL_TEMPLATE" },
+              { label: t("tasks.targetGroup"), value: "TARGET_GROUP" },
+              { label: t("tasks.sendingProfile"), value: "SENDING_PROFILE" },
+            ]}
+            onValueChange={(value) => {
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              setSearch("");
+              void setFieldValue(
+                "relation",
+                value === "NONE" ? null : { type: value, id: "" },
+              );
+            }}
+            onBlur={() => void setFieldTouched("relation.type", true)}
+            disabled={isSubmitting}
+          />
+        )}
+      </FormField>
       {type ? (
-        <label
-          htmlFor="task-relation-id"
-          className="block text-sm text-zinc-300"
+        <FormField
+          id="task-relation-id"
+          label={t("tasks.relatedResource")}
+          error={
+            activeQuery?.error ? t("tasks.resourcesFailed") : relationError
+          }
+          required
         >
-          {t("tasks.relatedResource")}
-          <Dropdown
-            inputId="task-relation-id"
-            aria-label={t("tasks.relatedResource")}
-            value={values.relation?.id || null}
-            options={options}
-            optionLabel="name"
-            optionValue="id"
-            filter
-            filterBy="name"
-            resetFilterOnHide
-            loading={loading}
-            emptyFilterMessage={t("tasks.noResources")}
-            emptyMessage={t("tasks.noResources")}
-            placeholder={t("tasks.searchResource")}
-            onFilter={handleFilter}
-            onChange={(event) =>
-              setFieldValue("relation", { type, id: event.value })
-            }
-            onBlur={() => setFieldTouched("relation.id", true)}
-            className="mt-1 w-full"
-            pt={selectSmall}
-          />
-          <ErrorMessage
-            name="relation.id"
-            component="p"
-            className="mt-1 text-xs text-red-400"
-          />
-        </label>
+          {(control) => (
+            <Autocomplete
+              {...control}
+              name="relation.id"
+              value={values.relation?.id ?? ""}
+              options={options.map(({ id, name }) => ({
+                value: id,
+                label: name,
+              }))}
+              filterMode="server"
+              onSearchChange={changeSearch}
+              onValueChange={(id) =>
+                void setFieldValue("relation", { type, id })
+              }
+              onBlur={() => void setFieldTouched("relation.id", true)}
+              placeholder={t("tasks.searchResource")}
+              loading={loading}
+              loadingLabel={t("common.loading")}
+              emptyLabel={t("tasks.noResources")}
+              listLabel={t("tasks.relatedResource")}
+              disabled={isSubmitting}
+            />
+          )}
+        </FormField>
       ) : (
-        <div />
+        <div aria-hidden="true" />
       )}
     </div>
   );

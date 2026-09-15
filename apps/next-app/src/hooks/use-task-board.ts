@@ -24,7 +24,9 @@ export function useTaskBoard() {
     limit: 100,
     offset: 0,
   };
-  const tasks = trpc.task.list.useQuery(input);
+  const tasks = trpc.task.list.useQuery(input, {
+    placeholderData: (previous) => previous,
+  });
   const statuses = trpc.task.statuses.useQuery();
   const invalidate = async () =>
     Promise.all([
@@ -48,6 +50,8 @@ export function useTaskBoard() {
     onSuccess: invalidate,
   });
   return {
+    moveError: move.error,
+    retry: () => Promise.all([tasks.refetch(), statuses.refetch()]),
     filters,
     setStatusIds: (value: string[]) => dispatch({ type: "statuses", value }),
     setSearch: (value: string) => dispatch({ type: "search", value }),
