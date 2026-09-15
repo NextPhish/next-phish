@@ -1,0 +1,32 @@
+.page {
+  color: var(--np-ink);
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+.page :global(.np-page-header) {
+  margin-bottom: 0;
+}
+.page > section {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+.page h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.analyticsGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.chartSkeleton {
+  min-height: 20rem;
+  border-radius: 1rem;
+}
+@media (max-width: 850px) {
+  .analyticsGrid {
+    grid-template-columns: 1fr;
+  }
+}

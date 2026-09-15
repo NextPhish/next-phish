@@ -5,7 +5,7 @@ import {
   ignoredNetworkSchema,
   type IgnoredNetworkInput,
 } from "@next-phish/shared";
-import { IgnoredNetworksPresentation } from "@/src/components/organisms/organization-settings/ignored-networks-presentation";
+import { GlobalIgnoredNetworksPresentation } from "./global-ignored-networks-presentation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { trpc } from "@/src/lib/trpc";
@@ -67,7 +67,7 @@ export function GlobalIgnoredNetworksContainer() {
       validate={toFormikValidation(ignoredNetworkSchema)}
       onSubmit={handleSubmit}
     >
-      <IgnoredNetworksPresentation
+      <GlobalIgnoredNetworksPresentation
         networks={networks}
         title={t("settings.globalIgnoredNetworks")}
         hint={t("settings.globalIgnoredNetworksHint")}

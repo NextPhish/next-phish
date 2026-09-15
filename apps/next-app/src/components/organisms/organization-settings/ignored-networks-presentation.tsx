@@ -1,13 +1,20 @@
 "use client";
 
-import { Form, useFormikContext } from "formik";
-import { Button } from "primereact/button";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { Field, Form, useFormikContext } from "formik";
+import {
+  Button,
+  Dialog,
+  DialogClose,
+  FormField,
+  FormMessage,
+  Input,
+  Skeleton,
+} from "@next-phish/ui";
+import { Plus, Trash2 } from "lucide-react";
 import type { IgnoredNetworkInput } from "@next-phish/shared";
 import type { FormStatus } from "@/src/hooks/use-form-status";
-import { FormMessage } from "@/src/components/atoms/form-message";
-import { FormField } from "@/src/components/molecules/form-field";
 import { useTranslation } from "@/src/lib/i18n";
+import styles from "./organization-settings.module.css";
 
 interface IgnoredNetwork {
   id: string;
@@ -22,9 +29,14 @@ interface IgnoredNetworksPresentationProps {
   title?: string;
   hint?: string;
   isLoading: boolean;
+  loadError?: string;
   deletingId?: string;
+  pendingDeleteId?: string;
   status: FormStatus;
   onDelete: (id: string) => Promise<void>;
+  onRequestDelete: (id: string) => void;
+  onCancelDelete: () => void;
+  onRetry?: () => void;
 }
 
 export function IgnoredNetworksPresentation({
@@ -32,79 +44,120 @@ export function IgnoredNetworksPresentation({
   title,
   hint,
   isLoading,
+  loadError,
   deletingId,
+  pendingDeleteId,
   status,
   onDelete,
+  onRequestDelete,
+  onCancelDelete,
+  onRetry = () => undefined,
 }: IgnoredNetworksPresentationProps) {
   const t = useTranslation();
-  const { isSubmitting } = useFormikContext<IgnoredNetworkInput>();
+  const { isSubmitting, errors, touched } =
+    useFormikContext<IgnoredNetworkInput>();
+  const pendingNetwork = networks.find(({ id }) => id === pendingDeleteId);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-base font-semibold text-white">
-          {title ?? t("organizations.ignoredNetworks")}
-        </h3>
-        <p className="mt-1 max-w-2xl text-sm text-zinc-400">
-          {hint ?? t("organizations.ignoredNetworksHint")}
-        </p>
+    <div>
+      <div className={styles.networkHeader}>
+        <h3>{title ?? t("organizations.ignoredNetworks")}</h3>
+        <p>{hint ?? t("organizations.ignoredNetworksHint")}</p>
       </div>
 
-      <Form className="grid max-w-3xl gap-4 md:grid-cols-[1fr_1fr_auto] md:items-start">
+      <Form className={styles.networkForm} noValidate>
         <FormField
-          name="network"
+          id="ignored-network"
           label={t("organizations.ipOrNetwork")}
-          placeholder="192.0.2.10 or 10.0.0.0/8"
-          inputClassName="rounded-xl border-white/10 bg-white/95 text-slate-900"
-        />
+          required
+          error={touched.network ? errors.network : undefined}
+        >
+          {(control) => (
+            <Field
+              as={Input}
+              name="network"
+              placeholder="192.0.2.10 or 10.0.0.0/8"
+              {...control}
+            />
+          )}
+        </FormField>
         <FormField
-          name="description"
+          id="ignored-network-description"
           label={t("organizations.description")}
-          placeholder={t("organizations.descriptionPlaceholder")}
-          inputClassName="rounded-xl border-white/10 bg-white/95 text-slate-900"
-        />
+          error={touched.description ? errors.description : undefined}
+        >
+          {(control) => (
+            <Field
+              as={Input}
+              name="description"
+              placeholder={t("organizations.descriptionPlaceholder")}
+              {...control}
+            />
+          )}
+        </FormField>
         <Button
-          size="small"
           type="submit"
-          icon="pi pi-plus"
-          label={t("organizations.addIgnoredNetwork")}
           loading={isSubmitting}
           disabled={isSubmitting}
-          className="mt-7 whitespace-nowrap rounded-xl border-0 bg-brand-blue text-white hover:bg-brand-azure"
-        />
+          className={styles.networkAction}
+        >
+          <Plus size={16} aria-hidden="true" />
+          {t("organizations.addIgnoredNetwork")}
+        </Button>
       </Form>
 
-      {status.type === "error" && (
+      {status.type === "error" && !pendingNetwork && (
         <FormMessage variant="error">{status.message}</FormMessage>
       )}
       {status.type === "success" && (
         <FormMessage variant="success">{status.message}</FormMessage>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-white/10">
+      <div className={styles.networkList}>
         {isLoading ? (
-          <div className="p-6 text-sm text-zinc-400">{t("common.loading")}</div>
+          <div
+            className={styles.skeletons}
+            role="status"
+            aria-label={t("common.loading")}
+          >
+            {["one", "two", "three"].map((key) => (
+              <div className={styles.skeletonRow} key={key}>
+                <Skeleton />
+                <Skeleton />
+              </div>
+            ))}
+          </div>
+        ) : loadError ? (
+          <div className={styles.empty}>
+            <FormMessage
+              variant="error"
+              action={
+                <Button size="sm" variant="secondary" onClick={onRetry}>
+                  {t("tableUi.retry")}
+                </Button>
+              }
+            >
+              {loadError}
+            </FormMessage>
+          </div>
         ) : networks.length === 0 ? (
-          <div className="p-6 text-sm text-zinc-400">
+          <div className={styles.empty}>
             {t("organizations.noIgnoredNetworks")}
           </div>
         ) : (
-          <ul className="divide-y divide-white/10">
+          <ul>
             {networks.map((network) => (
-              <li
-                key={network.id}
-                className="flex flex-col gap-3 bg-white/3 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0">
-                  <code className="text-sm font-semibold text-brand-cyan">
+              <li key={network.id} className={styles.networkRow}>
+                <div>
+                  <code className={styles.networkValue}>
                     {network.normalizedNetwork}
                   </code>
                   {network.description && (
-                    <p className="mt-1 text-sm text-zinc-300">
+                    <p className={styles.networkDescription}>
                       {network.description}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className={styles.networkDate}>
                     {t("organizations.addedOn", {
                       date: new Date(network.createdAt)
                         .toISOString()
@@ -114,31 +167,62 @@ export function IgnoredNetworksPresentation({
                 </div>
                 <Button
                   type="button"
-                  size="small"
-                  severity="danger"
-                  outlined
-                  icon="pi pi-trash"
-                  label={t("organizations.remove")}
+                  size="sm"
+                  variant="danger"
                   loading={deletingId === network.id}
                   disabled={Boolean(deletingId)}
-                  onClick={() =>
-                    confirmDialog({
-                      header: t("organizations.removeIgnoredNetworkTitle"),
-                      message: t("organizations.removeIgnoredNetworkConfirm", {
-                        network: network.normalizedNetwork,
-                      }),
-                      icon: "pi pi-exclamation-triangle",
-                      accept: () => void onDelete(network.id),
-                    })
-                  }
-                />
+                  onClick={() => onRequestDelete(network.id)}
+                >
+                  <Trash2 size={16} aria-hidden="true" />
+                  {t("organizations.remove")}
+                </Button>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      <ConfirmDialog draggable={false} dismissableMask />
+      <Dialog
+        open={Boolean(pendingNetwork)}
+        onOpenChange={(open) => !open && onCancelDelete()}
+        title={t("organizations.removeIgnoredNetworkTitle")}
+        description={
+          pendingNetwork
+            ? t("organizations.removeIgnoredNetworkConfirm", {
+                network: pendingNetwork.normalizedNetwork,
+              })
+            : t("organizations.removeIgnoredNetworkTitle")
+        }
+        closeLabel={t("organizationUi.closeDialog")}
+        dismissible={!deletingId}
+        footer={
+          <>
+            <DialogClose asChild>
+              <Button variant="secondary" disabled={Boolean(deletingId)}>
+                {t("common.cancel")}
+              </Button>
+            </DialogClose>
+            <Button
+              variant="danger"
+              loading={Boolean(
+                pendingNetwork && deletingId === pendingNetwork.id,
+              )}
+              onClick={() => pendingNetwork && void onDelete(pendingNetwork.id)}
+            >
+              {t("organizations.remove")}
+            </Button>
+          </>
+        }
+      >
+        {status.type === "error" && (
+          <FormMessage variant="error">{status.message}</FormMessage>
+        )}
+        {pendingNetwork && (
+          <code className={styles.dialogNetwork}>
+            {pendingNetwork.normalizedNetwork}
+          </code>
+        )}
+      </Dialog>
     </div>
   );
 }

@@ -1064,5 +1064,27 @@
     "noWaiting": "Nothing waiting",
     "noReview": "No review needed",
     "noFailures": "No failed recipients"
+  },
+  "organizationUi": {
+    "listFailed": "Could not load organizations. Please try again.",
+    "deleteFailed": "Could not delete the organization. Please try again.",
+    "analyticsTitle": "Activity overview",
+    "campaignTrendDescription": "Campaigns created during the last six months.",
+    "emailTrendDescription": "Sent, opened, clicked, and submitted email activity.",
+    "emailActivityChart": "Email activity over the last six months",
+    "membersCaption": "Organization members",
+    "loadError": "We could not load this organization. Please try again.",
+    "notFoundDescription": "The organization may have been removed or you may no longer have access.",
+    "analyticsError": "We could not load organization activity.",
+    "membersError": "We could not load organization members.",
+    "nameRequired": "Organization name is required",
+    "slugRequired": "Slug is required",
+    "slugInvalid": "Slug must contain only lowercase letters, numbers, and hyphens",
+    "networkRequired": "IP address or network is required",
+    "networkTooLong": "Each IP address or network must be 64 characters or fewer",
+    "descriptionTooLong": "Description must be 200 characters or fewer",
+    "closeDialog": "Close dialog",
+    "networkLoadError": "Ignored networks could not be loaded. Please try again.",
+    "invalidField": "Check this field."
   }
 }

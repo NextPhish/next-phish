@@ -1,0 +1,154 @@
+.settings {
+  color: var(--np-text);
+}
+
+.tabs {
+  min-width: 0;
+}
+
+.tabList {
+  padding: 0 24px;
+  margin-bottom: 0;
+}
+
+.panel {
+  padding: 24px;
+}
+
+.form {
+  display: flex;
+  max-width: 640px;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.networkHeader {
+  margin-bottom: 20px;
+}
+
+.networkHeader h3 {
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.networkHeader p {
+  max-width: 720px;
+  margin-top: 5px;
+  color: var(--np-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.networkForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.networkAction {
+  margin-top: 27px;
+  height: 43px;
+  white-space: nowrap;
+}
+
+.networkForm :global(.np-input) {
+  height: 43px;
+}
+
+.networkList {
+  overflow: hidden;
+  margin-top: 20px;
+  border: 1px solid var(--np-border);
+  border-radius: var(--np-radius);
+  background: var(--np-surface);
+}
+
+.networkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--np-border);
+}
+
+.networkRow:last-child {
+  border-bottom: 0;
+}
+
+.networkValue {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--np-primary);
+}
+
+.networkDescription,
+.networkDate,
+.empty {
+  color: var(--np-muted);
+  font-size: 13px;
+}
+
+.networkDescription {
+  margin-top: 4px;
+  color: var(--np-text);
+}
+
+.networkDate {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.empty {
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.skeletons {
+  display: grid;
+  gap: 1px;
+  background: var(--np-border);
+}
+
+.skeletonRow {
+  padding: 18px 20px;
+  background: var(--np-surface);
+}
+
+.skeletonRow > div:first-child {
+  width: 38%;
+  height: 14px;
+}
+
+.skeletonRow > div:last-child {
+  width: 62%;
+  height: 11px;
+  margin-top: 9px;
+}
+
+.dialogNetwork {
+  font-weight: 650;
+}
+
+@media (max-width: 760px) {
+  .tabList,
+  .panel {
+    padding-inline: 18px;
+  }
+
+  .networkForm {
+    grid-template-columns: 1fr;
+  }
+
+  .networkAction {
+    margin-top: 0;
+    width: fit-content;
+  }
+
+  .networkRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
