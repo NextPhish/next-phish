@@ -60,3 +60,13 @@ export const updateProfileSchema = z.object({
   timezone: z.string().min(1, "Timezone is required"),
   language: z.string().min(1, "Language is required"),
 });
+
+export const twoFactorPasswordSchema = z.object({
+  password: z.string().min(1, "currentPasswordRequired"),
+  verifyCode: z.string(),
+});
+
+export const twoFactorCodeSchema = z.object({
+  password: z.string(),
+  verifyCode: z.string().regex(/^\d{6}$/, "codeInvalid"),
+});

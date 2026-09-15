@@ -1,14 +1,26 @@
 "use client";
 
-import { useTranslation } from "@/src/lib/i18n";
+import { Bell } from "lucide-react";
+import { Card, CardBody, CardHeader } from "@next-phish/ui";
+import { useTranslation } from "../../../lib/i18n";
+import styles from "./profile-settings.module.css";
 
 export function NotificationsTab() {
   const t = useTranslation();
-
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-16">
-      <i className="pi pi-bell text-4xl text-zinc-500" />
-      <p className="text-sm text-zinc-400">{t("settings.notificationsSoon")}</p>
-    </div>
+    <Card>
+      <CardHeader
+        title={t("settings.notificationsTitle")}
+        description={t("settings.notificationsDescription")}
+      />
+      <CardBody>
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon}>
+            <Bell size={22} aria-hidden="true" />
+          </span>
+          <p>{t("settings.notificationsSoon")}</p>
+        </div>
+      </CardBody>
+    </Card>
   );
 }

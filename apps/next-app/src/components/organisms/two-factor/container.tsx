@@ -1,36 +1,60 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Formik, type FormikErrors } from "formik";
+import { twoFactorCodeSchema } from "@next-phish/shared";
 import { authClient } from "@/src/lib/auth-client";
 import { TwoFactorPresentation } from "./presentation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 import { useTranslation } from "@/src/lib/i18n";
+
+export interface TwoFactorValues {
+  code: string;
+}
 
 export function TwoFactorContainer() {
   const t = useTranslation();
   const router = useRouter();
-  const [error, setError] = useState("");
-  const [code, setCode] = useState("");
+  const { status, setError, reset } = useFormStatus();
 
-  async function handleVerify() {
-    setError("");
-    const { error: err } = await authClient.twoFactor.verifyTotp({
-      code,
-      trustDevice: true,
-    });
-    if (err) {
-      setError(err.message || err.code || t("twoFactorPage.invalidCode"));
-      return;
+  function validate(values: TwoFactorValues) {
+    const errors: FormikErrors<TwoFactorValues> = {};
+    if (!twoFactorCodeSchema.shape.verifyCode.safeParse(values.code).success) {
+      errors.code = t("twoFactorPage.invalidCode");
     }
-    router.push("/");
+    return errors;
+  }
+
+  async function handleVerify(values: TwoFactorValues) {
+    reset();
+    try {
+      const { error } = await authClient.twoFactor.verifyTotp({
+        code: values.code,
+        trustDevice: true,
+      });
+      if (error) {
+        setError(
+          error.code === "INVALID_CODE"
+            ? t("twoFactorPage.invalidCode")
+            : t("settings.unexpectedTwoFactorError"),
+        );
+        return;
+      }
+      router.push("/");
+    } catch {
+      setError(t("settings.unexpectedTwoFactorError"));
+    }
   }
 
   return (
-    <TwoFactorPresentation
-      error={error}
-      code={code}
-      onCodeChange={setCode}
-      onVerify={handleVerify}
-    />
+    <Formik<TwoFactorValues>
+      initialValues={{ code: "" }}
+      validate={validate}
+      onSubmit={handleVerify}
+    >
+      <TwoFactorPresentation
+        error={status.type === "error" ? status.message : ""}
+      />
+    </Formik>
   );
 }

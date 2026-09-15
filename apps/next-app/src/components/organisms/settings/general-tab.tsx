@@ -1,72 +1,66 @@
 "use client";
 
-import { Formik, Form } from "formik";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
-import { authClient } from "@/src/lib/auth-client";
-import { updateProfileSchema } from "@next-phish/shared";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import { SUPPORTED_LANGUAGES } from "@/src/lib/constants";
-import { FormField } from "@/src/components/molecules/form-field";
-import { FormMessage } from "@/src/components/atoms/form-message";
-import { useFormStatus } from "@/src/hooks/use-form-status";
-import { selectSmall } from "@/src/components/ui/theme-constants";
+import { Formik } from "formik";
 import { useRouter } from "next/navigation";
+
+import { authClient } from "@/src/lib/auth-client";
+import { profileValidator } from "./profile-validation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 import { type Locale, useSetLocale, useTranslation } from "@/src/lib/i18n";
+import {
+  GeneralTabPresentation,
+  type GeneralValues,
+} from "./general-tab-presentation";
 
-const inputClassName =
-  "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
-
-interface GeneralTabProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    timezone?: string | null;
-    language?: string | null;
-  };
+export interface GeneralTabUser {
+  id: string;
+  name: string;
+  email: string;
+  timezone?: string | null;
+  language?: string | null;
 }
 
-function getTimezones(): string[] {
+function getTimezones(currentTimezone?: string | null): string[] {
   try {
-    return Intl.supportedValuesOf("timeZone");
+    return Array.from(
+      new Set([
+        "UTC",
+        ...(currentTimezone ? [currentTimezone] : []),
+        ...Intl.supportedValuesOf("timeZone"),
+      ]),
+    );
   } catch {
-    return ["UTC"];
+    return Array.from(
+      new Set(["UTC", ...(currentTimezone ? [currentTimezone] : [])]),
+    );
   }
 }
 
-const timezones = getTimezones();
-
-interface GeneralValues {
-  name: string;
-  timezone: string;
-  language: string;
-}
-
-export function GeneralTab({ user }: GeneralTabProps) {
+export function GeneralTab({ user }: { user: GeneralTabUser }) {
   const t = useTranslation();
   const setLocale = useSetLocale();
   const router = useRouter();
   const { status, setError, setSuccess, reset } = useFormStatus();
+  const validate = profileValidator(t);
 
   async function handleSubmit(values: GeneralValues) {
     reset();
-
-    const { error: err } = await authClient.updateUser({
-      name: values.name,
-      timezone: values.timezone,
-      language: values.language,
-    } as Parameters<typeof authClient.updateUser>[0]);
-
-    if (err) {
-      setError(err.message || err.code || t("settings.failedToUpdateProfile"));
-      return;
+    try {
+      const { error } = await authClient.updateUser({
+        name: values.name,
+        timezone: values.timezone,
+        language: values.language,
+      } as Parameters<typeof authClient.updateUser>[0]);
+      if (error) {
+        setError(t("settings.failedToUpdateProfile"));
+        return;
+      }
+      setLocale(values.language as Locale);
+      router.refresh();
+      setSuccess(t("settings.profileUpdated"));
+    } catch {
+      setError(t("settings.unexpectedProfileError"));
     }
-
-    setLocale(values.language as Locale);
-    router.refresh();
-    setSuccess(t("settings.profileUpdated"));
   }
 
   return (
@@ -76,93 +70,15 @@ export function GeneralTab({ user }: GeneralTabProps) {
         timezone: user.timezone || "UTC",
         language: user.language || "en",
       }}
-      validate={toFormikValidation(updateProfileSchema)}
+      validate={validate}
       onSubmit={handleSubmit}
     >
-      {({ isSubmitting, setFieldValue, values }) => (
-        <Form className="flex flex-col gap-5 max-w-lg">
-          <FormField
-            name="name"
-            label={t("common.name")}
-            placeholder="Your name"
-            inputClassName={inputClassName}
-          />
-
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-zinc-100"
-            >
-              {t("common.email")}
-            </label>
-            <InputText
-              size="small"
-              id="email"
-              value={user.email}
-              disabled
-              className={`${inputClassName} opacity-60`}
-            />
-            <p className="text-xs text-zinc-400 mt-2">
-              {t("settings.emailReadonly")}
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="timezone"
-              className="block text-sm font-medium text-zinc-100"
-            >
-              {t("settings.timezone")}
-            </label>
-            <Dropdown
-              pt={selectSmall}
-              id="timezone"
-              size={"small" as never}
-              value={values.timezone}
-              options={timezones.map((tz) => ({ label: tz, value: tz }))}
-              onChange={(e) => setFieldValue("timezone", e.value)}
-              filter
-              placeholder={t("settings.selectTimezone")}
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="language"
-              className="block text-sm font-medium text-zinc-100"
-            >
-              {t("settings.language")}
-            </label>
-            <Dropdown
-              pt={selectSmall}
-              size={"small" as never}
-              id="language"
-              value={values.language}
-              options={SUPPORTED_LANGUAGES}
-              onChange={(e) => setFieldValue("language", e.value)}
-              placeholder={t("settings.selectLanguage")}
-              className="w-full"
-            />
-          </div>
-
-          {status.type === "error" && (
-            <FormMessage variant="error">{status.message}</FormMessage>
-          )}
-          {status.type === "success" && (
-            <FormMessage variant="success">{status.message}</FormMessage>
-          )}
-
-          <Button
-            size="small"
-            type="submit"
-            label={t("common.saveChanges")}
-            loading={isSubmitting}
-            disabled={isSubmitting}
-            className="mt-2 w-fit rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
-          />
-        </Form>
-      )}
+      <GeneralTabPresentation
+        email={user.email}
+        timezones={getTimezones(user.timezone)}
+        error={status.type === "error" ? status.message : ""}
+        success={status.type === "success" ? status.message : ""}
+      />
     </Formik>
   );
 }

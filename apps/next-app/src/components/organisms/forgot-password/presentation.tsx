@@ -1,73 +1,60 @@
 "use client";
 
-import { useRef } from "react";
-import { Form, Field } from "formik";
-import type { FieldInputProps } from "formik";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { FormMessage } from "@/src/components/atoms/form-message";
+import { Form, Field, useFormikContext, type FieldInputProps } from "formik";
+import { Button, Input, FormField, FormMessage } from "@next-phish/ui";
 import Link from "next/link";
 import { useTranslation } from "@/src/lib/i18n";
-
-const inputClassName =
-  "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
+import styles from "@/app/(auth)/login/login.module.css";
 
 interface ForgotPasswordPresentationProps {
   error: string;
-  success: string;
-  isSubmitting: boolean;
 }
-
 export function ForgotPasswordPresentation({
   error,
-  success,
-  isSubmitting,
 }: ForgotPasswordPresentationProps) {
   const t = useTranslation();
-  const formRef = useRef<HTMLFormElement>(null);
-
+  const { errors, touched, isSubmitting } = useFormikContext<{
+    email: string;
+  }>();
   return (
-    <Form ref={formRef} className="flex flex-col gap-5">
-      <div className="space-y-2">
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-zinc-100"
-        >
-          {t("common.email")}
-        </label>
-        <Field name="email">
-          {({ field }: { field: FieldInputProps<string> }) => (
-            <InputText
-              size="small"
-              id="email"
-              {...field}
-              type="email"
-              className={inputClassName}
-              placeholder="you@example.com"
-            />
-          )}
-        </Field>
-        <p className="text-xs text-zinc-400 mt-2">{t("forgotPassword.hint")}</p>
-      </div>
-
+    <Form className={styles.form} noValidate>
+      <FormField
+        id="recovery-email"
+        label={t("common.email")}
+        hint={t("forgotPassword.hint")}
+        error={
+          touched.email && errors.email
+            ? t("login.validation.invalidEmail")
+            : undefined
+        }
+        required
+      >
+        {(controlProps) => (
+          <Field name="email">
+            {({ field }: { field: FieldInputProps<string> }) => (
+              <Input
+                {...controlProps}
+                {...field}
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+              />
+            )}
+          </Field>
+        )}
+      </FormField>
       {error && <FormMessage variant="error">{error}</FormMessage>}
-      {success && <FormMessage variant="success">{success}</FormMessage>}
-
       <Button
-        size="small"
         type="submit"
-        label={t("forgotPassword.sendVerificationCode")}
         loading={isSubmitting}
-        className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
         disabled={isSubmitting}
-      />
-
-      <p className="text-center text-sm text-zinc-400">
+        className={styles.submitButton}
+      >
+        {t("forgotPassword.sendVerificationCode")}
+      </Button>
+      <p className={styles.setupPrompt}>
         {t("forgotPassword.rememberPassword")}{" "}
-        <Link
-          href="/login"
-          className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
-        >
+        <Link href="/login" className={styles.authLink}>
           {t("common.signIn")}
         </Link>
       </p>

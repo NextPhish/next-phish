@@ -1,10 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { Field, Form, useFormikContext, type FieldInputProps } from "formik";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
-import { Button, FormField, FormMessage, Input } from "@next-phish/ui";
+import { ArrowRight } from "lucide-react";
+import {
+  Button,
+  FormField,
+  FormMessage,
+  Input,
+  PasswordInput,
+} from "@next-phish/ui";
 import { useTranslation } from "@/src/lib/i18n";
 import styles from "@/app/(auth)/login/login.module.css";
 
@@ -33,7 +39,6 @@ export function LoginPresentation({
 }: LoginPresentationProps) {
   const t = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const { errors, touched } = useFormikContext<LoginValues>();
 
   return (
@@ -80,36 +85,18 @@ export function LoginPresentation({
             required
           >
             {(controlProps) => (
-              <div className={styles.passwordWrap}>
-                <Field name="password">
-                  {({ field }: { field: FieldInputProps<string> }) => (
-                    <Input
-                      {...controlProps}
-                      {...field}
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      placeholder={t("login.passwordPlaceholder")}
-                    />
-                  )}
-                </Field>
-                <button
-                  type="button"
-                  className={styles.visibilityButton}
-                  onClick={() => setShowPassword((visible) => !visible)}
-                  aria-pressed={showPassword}
-                  aria-label={
-                    showPassword
-                      ? t("login.hidePassword")
-                      : t("login.showPassword")
-                  }
-                >
-                  {showPassword ? (
-                    <EyeOff size={17} aria-hidden="true" />
-                  ) : (
-                    <Eye size={17} aria-hidden="true" />
-                  )}
-                </button>
-              </div>
+              <Field name="password">
+                {({ field }: { field: FieldInputProps<string> }) => (
+                  <PasswordInput
+                    {...controlProps}
+                    {...field}
+                    autoComplete="current-password"
+                    placeholder={t("login.passwordPlaceholder")}
+                    showLabel={t("login.showPassword")}
+                    hideLabel={t("login.hidePassword")}
+                  />
+                )}
+              </Field>
             )}
           </FormField>
           <div className={styles.passwordMeta}>

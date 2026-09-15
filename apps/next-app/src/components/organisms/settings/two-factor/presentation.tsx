@@ -1,28 +1,38 @@
 "use client";
 
-import { Button } from "primereact/button";
-import { FormMessage } from "@/src/components/atoms/form-message";
+import {
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Dialog,
+  FormMessage,
+} from "@next-phish/ui";
+import { useFormikContext } from "formik";
+import { Smartphone } from "lucide-react";
+import { useRef } from "react";
+import { useTranslation } from "../../../../lib/i18n";
 import { PasswordPrompt } from "./password-prompt";
 import { TotpSetup } from "./totp-setup";
-import { useTranslation } from "@/src/lib/i18n";
+import styles from "../profile-settings.module.css";
+
+export interface TwoFactorValues {
+  password: string;
+  verifyCode: string;
+}
+type Step = "idle" | "password-enable-totp" | "setup" | "password-disable";
 
 interface TwoFactorPresentationProps {
   isEnabled: boolean;
-  step: "idle" | "password-enable-totp" | "setup" | "password-disable";
+  step: Step;
   error: string;
   success: string;
   totpUri: string;
   backupCodes: string[];
-  verifyCode: string;
-  password: string;
-  onPasswordChange: (v: string) => void;
-  onVerifyCodeChange: (v: string) => void;
-  onEnableTotp: () => void;
-  onEnableTotpWithPassword: () => void;
-  onVerify: () => void;
+  onEnable: () => void;
   onDisable: () => void;
-  onConfirmDisable: () => void;
-  onReset: () => void;
+  onClose: () => void;
 }
 
 export function TwoFactorPresentation({
@@ -32,112 +42,93 @@ export function TwoFactorPresentation({
   success,
   totpUri,
   backupCodes,
-  verifyCode,
-  password,
-  onPasswordChange,
-  onVerifyCodeChange,
-  onEnableTotp,
-  onEnableTotpWithPassword,
-  onVerify,
+  onEnable,
   onDisable,
-  onConfirmDisable,
-  onReset,
+  onClose,
 }: TwoFactorPresentationProps) {
   const t = useTranslation();
+  const { isSubmitting } = useFormikContext<TwoFactorValues>();
+  const actionButtonRef = useRef<HTMLButtonElement>(null);
+  const enabling = step === "password-enable-totp";
+  const title =
+    step === "setup"
+      ? t("settings.verifyTwoFactorTitle")
+      : enabling
+        ? t("settings.setupTwoFactorTitle")
+        : t("settings.disableTwoFactorTitle");
+  const description =
+    step === "setup"
+      ? t("settings.verifyTwoFactorDialogHint")
+      : enabling
+        ? t("settings.setupTwoFactorDialogHint")
+        : t("settings.disableTwoFactorDialogHint");
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h3 className="text-lg font-medium text-white">
-          {t("settings.twoFactorTitle")}
-        </h3>
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            isEnabled
-              ? "bg-emerald-500/20 text-emerald-300"
-              : "bg-zinc-500/20 text-zinc-400"
-          }`}
-        >
-          {isEnabled ? t("common.enabled") : t("common.disabled")}
-        </span>
-      </div>
-
-      {step === "idle" && (
-        <div className="space-y-3">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <i className="pi pi-mobile text-lg text-zinc-300" />
-                <div>
-                  <p className="text-sm font-medium text-zinc-100">
-                    {t("settings.authenticatorApp")}
-                  </p>
-                  <p className="text-xs text-zinc-400">
-                    {t("settings.authenticatorHint")}
-                  </p>
-                </div>
-              </div>
-              {isEnabled ? (
-                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
-                  {t("common.active")}
-                </span>
-              ) : (
-                <Button
-                  size="small"
-                  label={t("settings.setupAction")}
-                  onClick={onEnableTotp}
-                  className="rounded-lg px-3 py-1.5 text-xs"
-                />
-              )}
-            </div>
+    <Card>
+      <CardHeader
+        title={t("settings.twoFactorTitle")}
+        description={t("settings.twoFactorHint")}
+        action={
+          <Badge tone={isEnabled ? "success" : "neutral"}>
+            {isEnabled ? t("common.enabled") : t("common.disabled")}
+          </Badge>
+        }
+      />
+      <CardBody>
+        <div className={styles.securityRow}>
+          <span className={styles.securityIcon}>
+            <Smartphone size={20} aria-hidden="true" />
+          </span>
+          <div className={styles.securityCopy}>
+            <strong>{t("settings.authenticatorApp")}</strong>
+            <p>
+              {isEnabled
+                ? t("settings.twoFactorEnabledHint")
+                : t("settings.twoFactorDisabledHint")}
+            </p>
           </div>
-
-          {success && <FormMessage variant="success">{success}</FormMessage>}
-
-          {isEnabled && (
-            <Button
-              size="small"
-              label={t("settings.disableAction")}
-              severity="danger"
-              onClick={onConfirmDisable}
-              className="w-fit rounded-lg px-3 py-1.5 text-xs"
-            />
-          )}
+          <Button
+            ref={actionButtonRef}
+            variant={isEnabled ? "danger" : "secondary"}
+            size="sm"
+            onClick={isEnabled ? onDisable : onEnable}
+          >
+            {isEnabled
+              ? t("settings.disableAction")
+              : t("settings.setupAction")}
+          </Button>
         </div>
-      )}
-
-      {step === "password-enable-totp" && (
-        <PasswordPrompt
-          password={password}
-          onChange={onPasswordChange}
-          onSubmit={onEnableTotpWithPassword}
-          onCancel={onReset}
-          label={t("settings.enablePasswordPrompt")}
-        />
-      )}
-
-      {step === "setup" && (
-        <TotpSetup
-          totpUri={totpUri}
-          backupCodes={backupCodes}
-          verifyCode={verifyCode}
-          onVerifyCodeChange={onVerifyCodeChange}
-          onVerify={onVerify}
-          onCancel={onReset}
-        />
-      )}
-
-      {step === "password-disable" && (
-        <PasswordPrompt
-          password={password}
-          onChange={onPasswordChange}
-          onSubmit={onDisable}
-          onCancel={onReset}
-          label={t("settings.disablePasswordPrompt")}
-        />
-      )}
-
-      {error && <FormMessage variant="error">{error}</FormMessage>}
-    </div>
+        {success && (
+          <div className={styles.inlineMessage}>
+            <FormMessage variant="success">{success}</FormMessage>
+          </div>
+        )}
+      </CardBody>
+      <Dialog
+        open={step !== "idle"}
+        dismissible={!isSubmitting}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          actionButtonRef.current?.focus();
+        }}
+        onOpenChange={(open) => {
+          if (!open && !isSubmitting) onClose();
+        }}
+        title={title}
+        description={description}
+        closeLabel={t("settings.closeDialog")}
+      >
+        {step === "setup" ? (
+          <TotpSetup
+            totpUri={totpUri}
+            backupCodes={backupCodes}
+            error={error}
+            onCancel={onClose}
+          />
+        ) : (
+          <PasswordPrompt error={error} onCancel={onClose} />
+        )}
+      </Dialog>
+    </Card>
   );
 }

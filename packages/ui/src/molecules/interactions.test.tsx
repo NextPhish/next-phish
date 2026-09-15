@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -83,4 +84,39 @@ it("opens and dismisses responsive navigation", async () => {
   ).toBeInTheDocument();
   await user.keyboard("{Escape}");
   expect(trigger).toHaveFocus();
+});
+
+function OneTimeSecretDialog() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Reveal key</Button>
+      <Dialog
+        open={open}
+        onOpenChange={setOpen}
+        dismissible={false}
+        title="Copy your key"
+        description="Shown only once"
+      >
+        <Button onClick={() => setOpen(false)}>Done</Button>
+      </Dialog>
+    </>
+  );
+}
+
+it("protects one-time content from Escape and restores the external opener after Done", async () => {
+  const user = userEvent.setup();
+  render(<OneTimeSecretDialog />);
+  const opener = screen.getByRole("button", { name: "Reveal key" });
+  await user.click(opener);
+  expect(
+    screen.queryByRole("button", { name: "Close dialog" }),
+  ).not.toBeInTheDocument();
+  await user.keyboard("{Escape}");
+  expect(
+    screen.getByRole("dialog", { name: "Copy your key" }),
+  ).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Done" }));
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(opener).toHaveFocus();
 });

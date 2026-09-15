@@ -21,6 +21,7 @@ import { nextCookies } from "better-auth/next-js";
 import { apiKey } from "@better-auth/api-key";
 import { db } from "@next-phish/database";
 import { ac, owner, admin, member } from "./auth/permissions";
+import { twoFactorOptions } from "./auth/two-factor-options";
 
 const email = Container.get<IEmailService>(EMAIL_SERVICE_TOKEN);
 
@@ -111,10 +112,7 @@ export const auth = betterAuth({
         });
       },
     }),
-    twoFactor({
-      skipVerificationOnEnable: true,
-      issuer: "Next Phish",
-    }),
+    twoFactor(twoFactorOptions),
     emailOTP({
       async sendVerificationOTP({ email: to, otp, type }) {
         if (type === "forget-password") {

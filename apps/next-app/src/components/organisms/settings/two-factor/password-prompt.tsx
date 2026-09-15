@@ -1,75 +1,71 @@
 "use client";
 
-import { Password } from "primereact/password";
-import { Button } from "primereact/button";
-import { useTranslation } from "@/src/lib/i18n";
-
-const inputClassName =
-  "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
-
-interface PasswordPromptProps {
-  password: string;
-  onChange: (v: string) => void;
-  onSubmit: () => void;
-  onCancel: () => void;
-  label?: string;
-}
+import { Field, Form, useFormikContext, type FieldInputProps } from "formik";
+import {
+  Button,
+  DialogClose,
+  FormField,
+  FormMessage,
+  PasswordInput,
+} from "@next-phish/ui";
+import { useTranslation } from "../../../../lib/i18n";
+import type { TwoFactorValues } from "./presentation";
+import styles from "../profile-settings.module.css";
 
 export function PasswordPrompt({
-  password,
-  onChange,
-  onSubmit,
+  error,
   onCancel,
-  label,
-}: PasswordPromptProps) {
+}: {
+  error: string;
+  onCancel: () => void;
+}) {
   const t = useTranslation();
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    onSubmit();
-  }
-
+  const { errors, touched, isSubmitting } = useFormikContext<TwoFactorValues>();
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-sm text-zinc-400">
-        {label || t("settings.enterPasswordToContinue")}
-      </p>
-      <div className="space-y-2">
-        <label
-          htmlFor="password-input"
-          className="block text-sm font-medium text-zinc-100"
-        >
-          {t("common.password")}
-        </label>
-        <Password
-          inputId="password-input"
-          size={"small" as never}
-          value={password}
-          onChange={(e) => onChange(e.target.value)}
-          toggleMask
-          feedback={false}
-          className="w-full"
-          inputClassName={inputClassName}
-          pt={{ iconField: { root: { className: "w-full" } } }}
-          placeholder={t("settings.enterCurrentPassword")}
-        />
+    <Form
+      noValidate
+      className={styles.dialogForm}
+      aria-busy={isSubmitting || undefined}
+    >
+      <FormField
+        id="two-factor-password"
+        label={t("common.password")}
+        error={touched.password ? errors.password : undefined}
+        required
+      >
+        {(control) => (
+          <Field name="password">
+            {({ field }: { field: FieldInputProps<string> }) => (
+              <PasswordInput
+                {...control}
+                {...field}
+                autoComplete="current-password"
+                autoFocus
+                disabled={isSubmitting}
+                placeholder={t("settings.enterCurrentPassword")}
+                showLabel={t("settings.showPassword")}
+                hideLabel={t("settings.hidePassword")}
+              />
+            )}
+          </Field>
+        )}
+      </FormField>
+      {error && <FormMessage variant="error">{error}</FormMessage>}
+      <div className={styles.dialogActions}>
+        <DialogClose asChild>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isSubmitting}
+            onClick={onCancel}
+          >
+            {t("common.cancel")}
+          </Button>
+        </DialogClose>
+        <Button type="submit" loading={isSubmitting}>
+          {t("settings.continue")}
+        </Button>
       </div>
-      <div className="flex gap-2">
-        <Button
-          size="small"
-          type="submit"
-          label={t("settings.continue")}
-          className="rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
-        />
-        <Button
-          size="small"
-          type="button"
-          label={t("common.cancel")}
-          outlined
-          onClick={onCancel}
-          className="rounded-xl border-white/10 px-6 py-3 text-sm text-zinc-300"
-        />
-      </div>
-    </form>
+    </Form>
   );
 }

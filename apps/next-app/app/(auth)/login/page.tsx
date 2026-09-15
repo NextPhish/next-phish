@@ -1,6 +1,5 @@
-import type { CSSProperties } from "react";
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { AuthLayout } from "@next-phish/ui";
 import { GetUserCountQuery, MessageBus } from "@next-phish/backend";
 import { LoginContainer } from "@/src/components/organisms/login";
 import { Container } from "@/src/server/container";
@@ -38,47 +37,21 @@ export default async function LoginPage({
   );
 
   return (
-    <div className={`np-theme ${styles.layout}`}>
-      <aside className={styles.brandPanel}>
-        <Link href="/" className={styles.brand} aria-label="NextPhish">
-          <span className={styles.brandMark}>
-            <ShieldCheck className={styles.brandIcon} aria-hidden="true" />
-          </span>
-          nextphish.
-        </Link>
-        <div className={styles.brandCopy}>
-          <h2>{t("login.brandTitle")}</h2>
-          <p>{t("login.brandDescription")}</p>
-          <div className={styles.brandArt} aria-hidden="true">
-            {[18, 25, 22, 38, 33, 50, 58, 68].map((height, index) => (
-              <span
-                key={`${height}-${index}`}
-                style={
-                  {
-                    "--bar-height": `${height}px`,
-                    "--bar-opacity": 0.4 + index * 0.08,
-                  } as CSSProperties
-                }
-              />
-            ))}
-          </div>
-        </div>
-        <small className={styles.brandFooter}>{t("login.brandFooter")}</small>
-      </aside>
-      <main className={styles.formPanel}>
-        <div className={styles.formInner}>
-          <div className={styles.previewLabel}>{t("login.badge")}</div>
-          <h1 className={styles.title}>{t("login.title")}</h1>
-          <p className={styles.subtitle}>{t("login.subtitle")}</p>
-          <LoginContainer authError={authError} authSuccess={authSuccess} />
-          {count === 0 && (
-            <p className={styles.setupPrompt}>
-              {t("login.firstAdminPrompt")}{" "}
-              <Link href="/setup">{t("login.startSetup")}</Link>
-            </p>
-          )}
-        </div>
-      </main>
-    </div>
+    <AuthLayout
+      badge={t("login.badge")}
+      title={t("login.title")}
+      subtitle={t("login.subtitle")}
+      brandTitle={t("login.brandTitle")}
+      brandDescription={t("login.brandDescription")}
+      brandFooter={t("login.brandFooter")}
+    >
+      <LoginContainer authError={authError} authSuccess={authSuccess} />
+      {count === 0 && (
+        <p className={styles.setupPrompt}>
+          {t("login.firstAdminPrompt")}{" "}
+          <Link href="/setup">{t("login.startSetup")}</Link>
+        </p>
+      )}
+    </AuthLayout>
   );
 }

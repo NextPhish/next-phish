@@ -5,7 +5,8 @@
     "jsx": "react-jsx",
     "types": ["vite/client", "node"],
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "paths": { "@/*": ["../../apps/next-app/*"] }
   },
   "include": ["src", ".storybook", "vitest.config.ts"]
 }

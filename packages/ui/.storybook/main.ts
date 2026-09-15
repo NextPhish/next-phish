@@ -6,6 +6,13 @@ const config: StorybookConfig = {
   framework: "@storybook/react-vite",
   core: { disableTelemetry: true },
   async viteFinal(config) {
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        ...config.resolve?.alias,
+        "@": new URL("../../../apps/next-app", import.meta.url).pathname,
+      },
+    };
     config.plugins = [...(config.plugins ?? []), tailwindcss()];
     return config;
   },

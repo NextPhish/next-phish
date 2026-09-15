@@ -1,16 +1,19 @@
 "use client";
 
+import { Formik, type FormikHelpers, type FormikProps } from "formik";
+import { useRef } from "react";
+import {
+  twoFactorCodeSchema,
+  twoFactorPasswordSchema,
+} from "@next-phish/shared";
 import { authClient } from "@/src/lib/auth-client";
-import { TwoFactorPresentation } from "./presentation";
 import { useTwoFactorState } from "@/src/hooks/use-two-factor-state";
 import { useTranslation } from "@/src/lib/i18n";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
+import { TwoFactorPresentation, type TwoFactorValues } from "./presentation";
 
 interface TwoFactorContainerProps {
-  user: {
-    id: string;
-    email: string;
-    twoFactorEnabled?: boolean | null;
-  };
+  user: { id: string; email: string; twoFactorEnabled?: boolean | null };
 }
 
 export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
@@ -18,9 +21,7 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
   const { data: session } = authClient.useSession();
   const isEnabled = session?.user?.twoFactorEnabled ?? user.twoFactorEnabled;
   const {
-    state: { step, status, totpUri, backupCodes, verifyCode, password },
-    setPassword,
-    setVerifyCode,
+    state: { step, status, totpUri, backupCodes },
     setError,
     setupTotp,
     enableTotp,
@@ -28,62 +29,93 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
     complete,
     reset,
   } = useTwoFactorState();
+  const schema =
+    step === "setup" ? twoFactorCodeSchema : twoFactorPasswordSchema;
+  const baseValidate = toFormikValidation(schema);
+  const formikRef = useRef<FormikProps<TwoFactorValues>>(null);
 
-  async function handleEnableTotpWithPassword() {
+  function validate(values: TwoFactorValues) {
+    return Object.fromEntries(
+      Object.entries(baseValidate(values)).map(([field, message]) => [
+        field,
+        t(`settings.validation.${message}`),
+      ]),
+    );
+  }
+
+  async function handleSubmit(
+    values: TwoFactorValues,
+    helpers: FormikHelpers<TwoFactorValues>,
+  ) {
     setError("");
-    const { data, error: err } = await authClient.twoFactor.enable({
-      password,
-    });
-    if (err) {
-      setError(err.message || err.code || t("settings.failedToEnable2fa"));
-      return;
-    }
-
-    if (data) {
-      setupTotp(data.totpURI, data.backupCodes);
+    try {
+      if (step === "password-enable-totp") {
+        const { data, error } = await authClient.twoFactor.enable({
+          password: values.password,
+        });
+        if (error) {
+          setError(t("settings.failedToEnable2fa"));
+          return;
+        }
+        if (!data) {
+          setError(t("settings.failedToEnable2fa"));
+          return;
+        }
+        helpers.resetForm();
+        setupTotp(data.totpURI, data.backupCodes);
+        return;
+      }
+      if (step === "setup") {
+        const { error } = await authClient.twoFactor.verifyTotp({
+          code: values.verifyCode,
+        });
+        if (error) {
+          setError(t("twoFactorPage.invalidCode"));
+          return;
+        }
+        helpers.resetForm();
+        complete(t("settings.authenticatorConfigured"));
+        return;
+      }
+      if (step === "password-disable") {
+        const { error } = await authClient.twoFactor.disable({
+          password: values.password,
+        });
+        if (error) {
+          setError(t("settings.failedToDisable2fa"));
+          return;
+        }
+        helpers.resetForm();
+        reset();
+      }
+    } catch {
+      setError(t("settings.unexpectedTwoFactorError"));
     }
   }
 
-  async function handleVerify() {
-    setError("");
-    const { error: err } = await authClient.twoFactor.verifyTotp({
-      code: verifyCode,
-    });
-    if (err) {
-      setError(err.message || err.code || t("twoFactorPage.invalidCode"));
-      return;
-    }
-    complete(t("settings.authenticatorConfigured"));
-  }
-
-  async function handleDisable() {
-    setError("");
-    const { error: err } = await authClient.twoFactor.disable({ password });
-    if (err) {
-      setError(err.message || err.code || t("settings.failedToDisable2fa"));
-      return;
-    }
+  function handleClose() {
+    formikRef.current?.resetForm();
     reset();
   }
 
   return (
-    <TwoFactorPresentation
-      isEnabled={!!isEnabled}
-      step={step}
-      error={status.type === "error" ? status.message : ""}
-      success={status.type === "success" ? status.message : ""}
-      totpUri={totpUri}
-      backupCodes={backupCodes}
-      verifyCode={verifyCode}
-      password={password}
-      onPasswordChange={setPassword}
-      onVerifyCodeChange={setVerifyCode}
-      onEnableTotp={enableTotp}
-      onEnableTotpWithPassword={handleEnableTotpWithPassword}
-      onVerify={handleVerify}
-      onDisable={handleDisable}
-      onConfirmDisable={confirmDisable}
-      onReset={reset}
-    />
+    <Formik<TwoFactorValues>
+      innerRef={formikRef}
+      initialValues={{ password: "", verifyCode: "" }}
+      validate={validate}
+      onSubmit={handleSubmit}
+    >
+      <TwoFactorPresentation
+        isEnabled={Boolean(isEnabled)}
+        step={step}
+        error={status.type === "error" ? status.message : ""}
+        success={status.type === "success" ? status.message : ""}
+        totpUri={totpUri}
+        backupCodes={backupCodes}
+        onEnable={enableTotp}
+        onDisable={confirmDisable}
+        onClose={handleClose}
+      />
+    </Formik>
   );
 }

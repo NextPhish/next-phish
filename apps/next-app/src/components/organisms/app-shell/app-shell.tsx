@@ -69,7 +69,11 @@ export function AppShell({
 
   return (
     <div
-      className={pathname === "/" ? styles.v1Boundary : styles.legacyBoundary}
+      className={
+        pathname === "/" || pathname === "/profile"
+          ? styles.v1Boundary
+          : styles.legacyBoundary
+      }
     >
       <V1AppShell
         navigation={navigation}
