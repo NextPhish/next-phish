@@ -1,0 +1,6 @@
+<mj-text>Hi there,</mj-text>
+<mj-text><strong><%= inviterName %></strong> has invited you to join <strong><%= organizationName %></strong> on NextPhish. Collaborate on simulations, share resources and review results together.</mj-text>
+<mj-button href="<%= inviteLink %>">Accept invitation</mj-button>
+<mj-divider />
+<mj-text color="#626d80" font-size="13px">If you were not expecting this invitation, you can safely ignore this email.</mj-text>
+<mj-text color="#626d80" font-size="12px" css-class="fallback">If the button does not work, copy this link into your browser:<br/><a href="<%= inviteLink %>"><%= inviteLink %></a></mj-text>

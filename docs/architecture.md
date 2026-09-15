@@ -197,3 +197,9 @@ All common operations run from the project root via `turbo`. Examples:
 - Lives in `apps/worker/`, deployed as an independent container.
 - Processes BullMQ jobs from Redis.
 - Shares business logic via `packages/shared` and database access via `packages/database`.
+
+## V1 UI foundation (September 2026)
+
+`packages/ui` (`@next-phish/ui`) contains the selected V1 design system: React 19, Radix primitives, Downshift autocomplete, Tailwind v4 and TanStack Table v8. Storybook runs independently inside the package. Its runtime exports are presentation-only and have no dependency on Next.js, tRPC, auth or database packages. The shared schemas and Formik are used only by demonstration stories.
+
+The login route is the first screen migrated to the V1 package; other application screens still use the existing PrimeReact components. Adopt the new package through application adapters and page-level migration; do not replace the existing AppDataTable before mapping its callbacks and permission-aware actions. See [UI library plan](ui-library-plan.md) and [package documentation](../packages/ui/README.md).

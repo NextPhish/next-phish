@@ -1,0 +1,9 @@
+.content,
+.form {
+  display: grid;
+  gap: 24px;
+}
+.slugStatus {
+  margin-top: -12px;
+  font-weight: 600;
+}

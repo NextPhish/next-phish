@@ -68,3 +68,7 @@ The following Tailwind default palette slots are overridden with brand colors so
 | `green-500` | brand-cyan  | `#15E5D4` |
 
 These overrides affect both PrimeReact and any custom code using those classes. See `apps/next-app/app/globals.css` for the `@theme` block.
+
+## Selected V1 redesign
+
+The existing palette above applies to the current PrimeReact app. New components in `packages/ui` use the approved V1 light workspace/dark sidebar/indigo direction. The source of truth is `packages/ui/src/styles.css`, scoped to `.np-theme`; do not change existing global palette overrides until the app migration. The new muted text token is `#626d80`, adjusted from the prototype for contrast on `#f5f6fa`.

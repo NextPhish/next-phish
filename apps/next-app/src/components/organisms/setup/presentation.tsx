@@ -1,143 +1,132 @@
 "use client";
-
-import { useRef } from "react";
-import { Form, Field, ErrorMessage, useFormikContext } from "formik";
-import type { FieldInputProps } from "formik";
-import { Password } from "primereact/password";
-import { Button } from "primereact/button";
-import { FormField } from "@/src/components/molecules/form-field";
-import { FormMessage } from "@/src/components/atoms/form-message";
-import { errorClassName } from "@/src/components/atoms/form-message.styles";
-import { useTranslation } from "@/src/lib/i18n";
-
-const inputClassName =
-  "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
-
-interface SetupPresentationProps {
-  error: string;
-}
-
-interface SetupValues {
+import { Field, Form, useFormikContext, type FieldInputProps } from "formik";
+import {
+  Button,
+  FormField,
+  FormMessage,
+  Input,
+  PasswordInput,
+} from "@next-phish/ui";
+import { useTranslation } from "../../../lib/i18n";
+import styles from "./setup.module.css";
+export interface SetupValues {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
-
-export function SetupPresentation({ error }: SetupPresentationProps) {
+export function SetupPresentation({ error }: { error: string }) {
   const t = useTranslation();
-  const formRef = useRef<HTMLFormElement>(null);
-  const { errors, touched, submitCount, isSubmitting } =
+  const { values, errors, touched, isSubmitting } =
     useFormikContext<SetupValues>();
-
+  const fields = [
+    {
+      name: "name",
+      label: t("common.name"),
+      hint: t("setup.nameHint"),
+      placeholder: "Admin",
+      autoComplete: "name",
+      validation: "nameRequired",
+    },
+    {
+      name: "email",
+      label: t("common.email"),
+      hint: t("setup.emailHint"),
+      placeholder: "admin@example.com",
+      autoComplete: "email",
+      validation: "invalidEmail",
+    },
+    {
+      name: "password",
+      label: t("common.password"),
+      hint: t("setup.passwordHint"),
+      placeholder: t("settings.atLeastEightCharacters"),
+      autoComplete: "new-password",
+      validation: "passwordTooShort",
+    },
+    {
+      name: "confirmPassword",
+      label: t("setup.confirmPassword"),
+      hint: t("setup.confirmPasswordHint"),
+      placeholder: t("setup.confirmPassword"),
+      autoComplete: "new-password",
+      validation: "passwordMismatch",
+    },
+  ] as const;
+  // Retain the existing PrimeReact strength categories as guidance, not validation rules.
+  const strength = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/.test(
+    values.password,
+  )
+    ? "strong"
+    : /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/.test(
+          values.password,
+        )
+      ? "good"
+      : "weak";
   return (
-    <Form ref={formRef} className="flex flex-col gap-5">
-      <div className="space-y-2">
-        <FormField
-          name="name"
-          label={t("common.name")}
-          placeholder="Admin"
-          inputClassName={inputClassName}
-        />
-        <p className="text-xs text-zinc-400 mt-2">{t("setup.nameHint")}</p>
-      </div>
-
-      <div className="space-y-2">
-        <FormField
-          name="email"
-          label={t("common.email")}
-          type="email"
-          placeholder="admin@example.com"
-          inputClassName={inputClassName}
-        />
-        <p className="text-xs text-zinc-400 mt-2">{t("setup.emailHint")}</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-zinc-100"
-          >
-            {t("common.password")}
-          </label>
-          <Field name="password">
-            {({ field }: { field: FieldInputProps<string> }) => (
-              <Password
-                size={"small" as never}
-                id="password"
-                {...field}
-                feedback
-                toggleMask
-                invalid={Boolean(
-                  errors.password && (touched.password || submitCount > 0),
-                )}
-                className="w-full"
-                inputClassName={inputClassName}
-                pt={{ iconField: { root: { className: "w-full" } } }}
-                panelClassName="rounded-2xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur"
-                placeholder={t("settings.atLeastEightCharacters")}
-                promptLabel={t("settings.passwordStrengthPrompt")}
-                weakLabel={t("settings.weak")}
-                mediumLabel={t("settings.good")}
-                strongLabel={t("settings.strong")}
-              />
+    <Form
+      noValidate
+      className={styles.form}
+      aria-busy={isSubmitting || undefined}
+    >
+      {fields.map(
+        ({ name, label, hint, placeholder, autoComplete, validation }) => (
+          <div key={name}>
+            <FormField
+              id={`setup-${name}`}
+              label={label}
+              hint={hint}
+              required
+              error={
+                touched[name] && errors[name]
+                  ? t(`setup.validation.${validation}`)
+                  : undefined
+              }
+            >
+              {(control) => (
+                <Field name={name}>
+                  {({ field }: { field: FieldInputProps<string> }) =>
+                    name === "password" || name === "confirmPassword" ? (
+                      <PasswordInput
+                        {...control}
+                        {...field}
+                        autoComplete={autoComplete}
+                        placeholder={placeholder}
+                        disabled={isSubmitting}
+                        showLabel={t("login.showPassword")}
+                        hideLabel={t("login.hidePassword")}
+                      />
+                    ) : (
+                      <Input
+                        {...control}
+                        {...field}
+                        type={name === "email" ? "email" : "text"}
+                        autoComplete={autoComplete}
+                        placeholder={placeholder}
+                        disabled={isSubmitting}
+                      />
+                    )
+                  }
+                </Field>
+              )}
+            </FormField>
+            {name === "password" && values.password && (
+              <div className={styles.strength} data-strength={strength}>
+                <span className={styles.strengthTrack} aria-hidden="true">
+                  <span />
+                </span>
+                <span>
+                  {t("setup.passwordStrength")}: {t(`settings.${strength}`)}
+                </span>
+              </div>
             )}
-          </Field>
-          <p className="text-xs text-zinc-400">{t("setup.passwordHint")}</p>
-          <ErrorMessage
-            name="password"
-            component="p"
-            className={errorClassName}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-zinc-100"
-          >
-            {t("setup.confirmPassword")}
-          </label>
-          <Field name="confirmPassword">
-            {({ field }: { field: FieldInputProps<string> }) => (
-              <Password
-                id="confirmPassword"
-                {...field}
-                toggleMask
-                feedback={false}
-                invalid={Boolean(
-                  errors.confirmPassword &&
-                  (touched.confirmPassword || submitCount > 0),
-                )}
-                className="w-full"
-                inputClassName={inputClassName}
-                pt={{ iconField: { root: { className: "w-full" } } }}
-                placeholder={t("setup.confirmPassword")}
-              />
-            )}
-          </Field>
-          <p className="text-xs text-zinc-400">
-            {t("setup.confirmPasswordHint")}
-          </p>
-          <ErrorMessage
-            name="confirmPassword"
-            component="p"
-            className={errorClassName}
-          />
-        </div>
-      </div>
-
+          </div>
+        ),
+      )}
       {error && <FormMessage variant="error">{error}</FormMessage>}
-
-      <Button
-        size="small"
-        type="submit"
-        label={t("setup.createAccount")}
-        loading={isSubmitting}
-        className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
-        disabled={isSubmitting}
-      />
+      <Button type="submit" loading={isSubmitting}>
+        {t("setup.createAccount")}
+      </Button>
     </Form>
   );
 }

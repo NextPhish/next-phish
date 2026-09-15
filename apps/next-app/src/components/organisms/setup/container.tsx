@@ -19,23 +19,26 @@ interface SetupValues {
 export function SetupContainer() {
   const t = useTranslation();
   const router = useRouter();
-  const { status, setError } = useFormStatus();
+  const { status, setError, reset } = useFormStatus();
 
   async function handleSubmit(values: SetupValues) {
-    setError("");
+    reset();
+    try {
+      const { error: err } = await authClient.signUp.email({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
 
-    const { error: err } = await authClient.signUp.email({
-      name: values.name,
-      email: values.email,
-      password: values.password,
-    });
+      if (err) {
+        setError(err.message || err.code || t("setup.failedToCreateAccount"));
+        return;
+      }
 
-    if (err) {
-      setError(err.message || err.code || t("setup.failedToCreateAccount"));
-      return;
+      router.push("/login?message=check-email");
+    } catch {
+      setError(t("setup.failedToCreateAccount"));
     }
-
-    router.push("/login?message=check-email");
   }
 
   return (

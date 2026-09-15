@@ -20,7 +20,9 @@
     "db:seed": "pnpm --filter @next-phish/database exec prisma db seed",
     "dev:up": "bash scripts/dev.sh",
     "setup": "bash scripts/symlink-env.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "pnpm --filter @next-phish/ui storybook",
+    "storybook:build": "pnpm --filter @next-phish/ui build"
   },
   "packageManager": "pnpm@10.33.4",
   "devDependencies": {

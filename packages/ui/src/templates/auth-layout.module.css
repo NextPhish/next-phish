@@ -1,0 +1,175 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--np-background);
+}
+.brandPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 50px 12%;
+  color: #fff;
+  background: var(--np-nav);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  width: fit-content;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+}
+.brandMark {
+  display: grid;
+  width: 31px;
+  height: 35px;
+  place-items: center;
+  color: #fff;
+  background: #7666ec;
+  border-radius: 9px 9px 13px 13px;
+}
+.brandIcon {
+  width: 19px;
+  height: 19px;
+}
+.brandCopy h2 {
+  max-width: 440px;
+  font-size: clamp(36px, 3.2vw, 46px);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+}
+.brandCopy p {
+  max-width: 390px;
+  margin-top: 24px;
+  color: #a0abc3;
+  font-size: 15px;
+}
+.brandArt {
+  display: flex;
+  height: 70px;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 40px;
+}
+.brandArt span {
+  display: block;
+  width: 24px;
+  height: var(--bar-height);
+  background: #8c7fee;
+  border-radius: 4px;
+  opacity: var(--bar-opacity);
+}
+.brandFooter {
+  color: #a0abc3;
+  font-size: 13px;
+}
+.formPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.formInner {
+  width: min(360px, 100%);
+}
+.previewLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--np-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.title {
+  margin-top: 25px;
+  font-size: 30px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -1px;
+}
+.subtitle {
+  margin: 12px 0 30px;
+  color: var(--np-muted);
+  font-size: 14px;
+}
+.setupPrompt {
+  margin-top: 24px;
+  color: var(--np-muted);
+  font-size: 13px;
+  text-align: center;
+}
+.setupPrompt a {
+  color: var(--np-primary);
+  font-weight: 600;
+}
+.setupPrompt a:hover {
+  color: var(--np-primary-hover);
+}
+.form {
+  display: grid;
+  gap: 20px;
+}
+.skeletonLabel {
+  width: 78px;
+  height: 13px;
+  border-radius: 7px;
+}
+.skeletonInput {
+  width: 100%;
+  height: 41px;
+  border-radius: 7px;
+}
+.skeletonButton {
+  width: 100%;
+  height: 40px;
+  margin-top: 8px;
+  border-radius: 7px;
+}
+.skeletonTitle {
+  width: 210px;
+  height: 38px;
+  margin-top: 25px;
+  border-radius: 7px;
+}
+.skeletonSubtitle {
+  width: 245px;
+  height: 18px;
+  margin: 12px 0 30px;
+  border-radius: 7px;
+}
+.skeletonPreview {
+  width: 145px;
+  height: 22px;
+  border-radius: 7px;
+}
+@media (max-width: 700px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .brandPanel {
+    min-height: 180px;
+    padding: 30px;
+  }
+  .brandCopy h2 {
+    margin-top: 30px;
+    font-size: 26px;
+  }
+  .brandCopy p,
+  .brandArt,
+  .brandFooter {
+    display: none;
+  }
+  .formPanel {
+    padding: 35px 25px;
+  }
+}
+
+.wide {
+  width: min(460px, 100%);
+}

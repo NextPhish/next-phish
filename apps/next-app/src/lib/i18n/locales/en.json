@@ -130,12 +130,17 @@
   },
   "login": {
     "badge": "Secure access",
-    "title": "Welcome back",
-    "subtitle": "Sign in to your account",
+    "title": "Welcome back.",
+    "subtitle": "Sign in to your NextPhish workspace.",
+    "brandTitle": "Awareness is your first line of defence.",
+    "brandDescription": "Plan thoughtful simulations. Understand your team's response. Make security part of everyday work.",
+    "brandFooter": "NextPhish · Security awareness platform",
     "emailHintMagicLink": "We will send a secure sign-in link to this email.",
     "emailHintPassword": "Use the email address linked to your account.",
     "passwordPlaceholder": "Your password",
     "passwordHint": "Password visibility can be toggled from the eye icon.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "forgotPassword": "Forgot password?",
     "sendMagicLink": "Send magic link",
     "signInWithPasswordInstead": "Sign in with password instead",
@@ -145,7 +150,11 @@
     "invalidCredentials": "Invalid credentials",
     "unexpectedError": "An unexpected error occurred",
     "firstAdminPrompt": "Need the first admin account?",
-    "startSetup": "Start setup"
+    "startSetup": "Start setup",
+    "validation": {
+      "invalidEmail": "Invalid email address",
+      "passwordRequired": "Password is required"
+    }
   },
   "forgotPassword": {
     "badge": "Password recovery",
@@ -181,7 +190,17 @@
     "confirmPasswordHint": "Repeat the password exactly to avoid lockouts.",
     "createAccount": "Create account",
     "failedToCreateAccount": "Failed to create account",
-    "alreadyHaveAccess": "Already have access?"
+    "alreadyHaveAccess": "Already have access?",
+    "brandTitle": "A stronger security culture starts here.",
+    "brandDescription": "Create your administrator account to start planning simulations and helping your team recognize threats.",
+    "loading": "Loading initial setup…",
+    "passwordStrength": "Password strength",
+    "validation": {
+      "nameRequired": "Name is required",
+      "invalidEmail": "Invalid email address",
+      "passwordTooShort": "Use at least 8 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
   },
   "onboarding": {
     "badge": "Getting started",
@@ -191,7 +210,15 @@
     "infoBody": "An organization is a way to manage users and share access to your phishing simulation data. Members of an organization collaborate on campaigns, target groups, email templates, page templates, sending profiles, and logs - all under one roof.",
     "organizationName": "Organization name",
     "createOrganization": "Create organization",
-    "failedToCreateOrganization": "Failed to create organization"
+    "failedToCreateOrganization": "Failed to create organization",
+    "brandTitle": "One workspace. A more aware team.",
+    "brandDescription": "Bring your people, simulations and results together. Create an organization to start building your security awareness program.",
+    "slugCheckError": "Availability could not be checked. You can try creating the organization again.",
+    "validation": {
+      "nameRequired": "Organization name is required",
+      "slugRequired": "Slug is required",
+      "slugInvalid": "Use lowercase letters, numbers, and single hyphens between words."
+    }
   },
   "twoFactorPage": {
     "badge": "Two-factor verification",

@@ -1,14 +1,16 @@
-import Image from "next/image";
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { Container } from "@/src/server/container";
-import { MessageBus, GetUserCountQuery } from "@next-phish/backend";
+import { ShieldCheck } from "lucide-react";
+import { GetUserCountQuery, MessageBus } from "@next-phish/backend";
 import { LoginContainer } from "@/src/components/organisms/login";
+import { Container } from "@/src/server/container";
 import {
   getAuthErrorMessage,
   getAuthSuccessMessage,
 } from "@/src/lib/auth-errors";
 import { createTranslator } from "@/src/lib/i18n";
 import { getLocale } from "@/src/lib/i18n/server";
+import styles from "./login.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,6 @@ export default async function LoginPage({
 }) {
   const bus = Container.get(MessageBus);
   const handler = Container.get(GetUserCountQuery);
-
   const [locale, resolvedSearchParams, count] = await Promise.all([
     getLocale(),
     searchParams,
@@ -37,47 +38,47 @@ export default async function LoginPage({
   );
 
   return (
-    <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">
-      <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,_rgba(41,184,255,0.22),_transparent_65%)]" />
-      <div className="absolute -left-20 top-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
-      <div className="absolute -right-16 bottom-16 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
-
-      <div className="auth-card rounded-3xl">
-        <div className="min-w-[400px] md:min-w-[600px] m-[1px] auth-card__container w-full max-w-md rounded-3xl border border-white/10 bg-brand-dark p-8 shadow-[0_24px_80px_rgba(2,11,29,0.55)] backdrop-blur-xl sm:p-10">
-          <div className="mb-8 text-center">
-            <Image
-              src="/images/logo/logo-icon-only.png"
-              alt="NextPhish"
-              width={85}
-              height={85}
-              className="mx-auto mb-6"
-              priority
-            />
-            <div className="mx-auto mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200/80">
-              {t("login.badge")}
-            </div>
-            <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-(image:--brand-gradient)" />
-            <h1 className="text-3xl font-semibold tracking-tight text-white">
-              {t("login.title")}
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-zinc-400">
-              {t("login.subtitle")}
-            </p>
+    <div className={`np-theme ${styles.layout}`}>
+      <aside className={styles.brandPanel}>
+        <Link href="/" className={styles.brand} aria-label="NextPhish">
+          <span className={styles.brandMark}>
+            <ShieldCheck className={styles.brandIcon} aria-hidden="true" />
+          </span>
+          nextphish.
+        </Link>
+        <div className={styles.brandCopy}>
+          <h2>{t("login.brandTitle")}</h2>
+          <p>{t("login.brandDescription")}</p>
+          <div className={styles.brandArt} aria-hidden="true">
+            {[18, 25, 22, 38, 33, 50, 58, 68].map((height, index) => (
+              <span
+                key={`${height}-${index}`}
+                style={
+                  {
+                    "--bar-height": `${height}px`,
+                    "--bar-opacity": 0.4 + index * 0.08,
+                  } as CSSProperties
+                }
+              />
+            ))}
           </div>
+        </div>
+        <small className={styles.brandFooter}>{t("login.brandFooter")}</small>
+      </aside>
+      <main className={styles.formPanel}>
+        <div className={styles.formInner}>
+          <div className={styles.previewLabel}>{t("login.badge")}</div>
+          <h1 className={styles.title}>{t("login.title")}</h1>
+          <p className={styles.subtitle}>{t("login.subtitle")}</p>
           <LoginContainer authError={authError} authSuccess={authSuccess} />
           {count === 0 && (
-            <p className="mt-6 text-center text-sm text-zinc-400">
+            <p className={styles.setupPrompt}>
               {t("login.firstAdminPrompt")}{" "}
-              <Link
-                href="/setup"
-                className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
-              >
-                {t("login.startSetup")}
-              </Link>
+              <Link href="/setup">{t("login.startSetup")}</Link>
             </p>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

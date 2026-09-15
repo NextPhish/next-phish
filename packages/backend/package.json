@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "emails:build": "node scripts/build-emails.mjs",
+    "emails:check": "node scripts/build-emails.mjs --check"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1073.0",
@@ -31,6 +33,7 @@
     "@types/node": "^24",
     "@types/nodemailer": "^6.4.24",
     "@vitest/coverage-v8": "^4.1.9",
+    "mjml": "^5.4.1",
     "typescript": "^6",
     "vitest": "^4.1.9"
   }
