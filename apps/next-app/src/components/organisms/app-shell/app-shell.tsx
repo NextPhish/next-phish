@@ -80,7 +80,8 @@ export function AppShell({
         pathname === "/pages" ||
         pathname.startsWith("/pages/") ||
         pathname === "/email-templates" ||
-        pathname.startsWith("/email-templates/")
+        pathname.startsWith("/email-templates/") ||
+        pathname === "/settings"
           ? styles.v1Boundary
           : styles.legacyBoundary
       }

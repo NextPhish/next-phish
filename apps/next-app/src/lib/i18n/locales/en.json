@@ -340,7 +340,9 @@
       "codeInvalid": "Enter a valid six-digit code."
     },
     "accountDescription": "Your account, preferences, and security settings.",
-    "previewNotice": "Preview only — no account changes were saved."
+    "previewNotice": "Preview only — no account changes were saved.",
+    "applicationDescription": "Global application policies and trusted network exclusions.",
+    "globalIgnoredNetworkLoadError": "Could not load global ignored networks."
   },
   "organizations": {
     "title": "Organizations",
