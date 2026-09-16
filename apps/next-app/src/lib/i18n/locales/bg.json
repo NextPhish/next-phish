@@ -29,7 +29,8 @@
     "disabled": "Изключено",
     "enabled": "Включено",
     "active": "Активно",
-    "backToLogin": "Обратно към вход"
+    "backToLogin": "Обратно към вход",
+    "close": "Затвори"
   },
   "dashboard": {
     "title": "Табло за осведоменост по сигурността",
@@ -494,7 +495,28 @@
     "importAssetsFetched": "{downloaded} от {total} ресурси изтеглени",
     "previousImports": "Предишни импортирания",
     "urlLabel": "URL",
-    "urlPlaceholder": "https://example.com"
+    "urlPlaceholder": "https://example.com",
+    "listLoadError": "Страниците не можаха да бъдат заредени.",
+    "importUrlInvalid": "Въведете валиден URL адрес.",
+    "nameRequired": "Името на страницата е задължително.",
+    "pathTooLong": "Пътят трябва да е до 120 знака.",
+    "pathInvalid": "Използвайте безопасни URL сегменти като login или account/verify.",
+    "pathReserved": "Този път е запазен от публичния сървър.",
+    "invalidField": "Проверете полето и опитайте отново.",
+    "regeneratePreview": "Обнови прегледа",
+    "previewSuccess": "Прегледът е обновен.",
+    "previewError": "Прегледът не можа да бъде обновен.",
+    "failedAssets": "{count} неуспешни",
+    "searchImports": "Търсене по URL или домейн...",
+    "htmlOnly": "Само HTML",
+    "fileCount": "{count} файла",
+    "noMatchingImports": "Няма импортирания за \"{search}\"",
+    "validationSummary": "Проверете данните на страницата",
+    "previewOf": "Преглед на {name}",
+    "selectPage": "Избери {name}",
+    "previewUnavailable": "Няма наличен преглед",
+    "itemsPerPage": "Елементи на страница",
+    "pageOf": "Страница {page} от {pages}"
   },
   "charts": {
     "jan": "Яну",

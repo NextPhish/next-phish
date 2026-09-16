@@ -29,7 +29,8 @@
     "disabled": "Disabled",
     "enabled": "Enabled",
     "active": "Active",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "close": "Close"
   },
   "dashboard": {
     "title": "Security awareness dashboard",
@@ -494,7 +495,28 @@
     "importAssetsFetched": "{downloaded} of {total} assets downloaded",
     "previousImports": "Previous imports",
     "urlLabel": "URL",
-    "urlPlaceholder": "https://example.com"
+    "urlPlaceholder": "https://example.com",
+    "listLoadError": "Could not load pages.",
+    "importUrlInvalid": "Enter a valid URL.",
+    "nameRequired": "Page name is required.",
+    "pathTooLong": "Page path must be 120 characters or fewer.",
+    "pathInvalid": "Use URL-safe path segments such as login or account/verify.",
+    "pathReserved": "This path is reserved by the public content server.",
+    "invalidField": "Check this field and try again.",
+    "regeneratePreview": "Regenerate preview",
+    "previewSuccess": "Preview regenerated.",
+    "previewError": "Could not regenerate the preview.",
+    "failedAssets": "{count} failed",
+    "searchImports": "Search by URL or domain...",
+    "htmlOnly": "HTML only",
+    "fileCount": "{count} files",
+    "noMatchingImports": "No imports matching \"{search}\"",
+    "validationSummary": "Check the page details",
+    "previewOf": "Preview of {name}",
+    "selectPage": "Select {name}",
+    "previewUnavailable": "Preview unavailable",
+    "itemsPerPage": "Items per page",
+    "pageOf": "Page {page} of {pages}"
   },
   "charts": {
     "jan": "Jan",

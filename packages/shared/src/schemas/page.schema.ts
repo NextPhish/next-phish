@@ -47,5 +47,10 @@ export const updatePageSchema = createPageSchema.extend({
   id: z.string(),
 });
 
+export const importWebsiteSchema = z.object({
+  url: z.string().url("Must be a valid URL"),
+});
+
 export type CreatePageInput = z.infer<typeof createPageSchema>;
 export type UpdatePageInput = z.infer<typeof updatePageSchema>;
+export type ImportWebsiteInput = z.infer<typeof importWebsiteSchema>;

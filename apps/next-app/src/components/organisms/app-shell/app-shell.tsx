@@ -76,7 +76,9 @@ export function AppShell({
         pathname === "/schedule" ||
         pathname.startsWith("/schedule/") ||
         pathname === "/organizations" ||
-        pathname.startsWith("/organizations/")
+        pathname.startsWith("/organizations/") ||
+        pathname === "/pages" ||
+        pathname.startsWith("/pages/")
           ? styles.v1Boundary
           : styles.legacyBoundary
       }

@@ -3,6 +3,7 @@ import {
   pagePathSchema,
   pageTypeSchema,
   pageStatusSchema,
+  importWebsiteSchema,
 } from "@next-phish/shared";
 
 const sortFieldSchema = z.enum([
@@ -59,8 +60,7 @@ export const DeletePageCommandSchema = z.object({
   id: z.string(),
 });
 
-export const ImportPageFromUrlSchema = z.object({
-  url: z.string().url("Must be a valid URL"),
+export const ImportPageFromUrlSchema = importWebsiteSchema.extend({
   includeAssets: z.boolean().default(false),
 });
 

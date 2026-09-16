@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { InputText } from "primereact/inputtext";
+import { Input } from "@next-phish/ui";
+import { CheckCircle2, ChevronDown, ChevronRight } from "lucide-react";
 
 interface PreviousImport {
   id: string;
@@ -43,49 +44,55 @@ export function PreviousImportsList({
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-sm text-zinc-400 hover:text-brand-blue transition-colors"
+        className="flex items-center gap-2 text-sm text-[var(--np-muted)] transition-colors hover:text-[var(--np-primary)]"
       >
-        <i
-          className={`pi ${expanded ? "pi-chevron-down" : "pi-chevron-right"} text-xs`}
-        />
+        {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         {t("pages.previousImports")} ({imports.length})
       </button>
 
       {expanded && (
         <div className="space-y-2">
-          <InputText
-            size="small"
+          <Input
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search by URL or domain..."
-            className="w-full rounded-lg border border-[#1C2945] bg-brand-dark text-slate-900 text-sm mb-3"
+            placeholder={t("pages.searchImports")}
+            className="mb-3 w-full text-sm"
           />
 
-          <div className="max-h-48 mt-3 space-y-1 overflow-y-auto rounded-xl border border-[#1C2945] bg-brand-dark p-2">
+          <div className="mt-3 max-h-48 space-y-1 overflow-y-auto rounded-xl border border-[var(--np-border)] bg-[var(--np-surface-subtle)] p-2">
             {imports.map((imp) => (
               <button
                 key={imp.id}
                 type="button"
                 onClick={() => onSelect(imp)}
-                className="flex w-full items-center cursor-pointer justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-white/5"
+                className="flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--np-tint)]"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-zinc-200">
+                  <p className="truncate text-[var(--np-ink)]">
                     {imp.finalUrl || imp.url}
                   </p>
-                  <p className="text-xs text-zinc-500">
-                    {imp.includeAssets ? `${imp.fileCount} files` : "HTML only"}
+                  <p className="text-xs text-[var(--np-muted)]">
+                    {imp.includeAssets
+                      ? t("pages.fileCount").replace(
+                          "{count}",
+                          String(imp.fileCount),
+                        )
+                      : t("pages.htmlOnly")}
                     {" · "}
                     {new Date(imp.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <i className="pi pi-check-circle ml-2 text-xs text-brand-cyan" />
+                <CheckCircle2
+                  className="ml-2 text-[var(--np-success)]"
+                  size={15}
+                  aria-hidden="true"
+                />
               </button>
             ))}
 
             {imports.length === 0 && search && (
               <p className="px-3 py-2 text-xs text-zinc-500">
-                No imports matching &quot;{search}&quot;
+                {t("pages.noMatchingImports").replace("{search}", search)}
               </p>
             )}
           </div>

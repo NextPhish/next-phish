@@ -51,8 +51,13 @@ export {
   pagePathSchema,
   createPageSchema,
   updatePageSchema,
+  importWebsiteSchema,
 } from "./schemas";
-export type { CreatePageInput, UpdatePageInput } from "./schemas";
+export type {
+  CreatePageInput,
+  UpdatePageInput,
+  ImportWebsiteInput,
+} from "./schemas";
 
 export type {
   PageType,

@@ -1,8 +1,11 @@
 "use client";
 
-import { FormSkeleton } from "@/src/components/atoms/form-skeleton";
+import { PageFormSkeleton } from "./page-form-skeleton";
 import { usePageEditor } from "@/src/hooks/use-page-editor";
 import { PageForm } from "./page-form";
+import { Formik } from "formik";
+import { createPageSchema } from "@next-phish/shared";
+import { localizedPageValidation } from "./pages-validation";
 
 interface PageFormContainerProps {
   pageId?: string;
@@ -20,7 +23,6 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
     handleSubmit,
     regeneratePreview,
     isGeneratingPreview,
-    breadcrumbItems,
     t,
     router,
   } = usePageEditor({ pageId });
@@ -40,13 +42,13 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
   };
 
   if (pageId && isLoading) {
-    return <FormSkeleton />;
+    return <PageFormSkeleton />;
   }
 
   if (notFound) {
     return (
-      <div className="flex flex-1 items-center justify-center px-6 py-8">
-        <p className="text-zinc-400">{t("pages.notFound")}</p>
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-[var(--np-muted)]">{t("pages.notFound")}</p>
       </div>
     );
   }
@@ -72,20 +74,24 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
   }
 
   return (
-    <PageForm
-      pageId={pageId}
+    <Formik
       initialValues={formInitialValues}
-      status={status}
-      breadcrumbItems={breadcrumbItems}
-      editorHtmlRef={editorHtmlRef}
-      editorDesignRef={editorDesignRef}
-      initialDesign={data?.design as object | undefined}
-      initialHtml={data?.html}
-      t={t}
+      enableReinitialize
+      validate={localizedPageValidation(createPageSchema, t)}
       onSubmit={handleFormSubmit}
-      onCancel={() => router.push("/pages")}
-      onRegeneratePreview={regeneratePreview ?? undefined}
-      isGeneratingPreview={isGeneratingPreview}
-    />
+    >
+      <PageForm
+        pageId={pageId}
+        status={status}
+        editorHtmlRef={editorHtmlRef}
+        editorDesignRef={editorDesignRef}
+        initialDesign={data?.design as object | undefined}
+        initialHtml={data?.html}
+        t={t}
+        onCancel={() => router.push("/pages")}
+        onRegeneratePreview={regeneratePreview ?? undefined}
+        isGeneratingPreview={isGeneratingPreview}
+      />
+    </Formik>
   );
 }

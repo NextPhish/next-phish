@@ -3,3 +3,6 @@
 /* Application presentations are previewed here without coupling library runtime CSS to the app. */
 @source "../../../apps/next-app/src/components/organisms/dashboard";
 @source "../../../apps/next-app/src/components/organisms/settings";
+@source "../../../apps/next-app/src/components/organisms/pages";
+@source "../../../apps/next-app/src/components/organisms/catalog";
+@source "../../../apps/next-app/src/components/molecules/catalog-card.tsx";
