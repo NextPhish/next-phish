@@ -296,6 +296,7 @@
   }
   .np-checkbox span {
     display: flex;
+    color: inherit;
   }
   .np-skeleton {
     height: 18px;

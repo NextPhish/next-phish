@@ -1,16 +1,16 @@
 "use client";
 
 import { useTranslation } from "@/src/lib/i18n";
-import { FormField } from "@/src/components/molecules/form-field";
+import { ConfigInput } from "./config-input";
 
 export function PostmarkConfigFields() {
   const t = useTranslation();
 
   return (
-    <FormField
+    <ConfigInput
       name="providerConfig.apiKey"
       label={t("sendingProfiles.postmarkApiKey")}
-      type="password"
+      secret
       autoComplete="off"
     />
   );

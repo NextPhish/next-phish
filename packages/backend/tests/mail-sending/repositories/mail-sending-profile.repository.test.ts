@@ -130,6 +130,32 @@ describe("MailSendingProfileRepository", () => {
     expect(result.total).toBe(1);
   });
 
+  it("filters rows and total by provider type on the server", async () => {
+    for (const [name, providerType] of [
+      ["SMTP one", MailProviderType.SMTP],
+      ["Graph one", MailProviderType.MICROSOFT_GRAPH],
+      ["SMTP two", MailProviderType.SMTP],
+    ] as const) {
+      await repo.create({
+        organizationId: orgId,
+        name,
+        providerType,
+        fromName: "Test",
+        fromEmail: "test@example.com",
+        providerConfig: {},
+      });
+    }
+    const result = await repo.findByOrganizationId(orgId, {
+      providerType: MailProviderType.SMTP,
+      limit: 1,
+      offset: 0,
+      sort: [{ field: "name", order: "asc" }],
+    });
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].providerType).toBe(MailProviderType.SMTP);
+    expect(result.total).toBe(2);
+  });
+
   it("updates a profile", async () => {
     const created = await repo.create({
       organizationId: orgId,

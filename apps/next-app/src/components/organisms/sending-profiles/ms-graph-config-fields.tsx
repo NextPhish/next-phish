@@ -1,28 +1,28 @@
 "use client";
 
 import { useTranslation } from "@/src/lib/i18n";
-import { FormField } from "@/src/components/molecules/form-field";
+import { ConfigInput } from "./config-input";
 
 export function MsGraphConfigFields() {
   const t = useTranslation();
 
   return (
     <>
-      <FormField
+      <ConfigInput
         name="providerConfig.tenantId"
         label={t("sendingProfiles.graphTenantId")}
       />
-      <FormField
+      <ConfigInput
         name="providerConfig.clientId"
         label={t("sendingProfiles.graphClientId")}
       />
-      <FormField
+      <ConfigInput
         name="providerConfig.clientSecret"
         label={t("sendingProfiles.graphClientSecret")}
-        type="password"
+        secret
         autoComplete="off"
       />
-      <FormField
+      <ConfigInput
         name="providerConfig.senderMailbox"
         label={t("sendingProfiles.graphSenderMailbox")}
       />

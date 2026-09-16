@@ -1,119 +1,56 @@
 "use client";
-
-import { useState } from "react";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { Dialog } from "primereact/dialog";
+import { Formik } from "formik";
+import { z } from "zod";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 import { useTranslation } from "@/src/lib/i18n";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { trpc } from "@/src/lib/trpc";
-import { FormMessage } from "@/src/components/atoms/form-message";
-import { formatValidationError } from "@/src/lib/format-validation-error";
+import { TestEmailPresentation } from "./test-email-presentation";
 
-interface TestEmailDialogProps {
+interface Props {
   profileId: string;
   visible: boolean;
   onHide: () => void;
 }
-
-export function TestEmailDialog({
-  profileId,
-  visible,
-  onHide,
-}: TestEmailDialogProps) {
+const schema = z.object({ toEmail: z.string().trim().email() });
+export function TestEmailDialog({ profileId, visible, onHide }: Props) {
   const t = useTranslation();
-
-  const [testEmail, setTestEmail] = useState("");
-  const [testResult, setTestResult] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
-
-  const sendTestMutation = trpc.mailSending.sendTest.useMutation({
-    onSuccess: () => {
-      setTestResult({
-        type: "success",
-        message: t("sendingProfiles.testEmailSuccess"),
-      });
-    },
-    onError: (err: unknown) => {
-      setTestResult({
-        type: "error",
-        message: formatValidationError(err),
-      });
-    },
-  });
-
-  function handleClose() {
-    setTestEmail("");
-    setTestResult(null);
-    onHide();
-  }
-
-  function handleSendTest() {
-    setTestResult(null);
-    sendTestMutation.mutate({
-      profileId,
-      toEmail: testEmail.trim(),
-    });
-  }
-
+  const { status, setError, setSuccess, reset } = useFormStatus();
+  const send = trpc.mailSending.sendTest.useMutation();
   return (
-    <Dialog
-      header={t("sendingProfiles.testEmailLabel")}
-      visible={visible}
-      onHide={handleClose}
-      className="max-w-md"
-      draggable={false}
-      dismissableMask
+    <Formik
+      initialValues={{ toEmail: "" }}
+      validate={(values) =>
+        Object.fromEntries(
+          Object.entries(toFormikValidation(schema)(values)).map(([key]) => [
+            key,
+            t("sendingProfiles.validation.testRecipientInvalid"),
+          ]),
+        )
+      }
+      onSubmit={async (values) => {
+        reset();
+        try {
+          await send.mutateAsync({ profileId, toEmail: values.toEmail.trim() });
+          setSuccess(t("sendingProfiles.testEmailSuccess"));
+        } catch {
+          setError(t("sendingProfiles.testEmailError"));
+        }
+      }}
     >
-      <div className="flex flex-col gap-4">
-        <p className="rounded-lg border border-brand-blue/30 bg-brand-blue/10 p-3 text-sm text-brand-blue">
-          {t("sendingProfiles.testEmailDescription")}
-        </p>
-        <div>
-          <label
-            htmlFor="testEmail"
-            className="mb-2 block text-sm font-medium text-zinc-300"
-          >
-            {t("sendingProfiles.testEmailRecipient")}
-          </label>
-          <InputText
-            id="testEmail"
-            size="small"
-            value={testEmail}
-            onChange={(e) => setTestEmail(e.target.value)}
-            placeholder={t("sendingProfiles.testEmailPlaceholder")}
-            className="w-full"
-          />
-        </div>
-        {testResult?.type === "success" && (
-          <FormMessage variant="success">{testResult.message}</FormMessage>
-        )}
-        {testResult?.type === "error" && (
-          <FormMessage variant="error">{testResult.message}</FormMessage>
-        )}
-        <div className="flex justify-end gap-3">
-          <Button
-            size="small"
-            type="button"
-            label={t("common.cancel")}
-            severity="secondary"
-            onClick={handleClose}
-          />
-          <Button
-            size="small"
-            type="button"
-            label={
-              sendTestMutation.isPending
-                ? t("sendingProfiles.testEmailSending")
-                : t("sendingProfiles.testEmailSend")
-            }
-            loading={sendTestMutation.isPending}
-            disabled={!testEmail.trim()}
-            onClick={handleSendTest}
-          />
-        </div>
-      </div>
-    </Dialog>
+      {({ resetForm }) => (
+        <TestEmailPresentation
+          visible={visible}
+          pending={send.isPending}
+          status={status}
+          onClose={() => {
+            if (send.isPending) return;
+            resetForm();
+            reset();
+            onHide();
+          }}
+        />
+      )}
+    </Formik>
   );
 }

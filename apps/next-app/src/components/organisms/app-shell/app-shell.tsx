@@ -81,7 +81,9 @@ export function AppShell({
         pathname.startsWith("/pages/") ||
         pathname === "/email-templates" ||
         pathname.startsWith("/email-templates/") ||
-        pathname === "/settings"
+        pathname === "/settings" ||
+        pathname === "/sending-profiles" ||
+        pathname.startsWith("/sending-profiles/")
           ? styles.v1Boundary
           : styles.legacyBoundary
       }
