@@ -207,6 +207,21 @@
     gap: 7px;
     min-width: 0;
   }
+  .np-field-label-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .np-help-content.np-help-tooltip {
+    max-width: min(340px, calc(100vw - 32px));
+    width: 340px;
+  }
+  .np-help-tooltip p {
+    margin: 0;
+  }
+  .np-help-tooltip p + p {
+    margin-top: 10px;
+  }
   .np-field label {
     font-size: 13px;
     font-weight: 600;

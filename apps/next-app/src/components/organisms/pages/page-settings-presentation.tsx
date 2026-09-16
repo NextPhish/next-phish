@@ -2,7 +2,14 @@
 import type { FieldInputProps } from "formik";
 import { ErrorMessage, Field } from "formik";
 import type { PageListItemView } from "@next-phish/shared";
-import { Button, Dialog, FormField, Input, Select } from "@next-phish/ui";
+import {
+  Button,
+  Dialog,
+  FormField,
+  HelpTooltip,
+  Input,
+  Select,
+} from "@next-phish/ui";
 import { AssetCatalogTab } from "@/src/components/organisms/catalog/asset-catalog";
 
 export interface PageSettingsValues {
@@ -38,7 +45,24 @@ export function PageSettingsPresentation(props: PageSettingsPresentationProps) {
   const { values, setFieldValue, t } = props;
   return (
     <div className="mb-3 flex flex-col gap-3">
-      <FormField label={t("pages.type")} id="page-type">
+      <FormField
+        label={t("pages.type")}
+        id="page-type"
+        labelAdornment={
+          <HelpTooltip label={t("pages.typeHelpLabel")}>
+            <p>
+              <strong>{t("pages.typeLanding")}</strong>
+              <br />
+              {t("pages.typeLandingHelp")}
+            </p>
+            <p>
+              <strong>{t("pages.typeRedirect")}</strong>
+              <br />
+              {t("pages.typeRedirectHelp")}
+            </p>
+          </HelpTooltip>
+        }
+      >
         {(control) => (
           <Select
             {...control}

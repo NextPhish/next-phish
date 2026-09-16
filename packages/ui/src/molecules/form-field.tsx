@@ -9,6 +9,7 @@ export interface FieldControlProps {
 export interface FormFieldProps {
   id?: string;
   label: string;
+  labelAdornment?: ReactNode;
   hint?: ReactNode;
   error?: string;
   required?: boolean;
@@ -18,6 +19,7 @@ export interface FormFieldProps {
 export function FormField({
   id,
   label,
+  labelAdornment,
   hint,
   error,
   required,
@@ -31,10 +33,13 @@ export function FormField({
       .join(" ") || undefined;
   return (
     <div className="np-field">
-      <label htmlFor={controlId}>
-        {label}
-        {required && <span aria-hidden="true"> *</span>}
-      </label>
+      <div className="np-field-label-row">
+        <label htmlFor={controlId}>
+          {label}
+          {required && <span aria-hidden="true"> *</span>}
+        </label>
+        {labelAdornment}
+      </div>
       {children({
         id: controlId,
         "aria-describedby": describedBy,

@@ -539,7 +539,10 @@
     "selectPage": "Select {name}",
     "previewUnavailable": "Preview unavailable",
     "itemsPerPage": "Items per page",
-    "pageOf": "Page {page} of {pages}"
+    "pageOf": "Page {page} of {pages}",
+    "typeHelpLabel": "About page types",
+    "typeLandingHelp": "Displays the content you build in the editor, such as a simulated sign-in page. You can configure where the visitor goes after submitting its form.",
+    "typeRedirectHelp": "Sends the visitor to the configured destination: another page or an external URL. It does not use the visual content editor."
   },
   "charts": {
     "jan": "Jan",

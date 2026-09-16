@@ -72,3 +72,5 @@ export {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "./molecules/dropdown-menu";
+
+export { HelpTooltip } from "./molecules/help-tooltip";
