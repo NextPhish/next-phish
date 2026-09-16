@@ -9,6 +9,7 @@ import {
 } from "./fixtures";
 function TableDemo(
   props: Pick<DataTableProps<Campaign>, "loading" | "error"> & {
+    withoutToolbar?: boolean;
     empty?: boolean;
     noResults?: boolean;
     server?: boolean;
@@ -24,7 +25,8 @@ function TableDemo(
     ...state,
     data: props.empty ? [] : campaigns,
     columns: campaignColumns,
-    filters: campaignFilters,
+    searchable: !props.withoutToolbar,
+    filters: props.withoutToolbar ? undefined : campaignFilters,
     getRowId: getCampaignId,
     caption: "Campaigns",
     loading: props.loading,
@@ -65,3 +67,5 @@ export const Error: Story = {
 export const ServerControlled: Story = { args: { server: true } };
 
 export const Filtered: Story = { args: { filtered: true } };
+
+export const WithoutToolbar: Story = { args: { withoutToolbar: true } };

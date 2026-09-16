@@ -520,6 +520,17 @@
     justify-content: flex-end;
     gap: 10px;
   }
+  .np-data-table {
+    overflow: hidden;
+  }
+  .np-data-table
+    > .np-table-scroll:first-child
+    .np-table
+    thead
+    tr:first-child
+    th {
+    border-top: 0;
+  }
   .np-table-toolbar {
     padding: 16px 21px;
     display: flex;
