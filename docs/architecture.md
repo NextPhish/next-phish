@@ -223,3 +223,7 @@ Campaigns use V1 authoring tabs, asset catalogs, lifecycle actions and recipient
 ### Two-factor enrollment
 
 BetterAuth's `twoFactorOptions` requires a verified TOTP code before enabling two-factor sign-in. Starting or abandoning setup must leave password sign-in available. The Prisma `TwoFactor` model includes the installed plugin's failed-attempt counter and lockout timestamp; apply database migrations and regenerate Prisma when upgrading the plugin. `pnpm --filter @next-phish/next-app test:auth` exercises pending, rejected, storage-failed and successful enrollment against an isolated in-memory BetterAuth instance; it never changes real accounts.
+
+## Production packaging
+
+Use `Dockerfile.production` and `docker-compose.production.yml` for production. Next.js emits standalone output; worker and content server builds use `scripts/build-service.mjs` to bundle workspace TypeScript into runnable CommonJS artifacts. Prisma and BullMQ remain external runtime dependencies. `pnpm build:production` builds only deployable services, and `pnpm start` runs existing artifacts without a Turbo build dependency. The development entry point loads the root `.env` with Node and passes it through Turbo's uncached loose mode. See [deployment](deployment.md) and [local setup](setup.md).

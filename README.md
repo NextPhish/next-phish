@@ -18,7 +18,24 @@ Check `docs/architecture.md` for the full stack and structure.
 
 ## Getting Started
 
-See [docs/setup.md](docs/setup.md) for local environment setup.
+Start with the [local development guide](docs/setup.md). It covers Node.js 24, pnpm 10.33.4, environment variables, database migrations, `pnpm dev:up`, Storybook, local email testing, and troubleshooting.
+
+`pnpm dev:up` starts PostgreSQL, Redis and the SMTP capture service in Docker, then runs the web app, public content server and worker on your host. It does not install dependencies or apply migrations. Follow the first-run setup before using it.
+
+## Deployment
+
+See the [deployment guide](docs/deployment.md) for service topology, production configuration, build and migration steps, service lifecycle, HTTPS reverse proxying, backups, upgrades and rollback.
+
+The checked-in Compose file targets development. The guide documents production images with a standalone Next.js app and compiled worker/content processes.
+
+## Documentation
+
+- [Local development](docs/setup.md)
+- [Deployment and operations](docs/deployment.md)
+- [Architecture](docs/architecture.md)
+- [Coding standards](docs/coding-standards.md)
+- [UI component library and Storybook](packages/ui/README.md)
+- [System email templates (MJML)](packages/backend/src/email/templates/README.md)
 
 ## MCP Server
 

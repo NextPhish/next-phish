@@ -10,6 +10,7 @@ COPY apps/static-server/package.json apps/static-server/package.json
 COPY packages/backend/package.json packages/backend/package.json
 COPY packages/database/package.json packages/database/package.json
 COPY packages/shared/package.json packages/shared/package.json
+COPY packages/ui/package.json packages/ui/package.json
 RUN pnpm fetch
 
 FROM deps AS dev
@@ -18,8 +19,4 @@ COPY . .
 RUN pnpm --filter @next-phish/database exec prisma generate
 CMD ["pnpm", "--filter", "@next-phish/worker", "dev"]
 
-FROM deps AS prod
-RUN pnpm install --frozen-lockfile --prod
-COPY . .
-RUN pnpm build
-CMD ["pnpm", "--filter", "@next-phish/worker", "start"]
+# Production images use Dockerfile.production and docker-compose.production.yml.
