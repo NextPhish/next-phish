@@ -116,7 +116,8 @@
   color: var(--np-primary);
 }
 .taskCard {
-  padding: 14px;
+  position: relative;
+  padding: 14px 14px 14px 38px;
   border: 1px solid var(--np-border);
   border-radius: 9px;
   background: var(--np-surface);
@@ -245,4 +246,65 @@
   .loadingAction {
     display: none;
   }
+}
+
+.dropTarget {
+  border-color: var(--np-primary);
+  box-shadow: inset 0 0 0 1px var(--np-primary);
+}
+.dropTarget .taskList {
+  background: var(--np-primary-soft, #eeecff);
+}
+.dragHandle {
+  position: absolute;
+  top: 9px;
+  left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 32px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--np-muted);
+  cursor: grab;
+  touch-action: none;
+}
+.dragHandle:hover,
+.dragHandle:focus-visible {
+  background: var(--np-primary-soft, #eeecff);
+  color: var(--np-primary);
+}
+.dragHandle:focus-visible {
+  outline: 2px solid var(--np-primary);
+  outline-offset: 2px;
+}
+.dragHandle:active {
+  cursor: grabbing;
+}
+.dragHandle:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+.dragging {
+  opacity: 0.4;
+}
+.dragPreview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--np-primary);
+  border-radius: 9px;
+  background: var(--np-surface);
+  color: var(--np-ink);
+  box-shadow: 0 12px 30px #18244026;
+  font-size: 14px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+  cursor: grabbing;
+}
+.dragPreview svg {
+  flex-shrink: 0;
 }

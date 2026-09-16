@@ -23,6 +23,11 @@ import {
 import type { useTaskBoard } from "@/src/hooks/use-task-board";
 import { useLocale, useTranslation } from "@/src/lib/i18n/client";
 import styles from "./tasks-board.module.css";
+import {
+  TaskDragAndDrop,
+  TaskDropColumn,
+  DraggableTask,
+} from "./task-drag-and-drop";
 import { TaskBoardSkeleton } from "./task-board-skeleton";
 
 type Board = ReturnType<typeof useTaskBoard>;
@@ -163,116 +168,131 @@ export function TasksPresentation({
       {board.moveError && (
         <FormMessage variant="error">{t("tasks.moveFailed")}</FormMessage>
       )}
-      <div className={styles.board} aria-label={t("tasks.title")}>
-        {visibleStatuses.map((status) => {
-          const tasks = tasksByStatus.get(status.id) ?? [];
-          return (
-            <Card
-              key={status.id}
-              className={styles.column}
-              aria-labelledby={`status-${status.id}`}
-            >
-              <div className={styles.columnHeader}>
-                <h2 id={`status-${status.id}`}>
-                  <span
-                    className={styles.statusDot}
-                    style={{ backgroundColor: statusColor(status.colorToken) }}
-                  />
-                  {status.name}
-                  <Badge tone="neutral">{tasks.length}</Badge>
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={styles.iconButton}
-                  aria-label={`${t("tasks.addTask")}: ${status.name}`}
-                  onClick={() => onCreate(status.id)}
-                >
-                  <Plus size={16} aria-hidden="true" />
-                </Button>
-              </div>
-              <div className={styles.taskList}>
-                {tasks.length === 0 ? (
-                  <button
-                    type="button"
+      <TaskDragAndDrop
+        tasks={board.tasks}
+        statuses={visibleStatuses}
+        disabled={board.move.isPending}
+        onMove={(input) => board.move.mutate(input)}
+      >
+        <div className={styles.board} aria-label={t("tasks.title")}>
+          {visibleStatuses.map((status) => {
+            const tasks = tasksByStatus.get(status.id) ?? [];
+            return (
+              <TaskDropColumn
+                key={status.id}
+                status={status}
+                disabled={board.move.isPending}
+              >
+                <div className={styles.columnHeader}>
+                  <h2 id={`status-${status.id}`}>
+                    <span
+                      className={styles.statusDot}
+                      style={{
+                        backgroundColor: statusColor(status.colorToken),
+                      }}
+                    />
+                    {status.name}
+                    <Badge tone="neutral">{tasks.length}</Badge>
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={styles.iconButton}
+                    aria-label={`${t("tasks.addTask")}: ${status.name}`}
                     onClick={() => onCreate(status.id)}
-                    className={styles.emptyColumn}
                   >
                     <Plus size={16} aria-hidden="true" />
-                    {t("tasks.addTask")}
-                  </button>
-                ) : (
-                  tasks.map((task) => (
-                    <article key={task.id} className={styles.taskCard}>
-                      <button
-                        type="button"
-                        onClick={() => onEdit(task)}
-                        className={styles.taskContent}
+                  </Button>
+                </div>
+                <div className={styles.taskList}>
+                  {tasks.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => onCreate(status.id)}
+                      className={styles.emptyColumn}
+                    >
+                      <Plus size={16} aria-hidden="true" />
+                      {t("tasks.addTask")}
+                    </button>
+                  ) : (
+                    tasks.map((task) => (
+                      <DraggableTask
+                        key={task.id}
+                        task={task}
+                        disabled={board.move.isPending}
                       >
-                        <div className={styles.taskTitleRow}>
-                          <h3>{task.title}</h3>
-                          <Badge
-                            tone={
-                              task.priority === "HIGH"
-                                ? "danger"
-                                : task.priority === "LOW"
-                                  ? "neutral"
-                                  : "info"
-                            }
-                          >
-                            {t(`tasks.${task.priority.toLowerCase()}`)}
-                          </Badge>
-                        </div>
-                        {task.description && (
-                          <p>{descriptionPreview(task.description)}</p>
-                        )}
-                      </button>
-                      {(task.relation || task.dueAt) && (
-                        <div className={styles.meta}>
-                          {task.relation && (
-                            <Link href={task.relation.href}>
-                              {task.relation.name}
-                              <ArrowRight size={13} aria-hidden="true" />
-                            </Link>
-                          )}
-                          {task.dueAt && (
-                            <span
-                              className={task.isOverdue ? styles.overdue : ""}
+                        <button
+                          type="button"
+                          onClick={() => onEdit(task)}
+                          className={styles.taskContent}
+                        >
+                          <div className={styles.taskTitleRow}>
+                            <h3>{task.title}</h3>
+                            <Badge
+                              tone={
+                                task.priority === "HIGH"
+                                  ? "danger"
+                                  : task.priority === "LOW"
+                                    ? "neutral"
+                                    : "info"
+                              }
                             >
-                              {task.isOverdue ? (
-                                <AlertTriangle size={13} aria-hidden="true" />
-                              ) : (
-                                <CalendarDays size={13} aria-hidden="true" />
-                              )}
-                              {task.isOverdue ? `${t("tasks.overdue")} · ` : ""}
-                              {dateFormatter.format(new Date(task.dueAt))}
-                            </span>
+                              {t(`tasks.${task.priority.toLowerCase()}`)}
+                            </Badge>
+                          </div>
+                          {task.description && (
+                            <p>{descriptionPreview(task.description)}</p>
                           )}
+                        </button>
+                        {(task.relation || task.dueAt) && (
+                          <div className={styles.meta}>
+                            {task.relation && (
+                              <Link href={task.relation.href}>
+                                {task.relation.name}
+                                <ArrowRight size={13} aria-hidden="true" />
+                              </Link>
+                            )}
+                            {task.dueAt && (
+                              <span
+                                className={task.isOverdue ? styles.overdue : ""}
+                              >
+                                {task.isOverdue ? (
+                                  <AlertTriangle size={13} aria-hidden="true" />
+                                ) : (
+                                  <CalendarDays size={13} aria-hidden="true" />
+                                )}
+                                {task.isOverdue
+                                  ? `${t("tasks.overdue")} · `
+                                  : ""}
+                                {dateFormatter.format(new Date(task.dueAt))}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <div className={styles.moveControl}>
+                          <label htmlFor={`task-status-${task.id}`}>
+                            {t("tasks.moveTo")}
+                          </label>
+                          <Select
+                            id={`task-status-${task.id}`}
+                            aria-label={`${t("tasks.moveTo")} ${task.title}`}
+                            value={task.statusId}
+                            options={statusOptions}
+                            disabled={board.move.isPending}
+                            onValueChange={(statusId) =>
+                              board.move.mutate({ id: task.id, statusId })
+                            }
+                          />
                         </div>
-                      )}
-                      <div className={styles.moveControl}>
-                        <label htmlFor={`task-status-${task.id}`}>
-                          {t("tasks.moveTo")}
-                        </label>
-                        <Select
-                          id={`task-status-${task.id}`}
-                          aria-label={`${t("tasks.moveTo")} ${task.title}`}
-                          value={task.statusId}
-                          options={statusOptions}
-                          disabled={board.move.isPending}
-                          onValueChange={(statusId) =>
-                            board.move.mutate({ id: task.id, statusId })
-                          }
-                        />
-                      </div>
-                    </article>
-                  ))
-                )}
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+                      </DraggableTask>
+                    ))
+                  )}
+                </div>
+              </TaskDropColumn>
+            );
+          })}
+        </div>
+      </TaskDragAndDrop>
       {board.total >= 100 && (
         <p className={styles.limit}>{t("tasks.showingLimit")}</p>
       )}
