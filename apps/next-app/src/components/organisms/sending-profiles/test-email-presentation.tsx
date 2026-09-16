@@ -3,6 +3,7 @@ import { Form, useFormikContext } from "formik";
 import { Button, Dialog, FormField, FormMessage, Input } from "@next-phish/ui";
 import type { FormStatus } from "@/src/hooks/use-form-status";
 import { useTranslation } from "@/src/lib/i18n";
+import styles from "./sending-profile-form.module.css";
 
 export function TestEmailPresentation({
   visible,
@@ -46,7 +47,7 @@ export function TestEmailPresentation({
         </>
       }
     >
-      <Form id="sending-test-form" noValidate>
+      <Form id="sending-test-form" className={styles.form} noValidate>
         <FormField
           id="sending-test-recipient"
           label={t("sendingProfiles.testEmailRecipient")}
