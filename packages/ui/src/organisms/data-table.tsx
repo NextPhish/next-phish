@@ -49,6 +49,7 @@ interface BaseProps<T> {
   error?: ReactNode;
   onRetry?: () => void;
   toolbar?: ReactNode;
+  searchable?: boolean;
   filters?: TableFilter[];
   emptyAction?: ReactNode;
   pageSizeOptions?: number[];
@@ -68,6 +69,7 @@ export function DataTable<T>({
   error,
   onRetry,
   toolbar,
+  searchable = true,
   filters,
   emptyAction,
   mode = "client",
@@ -129,16 +131,18 @@ export function DataTable<T>({
   return (
     <div className="np-card np-data-table" aria-busy={loading || undefined}>
       <div className="np-table-toolbar">
-        <div className="np-search">
-          <Search size={16} aria-hidden="true" />
-          <Input
-            aria-label={labels.search}
-            type="search"
-            value={state.search}
-            onChange={(e) => search(e.target.value)}
-            placeholder={labels.search}
-          />
-        </div>
+        {searchable && (
+          <div className="np-search">
+            <Search size={16} aria-hidden="true" />
+            <Input
+              aria-label={labels.search}
+              type="search"
+              value={state.search}
+              onChange={(e) => search(e.target.value)}
+              placeholder={labels.search}
+            />
+          </div>
+        )}
         {toolbar}
       </div>
       {filters && (

@@ -81,12 +81,14 @@ export function AppShell({
         pathname.startsWith("/pages/") ||
         pathname === "/email-templates" ||
         pathname.startsWith("/email-templates/") ||
-        pathname === "/settings" ||
-        pathname === "/users" ||
         pathname === "/target-groups" ||
         pathname.startsWith("/target-groups/") ||
         pathname === "/sending-profiles" ||
-        pathname.startsWith("/sending-profiles/")
+        pathname.startsWith("/sending-profiles/") ||
+        pathname === "/users" ||
+        pathname === "/settings" ||
+        pathname === "/campaigns" ||
+        pathname.startsWith("/campaigns/")
           ? styles.v1Boundary
           : styles.legacyBoundary
       }

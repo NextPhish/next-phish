@@ -12,7 +12,7 @@
 - **Serialization:** class-transformer (`@Expose`/`@Exclude` + groups)
 - **Queue:** BullMQ + Redis (background jobs)
 - **Static Server:** Hono (lightweight companion for public/redirect pages)
-- **UI:** Tailwind CSS v4 + PrimeReact
+- **UI:** Tailwind CSS v4 + `@next-phish/ui` (Radix, Downshift, TanStack Table); retained specialized PrimeReact editors and charts
 - **Lint:** ESLint (next config)
 - **Monorepo:** Turborepo + pnpm workspaces
 - **Package Manager:** pnpm
@@ -208,11 +208,17 @@ Task forms use V1 controls and dialogs. The rich-text description editor remains
 
 Schedule overview, create/edit forms and details use the light V1 workspace. The schedule table adapts the shared DataTable to server filtering, sorting and pagination; containers retain tRPC mutations and Formik submission. Delivery health uses compact metrics with the shared Radix-based HelpPopover. The timeline retains its existing PrimeReact Chart wrapper around Chart.js with V1 colors. Schedule forms, populated details and help popovers have independent Storybook previews; regression tests mock network mutations.
 
-Organization list, details, member tables and organization settings also use V1 components. Role filters and sorting remain server-side, and deletion eligibility uses the total owned-organization count rather than the current page. Settings preserve role restrictions and use shared dialogs and localized schema validation. Organization analytics opt into the V1 chart presentation while keeping all original series and chart interactions; the default chart variant remains available to legacy screens. Global ignored-network settings reuse the V1 organization network presentation through an admin-only adapter; their queries and mutations remain globally scoped under settings.\*.
+Organization list, details, member tables and organization settings also use V1 components. Role filters and sorting remain server-side, and deletion eligibility uses the total owned-organization count rather than the current page. Settings preserve role restrictions and use shared dialogs and localized schema validation. Organization analytics opt into the V1 chart presentation while keeping all original series and chart interactions; the default chart variant remains available to legacy screens. Global ignored-network settings reuse the V1 organization network presentation through an admin-only adapter; their queries and mutations remain globally scoped under settings.
 
 Pages use the V1 server table, forms, redirect catalog and import dialog. Containers retain Formik, tRPC and navigation; the import URL schema is shared with the backend. GrapesJS remains the specialized editor. Catalog thumbnails and sandboxed HTML previews work in the application and standalone Storybook. Mocked regression tests cover list controls, redirects, imports and create/update payloads.
 
 Email templates use the V1 server table and form presentation with the specialized GrapesJS editor supplied by the container. Shared TagInput and FileUploader controls preserve tags and attachments; upload/removal failures remain visible and pending attachment changes block saving. Standalone stories render the actual form presentation, and mocked tests cover query mapping, validation and attachment payloads.
+
+Sending profiles use V1 provider forms, dialogs and server tables. Provider filters reach the repository query; masked secrets are preserved when editing existing profiles. The form serializes only known boolean and numeric provider fields, preserving credentials as strings.
+
+Target groups use V1 lists, recipient forms and import dialogs. Formik owns import mode and the selected file, while the import hook tracks upload/job progress. Admin user management uses the same table and dialog primitives with the existing admin guard, shared server validation and a current deletion preview before destructive actions.
+
+Campaigns use V1 authoring tabs, asset catalogs, lifecycle actions and recipient tables. Error summaries reveal invalid fields across tabs. Recipient timeline queries remain in containers; the server-paginated recipient table hides unsupported search. Charts retain the specialized Chart.js wrapper. All migrated menu sections have a light workspace boundary and English/Bulgarian translation coverage tests.
 
 ### Two-factor enrollment
 

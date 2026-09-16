@@ -1,20 +1,28 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ErrorMessage, Form, useFormikContext } from "formik";
-import { Button } from "primereact/button";
-import { TabPanel, TabView } from "primereact/tabview";
+import {
+  Button,
+  FormErrorSummary,
+  FormMessage,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@next-phish/ui";
 import type {
   CampaignFormValues,
   EmailTemplateListItemView,
   PageListItemView,
 } from "@next-phish/shared";
-import { FormMessage } from "@/src/components/atoms/form-message";
 import type { CatalogPageState } from "@/src/hooks/use-campaign-catalog-state";
 import { AssetCatalogTab } from "@/src/components/organisms/catalog/asset-catalog";
 import { GeneralTab } from "./general-tab";
 import { ScheduleTab } from "./schedule-tab";
 import { SendingProfileTab } from "./sending-profile-tab";
+import styles from "./campaign-form.module.css";
+import { useTranslation } from "@/src/lib/i18n/client";
 
 interface CampaignFormPresentationProps {
   isEdit: boolean;
@@ -45,6 +53,19 @@ interface CampaignFormPresentationProps {
   onCancel: () => void;
 }
 
+const fieldTab: Record<string, string> = {
+  emailTemplateId: "email",
+  pageId: "page",
+  mailSendingProfileId: "profile",
+  scheduleName: "schedule",
+  scheduleStartsAt: "schedule",
+  scheduleTargetTimezone: "schedule",
+  scheduleDeliveryMode: "schedule",
+  scheduleDripEmailsPerMinute: "schedule",
+  scheduleBatchSize: "schedule",
+  scheduleBatchIntervalMinutes: "schedule",
+};
+
 export function CampaignFormPresentation({
   isEdit,
   emailTemplates,
@@ -68,8 +89,26 @@ export function CampaignFormPresentation({
   error,
   onCancel,
 }: CampaignFormPresentationProps) {
-  const { values, setFieldValue, isSubmitting } =
+  const t = useTranslation();
+  const { values, errors, submitCount, setFieldValue, isSubmitting } =
     useFormikContext<CampaignFormValues>();
+  const [activeTab, setActiveTab] = useState("general");
+  const visibleErrors = submitCount
+    ? Object.entries(errors).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      )
+    : [];
+  const firstError = visibleErrors[0]?.[0];
+  useEffect(() => {
+    if (firstError) setActiveTab(fieldTab[firstError] ?? "general");
+  }, [submitCount, firstError]);
+  function revealField(field: string) {
+    setActiveTab(fieldTab[field] ?? "general");
+    window.setTimeout(
+      () => document.getElementById(`campaign-field-${field}`)?.focus(),
+      0,
+    );
+  }
   const recipientCount =
     targetGroups.find((group) => group.id === values.targetGroupId)
       ?.userCount ?? 0;
@@ -81,102 +120,171 @@ export function CampaignFormPresentation({
     (id: string) => void setFieldValue("pageId", id),
     [setFieldValue],
   );
+  const catalogLabels = {
+    preview: (name: string) => t("campaignsUi.previewOf", { name }),
+    select: (name: string) => t("campaignsUi.selectAsset", { name }),
+    unavailable: t("campaignsUi.previewUnavailable"),
+    perPage: t("campaignsUi.itemsPerPage"),
+    page: (page: number, pages: number) =>
+      t("campaignsUi.pageOf", { page, pages }),
+    previous: t("campaignsUi.previous"),
+    next: t("campaignsUi.next"),
+  };
 
   return (
-    <Form className="space-y-6">
-      <TabView>
-        <TabPanel header="General" leftIcon="pi pi-sliders-h mr-2">
+    <Form className={styles.form} noValidate>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="general">{t("campaignsUi.general")}</TabsTrigger>
+          <TabsTrigger value="email">
+            {t("campaignsUi.emailTemplate")}
+          </TabsTrigger>
+          <TabsTrigger value="page">{t("campaignsUi.landingPage")}</TabsTrigger>
+          <TabsTrigger value="profile">
+            {t("campaignsUi.sendingProfile")}
+          </TabsTrigger>
+          {values.type === "CONCRETE" && (
+            <TabsTrigger value="schedule">
+              {t("campaignsUi.schedule")}
+            </TabsTrigger>
+          )}
+        </TabsList>
+        <TabsContent value="general">
           <GeneralTab targetGroups={targetGroups} isEdit={isEdit} />
-        </TabPanel>
-        <TabPanel header="Email template" leftIcon="pi pi-envelope mr-2">
-          <AssetCatalogTab
-            title="Email template"
-            description="Choose the message recipients receive. The current selection stays first while editing."
-            searchPlaceholder="Search email templates"
-            emptyMessage="No active email templates match this search."
-            items={emailTemplates}
-            total={emailTemplatesTotal}
-            loading={emailTemplatesLoading}
-            selectedId={values.emailTemplateId}
-            search={emailTemplateCatalogState.input}
-            offset={emailTemplateCatalogState.offset}
-            limit={emailTemplateCatalogState.limit}
-            onSearch={setEmailTemplateSearch}
-            onPage={setEmailTemplatePage}
-            onSelect={selectEmailTemplate}
-          />
+        </TabsContent>
+        <TabsContent value="email">
+          <div id="campaign-field-emailTemplateId" tabIndex={-1}>
+            <AssetCatalogTab
+              title={t("campaignsUi.emailTemplate")}
+              description={t("campaignsUi.emailDescription")}
+              searchPlaceholder={t("campaignsUi.searchEmail")}
+              emptyMessage={t("campaignsUi.noEmail")}
+              items={emailTemplates}
+              total={emailTemplatesTotal}
+              loading={emailTemplatesLoading}
+              selectedId={values.emailTemplateId}
+              search={emailTemplateCatalogState.input}
+              offset={emailTemplateCatalogState.offset}
+              limit={emailTemplateCatalogState.limit}
+              onSearch={setEmailTemplateSearch}
+              onPage={setEmailTemplatePage}
+              onSelect={selectEmailTemplate}
+              labels={catalogLabels}
+            />
+          </div>
           <ErrorMessage
             name="emailTemplateId"
             component="p"
             className="mt-3 text-sm text-red-400"
           />
-        </TabPanel>
-        <TabPanel header="Landing page" leftIcon="pi pi-window-maximize mr-2">
-          <AssetCatalogTab
-            title="Landing page"
-            description="Choose the destination shown after the recipient follows the campaign link."
-            searchPlaceholder="Search landing pages"
-            emptyMessage="No active landing pages match this search."
-            items={pages}
-            total={pagesTotal}
-            loading={pagesLoading}
-            selectedId={values.pageId}
-            search={pageCatalogState.input}
-            offset={pageCatalogState.offset}
-            limit={pageCatalogState.limit}
-            onSearch={setPageSearch}
-            onPage={setPagePage}
-            onSelect={selectPage}
-          />
+        </TabsContent>
+        <TabsContent value="page">
+          <div id="campaign-field-pageId" tabIndex={-1}>
+            <AssetCatalogTab
+              title={t("campaignsUi.landingPage")}
+              description={t("campaignsUi.pageDescription")}
+              searchPlaceholder={t("campaignsUi.searchPages")}
+              emptyMessage={t("campaignsUi.noPages")}
+              items={pages}
+              total={pagesTotal}
+              loading={pagesLoading}
+              selectedId={values.pageId}
+              search={pageCatalogState.input}
+              offset={pageCatalogState.offset}
+              limit={pageCatalogState.limit}
+              onSearch={setPageSearch}
+              onPage={setPagePage}
+              onSelect={selectPage}
+              labels={catalogLabels}
+            />
+          </div>
           <ErrorMessage
             name="pageId"
             component="p"
             className="mt-3 text-sm text-red-400"
           />
-        </TabPanel>
-        <TabPanel header="Sending profile" leftIcon="pi pi-send mr-2">
+        </TabsContent>
+        <TabsContent value="profile">
           <SendingProfileTab
             profiles={sendingProfiles}
             loading={sendingProfilesLoading}
             search={sendingProfileSearch}
             onSearch={setSendingProfileSearch}
           />
-        </TabPanel>
+        </TabsContent>
         {values.type === "CONCRETE" ? (
-          <TabPanel header="Schedule" leftIcon="pi pi-calendar mr-2">
+          <TabsContent value="schedule">
             <ScheduleTab
               recipientCount={recipientCount}
               hasExistingSchedule={hasExistingSchedule}
             />
-          </TabPanel>
+          </TabsContent>
         ) : null}
-      </TabView>
+      </Tabs>
 
-      <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)]">
+      <section className={styles.card}>
+        {visibleErrors.length > 0 && (
+          <div
+            className="mb-4"
+            onClickCapture={(event) => {
+              const link = (event.target as HTMLElement).closest(
+                "a[href^='#campaign-field-']",
+              );
+              const field = link
+                ?.getAttribute("href")
+                ?.replace("#campaign-field-", "");
+              if (field) {
+                event.preventDefault();
+                revealField(field);
+              }
+            }}
+            onKeyDownCapture={(event) => {
+              if (event.key !== "Enter" && event.key !== " ") return;
+              const link = (event.target as HTMLElement).closest(
+                "a[href^='#campaign-field-']",
+              );
+              const field = link
+                ?.getAttribute("href")
+                ?.replace("#campaign-field-", "");
+              if (field) {
+                event.preventDefault();
+                revealField(field);
+              }
+            }}
+          >
+            <FormErrorSummary
+              title={t("campaignsUi.formErrorsTitle")}
+              errors={visibleErrors.map(([field, message]) => ({
+                id: `campaign-field-${field}`,
+                message,
+              }))}
+            />
+          </div>
+        )}
         {error ? (
           <div className="mb-4">
             <FormMessage variant="error">{error}</FormMessage>
           </div>
         ) : null}
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <div className={styles.actions}>
           <Button
             type="button"
-            size="small"
-            outlined
-            label="Cancel"
+            size="sm"
+            variant="secondary"
             onClick={onCancel}
-          />
+          >
+            {t("common.cancel")}
+          </Button>
           <Button
             type="submit"
-            size="small"
-            label={
-              values.status === "PUBLISHED"
-                ? "Save and publish campaign"
-                : "Save draft"
-            }
+            size="sm"
             loading={isSubmitting}
             disabled={isSubmitting}
-          />
+          >
+            {values.status === "PUBLISHED"
+              ? t("campaignsUi.savePublish")
+              : t("campaignsUi.saveDraft")}
+          </Button>
         </div>
       </section>
     </Form>

@@ -2,16 +2,14 @@
 
 import { Formik } from "formik";
 import { useRouter } from "next/navigation";
-import { BreadCrumb } from "primereact/breadcrumb";
-import {
-  campaignFormSchema,
-  type CampaignFormValues,
-} from "@next-phish/shared";
-import { FormSkeleton } from "@/src/components/atoms/form-skeleton";
+import { PageHeader, Skeleton } from "@next-phish/ui";
+import type { CampaignFormValues } from "@next-phish/shared";
 import { useCampaignAuthoring } from "@/src/hooks/use-campaign-authoring";
 import { useFormStatus } from "@/src/hooks/use-form-status";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
+import { useTranslation } from "@/src/lib/i18n/client";
 import { CampaignFormPresentation } from "./form-presentation";
+import { campaignFormValidator } from "./campaign-form-validation";
+import { buildCampaignPayload } from "./form-payload";
 
 function toLocalInput(value: Date | string): string {
   const date = new Date(value);
@@ -21,6 +19,7 @@ function toLocalInput(value: Date | string): string {
 
 export function CampaignFormContainer({ campaignId }: { campaignId?: string }) {
   const router = useRouter();
+  const t = useTranslation();
   const { status, setError, reset } = useFormStatus();
   const authoring = useCampaignAuthoring(campaignId);
   const {
@@ -32,9 +31,12 @@ export function CampaignFormContainer({ campaignId }: { campaignId?: string }) {
     updateSchedule,
   } = authoring;
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading)
+    return <Skeleton style={{ height: "36rem", borderRadius: "1rem" }} />;
   if (campaignId && !campaign.data)
-    return <p className="p-8 text-zinc-400">Campaign not found.</p>;
+    return (
+      <p className="p-8 text-[var(--np-muted)]">{t("campaignsUi.notFound")}</p>
+    );
 
   const row = campaign.data;
   const existingSchedule = row?.scheduleSources
@@ -71,20 +73,7 @@ export function CampaignFormContainer({ campaignId }: { campaignId?: string }) {
 
   async function submit(values: CampaignFormValues) {
     reset();
-    const campaignPayload = {
-      name: values.name,
-      tags: values.tags,
-      type: values.type,
-      status: values.status,
-      emailTemplateId: values.emailTemplateId,
-      pageId: values.pageId,
-      mailSendingProfileId: values.mailSendingProfileId,
-      targetGroupId: values.type === "TEMPLATE" ? null : values.targetGroupId,
-      targetTimezone: values.targetTimezone,
-      autoCompleteAfterDays: values.automaticallyComplete
-        ? values.autoCompleteAfterDays
-        : null,
-    };
+    const campaignPayload = buildCampaignPayload(values);
 
     try {
       const saved = campaignId
@@ -134,34 +123,21 @@ export function CampaignFormContainer({ campaignId }: { campaignId?: string }) {
       router.push(
         `/campaigns/${saved.id}?saved=${campaignId ? "updated" : "created"}`,
       );
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Campaign could not be saved",
-      );
+    } catch {
+      setError(t("campaignsUi.saveError"));
     }
   }
 
   return (
-    <div className="px-6 py-8">
-      <div className="mb-6">
-        <BreadCrumb
-          home={{ icon: "pi pi-home", url: "/" }}
-          model={[
-            { label: "Campaigns", url: "/campaigns" },
-            { label: campaignId ? "Edit campaign" : "New campaign" },
-          ]}
-        />
-        <h1 className="mt-2 text-2xl font-semibold text-white">
-          {campaignId ? "Edit campaign" : "Create campaign"}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Configure campaign assets, delivery identity, and optional scheduling.
-        </p>
-      </div>
+    <div className="grid min-w-0 gap-6">
+      <PageHeader
+        title={campaignId ? t("campaignsUi.edit") : t("campaignsUi.create")}
+        description={t("campaignsUi.formDescription")}
+      />
       <Formik
         initialValues={initialValues}
         validateOnChange={false}
-        validate={toFormikValidation(campaignFormSchema)}
+        validate={campaignFormValidator(t)}
         onSubmit={submit}
       >
         <CampaignFormPresentation
