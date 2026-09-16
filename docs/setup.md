@@ -69,6 +69,8 @@ pnpm dev:up
 
 It runs **Next.js, the static server and the worker** in the foreground on your host. It does not start Storybook, install packages, generate Prisma or apply migrations. Restart it after changing `.env`.
 
+Turbopack filesystem caching is disabled for development to prevent large persistent caches during long sessions. Compilation still uses memory caching; the first compilation after a restart may take longer. This setting does not change production builds. To reclaim an older disk cache, stop the dev server and remove `apps/next-app/.next/dev/cache/turbopack` before restarting.
+
 See [Turbo environment modes](https://turborepo.dev/docs/reference/run#--env-mode-option). Loose mode is used only for this uncached development command; production builds bypass Turbo.
 
 | Service               | Address                        | Purpose                                                |
