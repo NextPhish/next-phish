@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ErrorMessage, Form, useFormikContext } from "formik";
 import {
   Button,
@@ -99,9 +99,13 @@ export function CampaignFormPresentation({
       )
     : [];
   const firstError = visibleErrors[0]?.[0];
-  useEffect(() => {
+  const validationKey = `${submitCount}:${firstError ?? ""}`;
+  const [previousValidationKey, setPreviousValidationKey] =
+    useState(validationKey);
+  if (previousValidationKey !== validationKey) {
+    setPreviousValidationKey(validationKey);
     if (firstError) setActiveTab(fieldTab[firstError] ?? "general");
-  }, [submitCount, firstError]);
+  }
   function revealField(field: string) {
     setActiveTab(fieldTab[field] ?? "general");
     window.setTimeout(
