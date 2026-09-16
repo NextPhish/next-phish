@@ -431,7 +431,7 @@
     "uploadSuccess": "File uploaded successfully.",
     "namePlaceholder": "Enter a template name",
     "regeneratePreview": "Regenerate preview",
-    "previewError": "Preview could not be regenerated. Please try again.",
+    "previewError": "Could not regenerate the preview.",
     "addTag": "Add tags",
     "selectedTags": "Selected tags",
     "removeTag": "Remove {tag}",

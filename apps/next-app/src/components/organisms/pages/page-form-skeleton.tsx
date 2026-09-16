@@ -1,9 +1,12 @@
+"use client";
 import { Skeleton } from "@next-phish/ui";
+import { useTranslation } from "@/src/lib/i18n/client";
 export function PageFormSkeleton() {
+  const t = useTranslation();
   return (
     <div
       role="status"
-      aria-label="Loading page editor"
+      aria-label={t("pages.editorLabel")}
       className="grid min-w-0 gap-6"
     >
       <Skeleton style={{ width: "42%", height: "3.5rem" }} />

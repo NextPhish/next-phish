@@ -32,7 +32,7 @@ export function PreviousImportsList({
   const [expanded, setExpanded] = useState(false);
   const [search, setSearch] = useState("");
 
-  if (imports.length === 0) return null;
+  if (imports.length === 0 && !search) return null;
 
   function handleSearchChange(value: string) {
     setSearch(value);

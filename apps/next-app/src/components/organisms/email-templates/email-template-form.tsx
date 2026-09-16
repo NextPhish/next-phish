@@ -112,7 +112,7 @@ export function EmailTemplateForm({
           ) : undefined
         }
       />
-      <Form className={styles.form}>
+      <Form noValidate className={styles.form}>
         <div className={styles.main}>
           <FormErrorSummary
             title={t("emailTemplates.validationSummary")}

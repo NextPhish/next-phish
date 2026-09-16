@@ -75,7 +75,7 @@ export function PageForm({
           pageId ? t("pages.editSubtitle") : t("pages.createSubtitle")
         }
       />
-      <Form className="space-y-6">
+      <Form noValidate className="space-y-6">
         {submitCount > 0 && (
           <FormErrorSummary
             title={t("pages.validationSummary")}
