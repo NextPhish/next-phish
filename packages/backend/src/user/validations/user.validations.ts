@@ -1,26 +1,7 @@
 import { z } from "zod";
+import { adminCreateUserSchema } from "@next-phish/shared";
 
-export const CreateUserSchema = z
-  .object({
-    name: z.string().trim().min(1, "Name is required"),
-    email: z
-      .string()
-      .trim()
-      .email("Invalid email")
-      .transform((value) => value.toLowerCase()),
-    role: z.enum(["admin", "user"]),
-    organizationMode: z.enum(["existing", "self"]),
-    organizationId: z.string().min(1).optional(),
-  })
-  .superRefine((value, ctx) => {
-    if (value.organizationMode === "existing" && !value.organizationId) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["organizationId"],
-        message: "Select an organization",
-      });
-    }
-  });
+export const CreateUserSchema = adminCreateUserSchema;
 
 export const ListUsersSchema = z.object({
   search: z.string().trim().optional(),

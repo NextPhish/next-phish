@@ -82,6 +82,7 @@ export function AppShell({
         pathname === "/email-templates" ||
         pathname.startsWith("/email-templates/") ||
         pathname === "/settings" ||
+        pathname === "/users" ||
         pathname === "/target-groups" ||
         pathname.startsWith("/target-groups/") ||
         pathname === "/sending-profiles" ||

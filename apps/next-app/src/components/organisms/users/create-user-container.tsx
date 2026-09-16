@@ -4,24 +4,28 @@ import { Formik } from "formik";
 import { adminCreateUserSchema } from "@next-phish/shared";
 import type { AdminCreateUserInput } from "@next-phish/shared";
 import { trpc } from "@/src/lib/trpc";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n/client";
 import { CreateUserPresentation } from "./create-user-presentation";
+import { validateCreateUser } from "./users-validation";
 
 export function CreateUserContainer({
+  visible,
   onCreated,
   onCancel,
 }: {
+  visible: boolean;
   onCreated: () => void;
   onCancel: () => void;
 }) {
   const utils = trpc.useUtils();
   const create = trpc.user.create.useMutation();
   const organizations = trpc.user.listOrganizations.useQuery();
-  const { status, setError } = useFormStatus();
+  const { status, setError, reset } = useFormStatus();
+  const t = useTranslation();
 
   async function submit(values: AdminCreateUserInput) {
-    setError("");
+    reset();
     try {
       await create.mutateAsync({
         ...values,
@@ -32,10 +36,8 @@ export function CreateUserContainer({
       });
       await utils.user.list.invalidate();
       onCreated();
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Could not create user",
-      );
+    } catch {
+      setError(t("usersUi.createError"));
     }
   }
 
@@ -46,13 +48,17 @@ export function CreateUserContainer({
         email: "",
         role: "user",
         organizationMode: "self",
-        organizationId: "",
+        organizationId: undefined,
       }}
-      validate={toFormikValidation(adminCreateUserSchema)}
+      validate={(values) =>
+        validateCreateUser(adminCreateUserSchema, values, t)
+      }
       onSubmit={submit}
     >
       <CreateUserPresentation
         organizations={organizations.data ?? []}
+        organizationsLoading={organizations.isLoading}
+        visible={visible}
         error={status.type === "error" ? status.message : ""}
         onCancel={onCancel}
       />

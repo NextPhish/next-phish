@@ -1,10 +1,16 @@
-import { Skeleton } from "primereact/skeleton";
+import { Skeleton } from "@next-phish/ui";
 
 export default function Loading() {
   return (
-    <div className="space-y-6 p-8">
-      <Skeleton width="18rem" height="2rem" />
-      <Skeleton width="100%" height="28rem" borderRadius="1rem" />
+    <div
+      role="status"
+      aria-label="Loading users"
+      className="grid min-w-0 gap-6"
+    >
+      <Skeleton style={{ width: "38%", height: "3.5rem" }} />
+      <Skeleton
+        style={{ width: "100%", height: "28rem", borderRadius: "1rem" }}
+      />
     </div>
   );
 }
