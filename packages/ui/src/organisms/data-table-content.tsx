@@ -6,7 +6,13 @@ import { Skeleton } from "../atoms/skeleton";
 import { EmptyState } from "../molecules/empty-state";
 import type { DataTableLabels } from "./data-table";
 
-function HeaderCell<T>({ header }: { header: Header<T, unknown> }) {
+function HeaderCell<T>({
+  header,
+  showSortPriority,
+}: {
+  header: Header<T, unknown>;
+  showSortPriority: boolean;
+}) {
   const sort = header.column.getIsSorted();
   const SortIcon =
     sort === "asc" ? ArrowUp : sort === "desc" ? ArrowDown : ArrowUpDown;
@@ -33,7 +39,7 @@ function HeaderCell<T>({ header }: { header: Header<T, unknown> }) {
         >
           {content}
           <SortIcon size={13} aria-hidden="true" />
-          {sort && (
+          {sort && showSortPriority && (
             <span className="np-sort-priority" aria-hidden="true">
               {header.column.getSortIndex() + 1}
             </span>
@@ -51,7 +57,11 @@ export function TableHead<T>({ table }: { table: Table<T> }) {
       {table.getHeaderGroups().map((group) => (
         <tr key={group.id}>
           {group.headers.map((header) => (
-            <HeaderCell key={header.id} header={header} />
+            <HeaderCell
+              key={header.id}
+              header={header}
+              showSortPriority={table.getState().sorting.length > 1}
+            />
           ))}
         </tr>
       ))}
