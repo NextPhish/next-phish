@@ -27,6 +27,7 @@ export interface FileUploaderProps {
     type: (name: string) => string;
     size: (name: string) => string;
     count: (count: number) => string;
+    summary?: (maxSizeKb: number, maxFiles?: number) => string;
   };
 }
 const defaults = {
@@ -139,9 +140,18 @@ export function FileUploader({
           {labels.choose}
         </Button>
         <p>
-          {accept ?? "All file types"} · Max{" "}
-          {Math.max(1, Math.round(maxFileSize / 1024))} KB / file · {maxFiles}{" "}
-          files
+          {labels.summary ? (
+            labels.summary(
+              Math.max(1, Math.round(maxFileSize / 1024)),
+              Number.isFinite(maxFiles) ? maxFiles : undefined,
+            )
+          ) : (
+            <>
+              {accept ?? "All file types"} · Max{" "}
+              {Math.max(1, Math.round(maxFileSize / 1024))} KB / file
+              {Number.isFinite(maxFiles) ? ` · ${maxFiles} files` : ""}
+            </>
+          )}
         </p>
       </div>
       {files.length > 0 && (

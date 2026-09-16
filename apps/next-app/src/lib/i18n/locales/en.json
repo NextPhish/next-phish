@@ -426,7 +426,28 @@
     "removeFile": "Remove",
     "uploadingFile": "Uploading...",
     "uploadFailed": "Upload failed.",
-    "uploadSuccess": "File uploaded successfully."
+    "uploadSuccess": "File uploaded successfully.",
+    "namePlaceholder": "Enter a template name",
+    "regeneratePreview": "Regenerate preview",
+    "previewError": "Preview could not be regenerated. Please try again.",
+    "addTag": "Add tags",
+    "selectedTags": "Selected tags",
+    "removeTag": "Remove {tag}",
+    "trackingPixelHelp": "About open tracking",
+    "validationSummary": "Check the template details",
+    "validation": {
+      "nameRequired": "Template name is required.",
+      "tagRequired": "Tags cannot be empty.",
+      "invalid": "Enter a valid value."
+    },
+    "attachmentHint": "Attach files that recipients should receive with this email.",
+    "attachmentError": "The attachment could not be changed. Please try again.",
+    "chooseFiles": "Choose files",
+    "removeNamedFile": "Remove {name}",
+    "unsupportedFile": "{name}: unsupported file type.",
+    "fileTooLarge": "{name}: file is larger than 10 MB.",
+    "fileCount": "Choose up to {count} files.",
+    "fileRequirements": "Images, PDF, Word, Excel or ZIP · Maximum {size} KB per file"
   },
   "pages": {
     "title": "Pages",

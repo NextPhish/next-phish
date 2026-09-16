@@ -41,6 +41,7 @@ export type { ColumnDef } from "@tanstack/react-table";
 export { Select, type SelectProps, type SelectOption } from "./atoms/select";
 export { Autocomplete, type AutocompleteProps } from "./molecules/autocomplete";
 export { MultiSelect, type MultiSelectProps } from "./molecules/multi-select";
+export { TagInput, type TagInputProps } from "./molecules/tag-input";
 export {
   FileUploader,
   type FileUploaderProps,

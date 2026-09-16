@@ -212,6 +212,8 @@ Organization list, details, member tables and organization settings also use V1 
 
 Pages use the V1 server table, forms, redirect catalog and import dialog. Containers retain Formik, tRPC and navigation; the import URL schema is shared with the backend. GrapesJS remains the specialized editor. Catalog thumbnails and sandboxed HTML previews work in the application and standalone Storybook. Mocked regression tests cover list controls, redirects, imports and create/update payloads.
 
+Email templates use the V1 server table and form presentation with the specialized GrapesJS editor supplied by the container. Shared TagInput and FileUploader controls preserve tags and attachments; upload/removal failures remain visible and pending attachment changes block saving. Standalone stories render the actual form presentation, and mocked tests cover query mapping, validation and attachment payloads.
+
 ### Two-factor enrollment
 
 BetterAuth's `twoFactorOptions` requires a verified TOTP code before enabling two-factor sign-in. Starting or abandoning setup must leave password sign-in available. The Prisma `TwoFactor` model includes the installed plugin's failed-attempt counter and lockout timestamp; apply database migrations and regenerate Prisma when upgrading the plugin. `pnpm --filter @next-phish/next-app test:auth` exercises pending, rejected, storage-failed and successful enrollment against an isolated in-memory BetterAuth instance; it never changes real accounts.

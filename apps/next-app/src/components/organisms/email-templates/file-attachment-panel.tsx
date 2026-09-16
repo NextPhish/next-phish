@@ -1,8 +1,15 @@
 "use client";
-
-import { Button } from "primereact/button";
-import { FileUploader } from "@/src/components/molecules/file-uploader";
+import { useState } from "react";
+import { FileText, Trash2 } from "lucide-react";
+import {
+  Button,
+  Card,
+  CardBody,
+  FileUploader,
+  FormMessage,
+} from "@next-phish/ui";
 import { useTranslation } from "@/src/lib/i18n";
+import styles from "./file-attachment-panel.module.css";
 
 export interface AttachedFile {
   id: string;
@@ -10,39 +17,39 @@ export interface AttachedFile {
   size: number;
   format: string;
 }
-
-interface FileAttachmentPanelProps {
+interface Props {
   files: AttachedFile[];
   onUpload: (file: File) => Promise<void>;
   onRemove: (fileId: string) => Promise<void>;
   disabled?: boolean;
+  error?: string;
 }
-
-function formatSize(bytes: number): string {
-  if (bytes >= 1_048_576) {
-    return `${(bytes / 1_048_576).toFixed(1)} MB`;
-  }
-  if (bytes >= 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${bytes} B`;
+function formatSize(bytes: number) {
+  return bytes >= 1_048_576
+    ? `${(bytes / 1_048_576).toFixed(1)} MB`
+    : bytes >= 1024
+      ? `${(bytes / 1024).toFixed(1)} KB`
+      : `${bytes} B`;
 }
-
-function formatType(format: string): string {
-  const iconMap: Record<string, string> = {
-    "application/pdf": "PDF",
-    "application/zip": "ZIP",
-    "image/png": "PNG",
-    "image/jpeg": "JPG",
-    "image/gif": "GIF",
-    "image/svg+xml": "SVG",
-    "application/msword": "DOC",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-      "DOCX",
-    "application/vnd.ms-excel": "XLS",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "XLSX",
-  };
-  return iconMap[format] ?? format.split("/").pop()?.toUpperCase() ?? format;
+function formatType(format: string) {
+  return (
+    (
+      {
+        "application/pdf": "PDF",
+        "application/zip": "ZIP",
+        "image/png": "PNG",
+        "image/jpeg": "JPG",
+        "application/msword": "DOC",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          "DOCX",
+        "application/vnd.ms-excel": "XLS",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+          "XLSX",
+      } as Record<string, string>
+    )[format] ??
+    format.split("/").pop()?.toUpperCase() ??
+    format
+  );
 }
 
 export function FileAttachmentPanel({
@@ -50,53 +57,73 @@ export function FileAttachmentPanel({
   onUpload,
   onRemove,
   disabled,
-}: FileAttachmentPanelProps) {
+  error,
+}: Props) {
   const t = useTranslation();
-
+  const [pending, setPending] = useState<File[]>([]);
   return (
-    <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)]">
-      <div className="mb-4">
-        <h2 className="text-base font-semibold text-white">
-          {t("emailTemplates.attachments")}
-        </h2>
-      </div>
-
-      <FileUploader
-        onUpload={onUpload}
-        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip"
-        maxFileSize={10000000}
-      />
-
-      {files.length > 0 && (
-        <div className="mt-3 space-y-2">
-          {files.map((file) => (
-            <div
-              key={file.id}
-              className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3"
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <i className="pi pi-file text-zinc-400" />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-zinc-100">
-                    {file.name}
-                  </p>
-                  <p className="text-xs text-zinc-500">
-                    {formatType(file.format)} &middot; {formatSize(file.size)}
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="small"
-                type="button"
-                icon="pi pi-trash"
-                disabled={disabled}
-                onClick={() => onRemove(file.id)}
-                className="ml-2 shrink-0 rounded-lg border border-red-500/30 bg-transparent px-2 py-1 text-xs text-red-400 hover:bg-red-500/10"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
+    <Card>
+      <CardBody>
+        <section className={styles.panel}>
+          <div>
+            <h2>{t("emailTemplates.attachments")}</h2>
+            <p>{t("emailTemplates.attachmentHint")}</p>
+          </div>
+          <FileUploader
+            files={pending}
+            onFilesChange={setPending}
+            onUpload={async (selected) => {
+              for (const file of selected) await onUpload(file);
+              setPending([]);
+            }}
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip"
+            maxFileSize={10_000_000}
+            maxFiles={Number.POSITIVE_INFINITY}
+            disabled={disabled}
+            label={t("emailTemplates.uploadFile")}
+            labels={{
+              hint: t("emailTemplates.dragDropHint"),
+              choose: t("emailTemplates.chooseFiles"),
+              upload: t("emailTemplates.uploadFile"),
+              uploading: t("emailTemplates.uploadingFile"),
+              complete: t("emailTemplates.uploadSuccess"),
+              failed: t("emailTemplates.uploadFailed"),
+              remove: (name) => t("emailTemplates.removeNamedFile", { name }),
+              type: (name) => t("emailTemplates.unsupportedFile", { name }),
+              size: (name) => t("emailTemplates.fileTooLarge", { name }),
+              count: (count) => t("emailTemplates.fileCount", { count }),
+              summary: (size) => t("emailTemplates.fileRequirements", { size }),
+            }}
+          />
+          {error && <FormMessage variant="error">{error}</FormMessage>}
+          {files.length > 0 && (
+            <ul className={styles.files}>
+              {files.map((file) => (
+                <li key={file.id}>
+                  <FileText size={18} aria-hidden="true" />
+                  <div>
+                    <strong>{file.name}</strong>
+                    <span>
+                      {formatType(file.format)} · {formatSize(file.size)}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={disabled}
+                    aria-label={t("emailTemplates.removeNamedFile", {
+                      name: file.name,
+                    })}
+                    onClick={() => void onRemove(file.id)}
+                  >
+                    <Trash2 size={16} aria-hidden="true" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </CardBody>
+    </Card>
   );
 }

@@ -426,7 +426,28 @@
     "removeFile": "Премахни",
     "uploadingFile": "Качване...",
     "uploadFailed": "Неуспешно качване.",
-    "uploadSuccess": "Файлът е качен успешно."
+    "uploadSuccess": "Файлът е качен успешно.",
+    "namePlaceholder": "Въведете име на шаблона",
+    "regeneratePreview": "Обнови прегледа",
+    "previewError": "Прегледът не можа да се обнови. Опитайте отново.",
+    "addTag": "Добавяне на тагове",
+    "selectedTags": "Избрани тагове",
+    "removeTag": "Премахни {tag}",
+    "trackingPixelHelp": "За проследяването на отваряния",
+    "validationSummary": "Проверете данните за шаблона",
+    "validation": {
+      "nameRequired": "Името на шаблона е задължително.",
+      "tagRequired": "Таговете не могат да бъдат празни.",
+      "invalid": "Въведете валидна стойност."
+    },
+    "attachmentHint": "Прикачете файлове, които получателите да получат с този имейл.",
+    "attachmentError": "Прикаченият файл не можа да бъде променен. Опитайте отново.",
+    "chooseFiles": "Избери файлове",
+    "removeNamedFile": "Премахни {name}",
+    "unsupportedFile": "{name}: неподдържан тип файл.",
+    "fileTooLarge": "{name}: файлът е по-голям от 10 MB.",
+    "fileCount": "Изберете до {count} файла.",
+    "fileRequirements": "Изображения, PDF, Word, Excel или ZIP · Максимум {size} KB на файл"
   },
   "pages": {
     "title": "Страници",
