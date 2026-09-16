@@ -1,16 +1,12 @@
 "use client";
 import { useMemo } from "react";
-import { EllipsisVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { MailSendingProfileView } from "@next-phish/backend";
 import {
   Badge,
   Button,
   DataTable,
   Dialog,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
   FormMessage,
   PageHeader,
   type ColumnDef,
@@ -19,9 +15,10 @@ import {
 } from "@next-phish/ui";
 import type { TranslationFunction } from "@/src/lib/i18n/shared";
 import { uiTableLabels } from "@/src/lib/ui-table-labels";
+import { EditDeleteMenu } from "@/src/components/molecules/edit-delete-menu";
 import styles from "./sending-profiles-list.module.css";
 
-export const PROVIDER_LABELS: Record<string, string> = {
+const PROVIDER_LABELS: Record<string, string> = {
   SMTP: "SMTP",
   MICROSOFT_GRAPH: "Microsoft Graph",
   AWS_SES: "AWS SES",
@@ -123,27 +120,13 @@ export function SendingProfilesListPresentation({
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={`${t("tableUi.actions")}: ${row.original.name}`}
-              >
-                <EllipsisVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => onEdit(row.original.id)}>
-                <Pencil size={16} />
-                {t("sendingProfiles.editProfile")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => onAskDelete(row.original)}>
-                <Trash2 size={16} />
-                {t("sendingProfiles.delete")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <EditDeleteMenu
+            label={`${t("tableUi.actions")}: ${row.original.name}`}
+            editLabel={t("sendingProfiles.editProfile")}
+            deleteLabel={t("sendingProfiles.delete")}
+            onEdit={() => onEdit(row.original.id)}
+            onDelete={() => onAskDelete(row.original)}
+          />
         ),
       },
     ],

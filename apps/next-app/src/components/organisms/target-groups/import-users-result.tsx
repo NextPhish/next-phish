@@ -67,9 +67,9 @@ export function ImportUsersResult({ status, progress }: Props) {
             {t("targetGroups.importValidationErrors")}
           </h3>
           <div className="max-h-48 overflow-y-auto rounded-xl border border-[var(--np-border)] p-3">
-            {progress.validationErrors.map((error, index) => (
+            {progress.validationErrors.map((error) => (
               <p
-                key={`${error.row}-${error.field}-${index}`}
+                key={JSON.stringify([error.row, error.field, error.message])}
                 className="text-sm text-[var(--np-danger)]"
               >
                 {t("targetGroups.rowError", {

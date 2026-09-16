@@ -13,6 +13,36 @@ import { useSidebarNavigation } from "./sidebar-menu";
 import styles from "./app-shell.module.css";
 
 const EMPTY_ORGANIZATIONS: OrganizationView[] = [];
+const V1_EXACT_PATHS = new Set([
+  "/",
+  "/profile",
+  "/tasks",
+  "/schedule",
+  "/organizations",
+  "/pages",
+  "/email-templates",
+  "/target-groups",
+  "/sending-profiles",
+  "/users",
+  "/settings",
+  "/campaigns",
+]);
+const V1_NESTED_PATHS = [
+  "/schedule/",
+  "/organizations/",
+  "/pages/",
+  "/email-templates/",
+  "/target-groups/",
+  "/sending-profiles/",
+  "/campaigns/",
+];
+
+function isV1Path(pathname: string) {
+  return (
+    V1_EXACT_PATHS.has(pathname) ||
+    V1_NESTED_PATHS.some((prefix) => pathname.startsWith(prefix))
+  );
+}
 
 interface AppShellProps {
   user: {
@@ -69,29 +99,7 @@ export function AppShell({
 
   return (
     <div
-      className={
-        pathname === "/" ||
-        pathname === "/profile" ||
-        pathname === "/tasks" ||
-        pathname === "/schedule" ||
-        pathname.startsWith("/schedule/") ||
-        pathname === "/organizations" ||
-        pathname.startsWith("/organizations/") ||
-        pathname === "/pages" ||
-        pathname.startsWith("/pages/") ||
-        pathname === "/email-templates" ||
-        pathname.startsWith("/email-templates/") ||
-        pathname === "/target-groups" ||
-        pathname.startsWith("/target-groups/") ||
-        pathname === "/sending-profiles" ||
-        pathname.startsWith("/sending-profiles/") ||
-        pathname === "/users" ||
-        pathname === "/settings" ||
-        pathname === "/campaigns" ||
-        pathname.startsWith("/campaigns/")
-          ? styles.v1Boundary
-          : styles.legacyBoundary
-      }
+      className={isV1Path(pathname) ? styles.v1Boundary : styles.legacyBoundary}
     >
       <V1AppShell
         navigation={navigation}

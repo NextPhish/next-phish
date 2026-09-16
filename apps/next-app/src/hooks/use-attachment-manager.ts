@@ -19,29 +19,42 @@ export function useAttachmentManager({
   errorMessage,
 }: UseAttachmentManagerOptions) {
   type State = {
-    uploading: boolean;
+    pendingCount: number;
     locallyAdded: AttachedFile[];
     locallyRemovedIds: Set<string>;
     error: string;
   };
   type Action =
     | { type: "patch"; value: Partial<State> }
+    | { type: "start" }
+    | { type: "finish" }
     | { type: "add"; file: AttachedFile }
     | { type: "remove"; id: string };
   const [state, update] = useReducer(
     (current: State, action: Action): State =>
-      action.type === "patch"
-        ? { ...current, ...action.value }
-        : action.type === "add"
-          ? { ...current, locallyAdded: [...current.locallyAdded, action.file] }
-          : {
-              ...current,
-              locallyRemovedIds: new Set(current.locallyRemovedIds).add(
-                action.id,
-              ),
-            },
+      action.type === "start"
+        ? {
+            ...current,
+            pendingCount: current.pendingCount + 1,
+            error: current.pendingCount ? current.error : "",
+          }
+        : action.type === "finish"
+          ? { ...current, pendingCount: current.pendingCount - 1 }
+          : action.type === "patch"
+            ? { ...current, ...action.value }
+            : action.type === "add"
+              ? {
+                  ...current,
+                  locallyAdded: [...current.locallyAdded, action.file],
+                }
+              : {
+                  ...current,
+                  locallyRemovedIds: new Set(current.locallyRemovedIds).add(
+                    action.id,
+                  ),
+                },
     {
-      uploading: false,
+      pendingCount: 0,
       locallyAdded: [],
       locallyRemovedIds: new Set<string>(),
       error: "",
@@ -58,7 +71,7 @@ export function useAttachmentManager({
   ];
 
   async function handleUpload(file: File) {
-    update({ type: "patch", value: { uploading: true, error: "" } });
+    update({ type: "start" });
     try {
       const fileView = await onUploadFile(file);
       update({
@@ -74,24 +87,24 @@ export function useAttachmentManager({
       update({ type: "patch", value: { error: errorMessage } });
       throw new Error(errorMessage);
     } finally {
-      update({ type: "patch", value: { uploading: false } });
+      update({ type: "finish" });
     }
   }
 
   async function handleRemove(fileId: string) {
-    update({ type: "patch", value: { uploading: true, error: "" } });
+    update({ type: "start" });
     try {
       await onDeleteFile(fileId);
       update({ type: "remove", id: fileId });
     } catch {
       update({ type: "patch", value: { error: errorMessage } });
     } finally {
-      update({ type: "patch", value: { uploading: false } });
+      update({ type: "finish" });
     }
   }
 
   return {
-    uploading: state.uploading,
+    uploading: state.pendingCount > 0,
     attachedFiles,
     handleUpload,
     handleRemove,

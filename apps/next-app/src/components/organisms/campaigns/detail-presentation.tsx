@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { CalendarDays, Check, Copy, Pencil, Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
@@ -15,9 +14,10 @@ import {
 } from "@next-phish/ui";
 import { useTranslation } from "@/src/lib/i18n/client";
 import type { FormStatus } from "@/src/hooks/use-form-status";
+import { CampaignDetailActions } from "./detail-actions";
 
 type Action = "publish" | "pause" | "resume" | "complete" | "clone";
-interface Props {
+export interface CampaignDetailPresentationProps {
   name: string;
   type: "TEMPLATE" | "CONCRETE";
   status: string;
@@ -36,9 +36,11 @@ interface Props {
   statistics: ReactNode;
   recipients: ReactNode;
 }
-export function CampaignDetailPresentation(props: Props) {
+export function CampaignDetailPresentation(
+  props: CampaignDetailPresentationProps,
+) {
   const t = useTranslation();
-  const { name, status, type, pending } = props;
+  const { name, type, pending } = props;
   return (
     <div className="grid min-w-0 gap-6 text-[var(--np-ink)]">
       <PageHeader
@@ -53,80 +55,7 @@ export function CampaignDetailPresentation(props: Props) {
             )}
           </span>
         }
-        actions={
-          <div className="flex flex-wrap gap-2">
-            {["DRAFT", "PUBLISHED"].includes(status) && (
-              <Button size="sm" variant="secondary" onClick={props.onEdit}>
-                <Pencil size={16} />
-                {t("campaignsUi.editShort")}
-              </Button>
-            )}
-            {status === "DRAFT" && (
-              <Button
-                size="sm"
-                loading={pending.publish}
-                onClick={() => props.onAction("publish")}
-              >
-                <Check size={16} />
-                {t("campaignsUi.publish")}
-              </Button>
-            )}
-            <Button
-              size="sm"
-              variant="secondary"
-              loading={pending.clone}
-              onClick={() => props.onAction("clone")}
-            >
-              <Copy size={16} />
-              {t("campaignsUi.clone")}
-            </Button>
-            {type === "CONCRETE" && status === "PUBLISHED" && (
-              <Button size="sm" onClick={props.onSchedule}>
-                <CalendarDays size={16} />
-                {t("campaignsUi.schedule")}
-              </Button>
-            )}
-            {["PENDING_START", "ACTIVE"].includes(status) && (
-              <Button
-                size="sm"
-                loading={pending.pause}
-                onClick={() => props.onAction("pause")}
-              >
-                {t("campaignsUi.pause")}
-              </Button>
-            )}
-            {status === "PAUSED" && (
-              <Button
-                size="sm"
-                loading={pending.resume}
-                onClick={() => props.onAction("resume")}
-              >
-                {t("campaignsUi.resume")}
-              </Button>
-            )}
-            {["DRAFT", "PUBLISHED", "COMPLETED", "FAILED"].includes(status) && (
-              <Button
-                size="sm"
-                variant="danger"
-                loading={pending.delete}
-                onClick={() => props.onDeleteOpenChange(true)}
-              >
-                <Trash2 size={16} />
-                {t("campaignsUi.deleteShort")}
-              </Button>
-            )}
-            {["ACTIVE", "PAUSED"].includes(status) && (
-              <Button
-                size="sm"
-                variant="danger"
-                loading={pending.complete}
-                onClick={() => props.onAction("complete")}
-              >
-                {t("campaignsUi.complete")}
-              </Button>
-            )}
-          </div>
-        }
+        actions={<CampaignDetailActions {...props} />}
       />
       {(props.savedMessage || props.actionStatus.type === "success") && (
         <FormMessage variant="success">

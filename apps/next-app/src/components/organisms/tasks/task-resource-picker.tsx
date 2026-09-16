@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { getIn, useFormikContext } from "formik";
 import { Autocomplete, FormField, Select } from "@next-phish/ui";
-import type { TaskFormValues, TaskResourceType } from "@next-phish/shared";
-import { trpc } from "@/src/lib/trpc";
+import type { TaskFormValues } from "@next-phish/shared";
+import { useTaskResourceOptions } from "@/src/hooks/use-task-resource-options";
 import { useTranslation } from "@/src/lib/i18n/client";
 import styles from "./task-forms.module.css";
 
@@ -38,62 +38,12 @@ export function TaskResourcePicker({
     [],
   );
 
-  const campaign = trpc.campaign.list.useQuery(
-    { search: search || undefined, limit: 20, offset: 0 },
-    { enabled: type === "CAMPAIGN" },
+  const resourceOptions = useTaskResourceOptions(
+    type,
+    values.relation?.id,
+    search,
   );
-  const schedule = trpc.campaign.listSchedules.useQuery(
-    { search: search || undefined, limit: 20, offset: 0 },
-    { enabled: type === "SCHEDULE" },
-  );
-  const page = trpc.page.list.useQuery(
-    {
-      search: search || undefined,
-      selectedId: type === "PAGE" ? values.relation?.id : undefined,
-      includeContent: false,
-      limit: 20,
-      offset: 0,
-    },
-    { enabled: type === "PAGE" },
-  );
-  const emailTemplate = trpc.emailTemplate.list.useQuery(
-    {
-      search: search || undefined,
-      selectedId: type === "EMAIL_TEMPLATE" ? values.relation?.id : undefined,
-      includeContent: false,
-      limit: 20,
-      offset: 0,
-    },
-    { enabled: type === "EMAIL_TEMPLATE" },
-  );
-  const targetGroup = trpc.targetGroup.list.useQuery(
-    { search: search || undefined, limit: 20, offset: 0 },
-    { enabled: type === "TARGET_GROUP" },
-  );
-  const sendingProfile = trpc.mailSending.list.useQuery(
-    { search: search || undefined, limit: 20, offset: 0 },
-    { enabled: type === "SENDING_PROFILE" },
-  );
-
-  const byType: Partial<Record<TaskResourceType, ResourceOption[]>> = {
-    CAMPAIGN: campaign.data?.rows ?? [],
-    SCHEDULE: schedule.data?.rows ?? [],
-    PAGE: page.data?.pages ?? [],
-    EMAIL_TEMPLATE: emailTemplate.data?.emailTemplates ?? [],
-    TARGET_GROUP: targetGroup.data?.targetGroups ?? [],
-    SENDING_PROFILE: sendingProfile.data?.profiles ?? [],
-  };
-  const queries = {
-    CAMPAIGN: campaign,
-    SCHEDULE: schedule,
-    PAGE: page,
-    EMAIL_TEMPLATE: emailTemplate,
-    TARGET_GROUP: targetGroup,
-    SENDING_PROFILE: sendingProfile,
-  };
-  const activeQuery = type ? queries[type] : undefined;
-  const loading = activeQuery?.isLoading ?? false;
-  const options = type ? [...(byType[type] ?? [])] : [];
+  const options = [...resourceOptions.options];
   if (
     currentResource &&
     values.relation?.id === currentResource.id &&
@@ -144,7 +94,7 @@ export function TaskResourcePicker({
           id="task-relation-id"
           label={t("tasks.relatedResource")}
           error={
-            activeQuery?.error ? t("tasks.resourcesFailed") : relationError
+            resourceOptions.error ? t("tasks.resourcesFailed") : relationError
           }
           required
         >
@@ -164,7 +114,7 @@ export function TaskResourcePicker({
               }
               onBlur={() => void setFieldTouched("relation.id", true)}
               placeholder={t("tasks.searchResource")}
-              loading={loading}
+              loading={resourceOptions.loading}
               loadingLabel={t("common.loading")}
               emptyLabel={t("tasks.noResources")}
               listLabel={t("tasks.relatedResource")}

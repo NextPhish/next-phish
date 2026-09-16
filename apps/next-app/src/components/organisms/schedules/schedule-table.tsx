@@ -1,33 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useReducer, useState } from "react";
 import {
-  Copy,
-  EllipsisVertical,
-  Eye,
-  Pencil,
-  Play,
-  Trash2,
-  X,
-} from "lucide-react";
-import {
-  Badge,
   Button,
   DataTable,
   Dialog,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   FormMessage,
   useDataTableState,
-  type ColumnDef,
 } from "@next-phish/ui";
-import { useLocale, useTranslation } from "@/src/lib/i18n";
+import { useTranslation } from "@/src/lib/i18n";
 import { uiTableLabels } from "@/src/lib/ui-table-labels";
 import { trpc } from "@/src/lib/trpc";
+import { useScheduleTableColumns } from "@/src/hooks/use-schedule-table-columns";
 
 export type ScheduleRow = {
   id: string;
@@ -51,24 +35,11 @@ const statuses = [
   "CANCELLED",
 ] as const;
 const types = ["ONE_TIME", "RECURRING"] as const;
-function statusTone(status: ScheduleRow["status"]) {
-  return status === "RUNNING"
-    ? ("success" as const)
-    : status === "SCHEDULED"
-      ? ("info" as const)
-      : status === "CANCELLED"
-        ? ("danger" as const)
-        : status === "DRAFT"
-          ? ("warning" as const)
-          : ("neutral" as const);
-}
 function getRowId(row: ScheduleRow) {
   return row.id;
 }
 
 export function ScheduleTable({ onChanged }: { onChanged: () => void }) {
-  const router = useRouter();
-  const locale = useLocale();
   const t = useTranslation();
   const utils = trpc.useUtils();
   const { state, onStateChange } = useDataTableState();
@@ -140,177 +111,13 @@ export function ScheduleTable({ onChanged }: { onChanged: () => void }) {
   const actionPending =
     cancel.isPending || duplicate.isPending || activate.isPending;
 
-  const columns = useMemo<ColumnDef<ScheduleRow>[]>(
-    () => [
-      {
-        accessorKey: "name",
-        header: t("scheduleUi.name"),
-        cell: ({ row }) => (
-          <button
-            type="button"
-            className="font-semibold text-[var(--np-ink)] hover:text-[var(--np-primary)]"
-            onClick={() => router.push(`/schedule/${row.original.id}`)}
-          >
-            {row.original.name}
-          </button>
-        ),
-      },
-      {
-        accessorKey: "type",
-        header: t("scheduleUi.type"),
-        cell: ({ row }) => (
-          <Badge tone={row.original.type === "RECURRING" ? "info" : "neutral"}>
-            {t(`scheduleUi.types.${row.original.type}`)}
-          </Badge>
-        ),
-      },
-      {
-        accessorKey: "status",
-        header: t("scheduleUi.status"),
-        cell: ({ row }) => (
-          <Badge tone={statusTone(row.original.status)}>
-            {t(`scheduleUi.statuses.${row.original.status}`)}
-          </Badge>
-        ),
-      },
-      {
-        accessorKey: "frequency",
-        header: t("scheduleUi.cadence"),
-        enableSorting: false,
-        cell: ({ row }) =>
-          row.original.frequency
-            ? t(`scheduleUi.options.${row.original.frequency}`)
-            : t("scheduleUi.oneTime"),
-      },
-      {
-        id: "sources",
-        header: t("scheduleUi.campaignSource"),
-        enableSorting: false,
-        cell: ({ row }) => (
-          <div className="max-w-64 text-sm">
-            <p className="truncate text-[var(--np-ink)]">
-              {row.original.sources
-                .map(({ campaign }) => campaign.name)
-                .join(", ")}
-            </p>
-            <p className="text-xs text-[var(--np-muted)]">
-              {t("scheduleUi.generatedCampaigns", {
-                count: row.original._count.campaigns,
-              })}
-            </p>
-          </div>
-        ),
-      },
-      {
-        id: "targetGroup",
-        header: t("scheduleUi.audience"),
-        enableSorting: false,
-        cell: ({ row }) =>
-          row.original.targetGroup ? (
-            <div className="text-sm">
-              <p>{row.original.targetGroup.name}</p>
-              <p className="text-xs text-[var(--np-muted)]">
-                {t("scheduleUi.recipients", {
-                  count: row.original.targetGroup._count.users,
-                })}
-              </p>
-            </div>
-          ) : (
-            <span className="text-[var(--np-muted)]">
-              {t("scheduleUi.inherited")}
-            </span>
-          ),
-      },
-      {
-        accessorKey: "startsAt",
-        header: t("scheduleUi.starts"),
-        cell: ({ row }) =>
-          new Date(row.original.startsAt).toLocaleString(locale, {
-            dateStyle: "medium",
-            timeStyle: "short",
-            timeZone: row.original.targetTimezone,
-          }),
-      },
-      {
-        id: "actions",
-        header: t("tableUi.actions"),
-        enableSorting: false,
-        cell: ({ row }) => {
-          const schedule = row.original;
-          const canChange = !["COMPLETED", "CANCELLED"].includes(
-            schedule.status,
-          );
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={`${t("tableUi.actions")}: ${schedule.name}`}
-                >
-                  <EllipsisVertical size={16} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onSelect={() => router.push(`/schedule/${schedule.id}`)}
-                >
-                  <Eye size={16} />
-                  {t("scheduleUi.viewDetails")}
-                </DropdownMenuItem>
-                {canChange && (
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      router.push(`/schedule/${schedule.id}/edit`)
-                    }
-                  >
-                    <Pencil size={16} />
-                    {t("scheduleUi.edit")}
-                  </DropdownMenuItem>
-                )}
-                {schedule.status === "DRAFT" && (
-                  <DropdownMenuItem
-                    disabled={actionPending}
-                    onSelect={() => activate.mutate({ id: schedule.id })}
-                  >
-                    <Play size={16} />
-                    {t("scheduleUi.activate")}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  disabled={actionPending}
-                  onSelect={() => duplicate.mutate({ id: schedule.id })}
-                >
-                  <Copy size={16} />
-                  {t("scheduleUi.duplicate")}
-                </DropdownMenuItem>
-                {canChange && (
-                  <DropdownMenuItem
-                    disabled={actionPending}
-                    onSelect={() => cancel.mutate({ id: schedule.id })}
-                  >
-                    <X size={16} />
-                    {t("scheduleUi.cancelSchedule")}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-700"
-                  onSelect={() =>
-                    setConfirmation({ type: "delete", row: schedule })
-                  }
-                >
-                  <Trash2 size={16} />
-                  {t("scheduleUi.delete")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
-      },
-    ],
-    [actionPending, activate, cancel, duplicate, locale, router, t],
-  );
+  const columns = useScheduleTableColumns({
+    actionPending,
+    onActivate: (id) => activate.mutate({ id }),
+    onDuplicate: (id) => duplicate.mutate({ id }),
+    onCancel: (id) => cancel.mutate({ id }),
+    onDelete: (row) => setConfirmation({ type: "delete", row }),
+  });
 
   return (
     <section aria-labelledby="schedule-table-heading">

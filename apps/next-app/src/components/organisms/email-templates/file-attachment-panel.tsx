@@ -73,8 +73,13 @@ export function FileAttachmentPanel({
             files={pending}
             onFilesChange={setPending}
             onUpload={async (selected) => {
-              for (const file of selected) await onUpload(file);
-              setPending([]);
+              const results = await Promise.allSettled(selected.map(onUpload));
+              const failed = selected.filter(
+                (_, index) => results[index].status === "rejected",
+              );
+              setPending(failed);
+              if (failed.length)
+                throw new Error(t("emailTemplates.uploadFailed"));
             }}
             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip"
             maxFileSize={10_000_000}
