@@ -1,8 +1,6 @@
 "use client";
-
-import { useTranslation } from "@/src/lib/i18n";
-
-interface ImportStatsGridProps {
+import { useTranslation } from "@/src/lib/i18n/client";
+interface Props {
   total: number;
   processed: number;
   inserted: number;
@@ -10,67 +8,37 @@ interface ImportStatsGridProps {
   skipped: number;
   errors: number;
 }
-
-export function ImportStatsGrid({
-  total,
-  processed,
-  inserted,
-  updated,
-  skipped,
-  errors,
-}: ImportStatsGridProps) {
+export function ImportStatsGrid(props: Props) {
   const t = useTranslation();
-
+  const fields = [
+    { key: "total", value: props.total },
+    { key: "processed", value: props.processed },
+    { key: "inserted", value: props.inserted },
+    { key: "updated", value: props.updated },
+    { key: "skipped", value: props.skipped },
+    { key: "errors", value: props.errors },
+  ];
   return (
-    <div className="grid grid-cols-2 gap-3 text-sm">
-      {total > 0 && (
-        <>
-          <StatItem label={t("targetGroups.importTotal")} value={total} />
-          <StatItem
-            label={t("targetGroups.importProcessed")}
-            value={processed}
-          />
-        </>
-      )}
-      <StatItem
-        label={t("targetGroups.importInserted")}
-        value={inserted}
-        color="text-brand-cyan"
-      />
-      <StatItem
-        label={t("targetGroups.importUpdated")}
-        value={updated}
-        color="text-brand-blue"
-      />
-      {skipped > 0 && (
-        <StatItem
-          label={t("targetGroups.importSkipped")}
-          value={skipped}
-          color="text-zinc-400"
-        />
-      )}
-      <StatItem
-        label={t("targetGroups.importErrors")}
-        value={errors}
-        color="text-red-400"
-      />
-    </div>
-  );
-}
-
-function StatItem({
-  label,
-  value,
-  color = "text-white",
-}: {
-  label: string;
-  value: number;
-  color?: string;
-}) {
-  return (
-    <div>
-      <span className="text-zinc-400">{label}: </span>
-      <span className={color}>{value}</span>
-    </div>
+    <dl className="grid grid-cols-2 gap-3 text-sm">
+      {fields
+        .filter(
+          (item) =>
+            (item.key !== "total" &&
+              item.key !== "processed" &&
+              item.key !== "skipped") ||
+            item.value > 0,
+        )
+        .map(({ key, value }) => (
+          <div
+            key={key}
+            className="rounded-lg border border-[var(--np-border)] bg-[var(--np-surface-subtle)] p-3"
+          >
+            <dt className="text-[var(--np-muted)]">
+              {t(`targetGroups.import${key[0]!.toUpperCase()}${key.slice(1)}`)}
+            </dt>
+            <dd className="font-semibold text-[var(--np-ink)]">{value}</dd>
+          </div>
+        ))}
+    </dl>
   );
 }

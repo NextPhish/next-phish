@@ -1,0 +1,202 @@
+"use client";
+import { useMemo } from "react";
+import { Plus, Users, Pencil, Trash2 } from "lucide-react";
+import type { TargetGroupListItemView } from "@next-phish/shared";
+import {
+  Badge,
+  Button,
+  DataTable,
+  Dialog,
+  FormMessage,
+  PageHeader,
+  type ColumnDef,
+  type DataTableState,
+  type TableStateChange,
+} from "@next-phish/ui";
+import { useLocale, useTranslation } from "@/src/lib/i18n/client";
+import { uiTableLabels } from "@/src/lib/ui-table-labels";
+import styles from "./target-groups.module.css";
+export interface TargetGroupsListProps {
+  groups: TargetGroupListItemView[];
+  total: number;
+  loading: boolean;
+  error?: string;
+  state: DataTableState;
+  onStateChange: (change: TableStateChange) => void;
+  onRetry: () => void;
+  onCreate: () => void;
+  onEdit: (id: string) => void;
+  deleting: TargetGroupListItemView | null;
+  deletePending: boolean;
+  deleteError?: string;
+  onDeleteRequest: (group: TargetGroupListItemView) => void;
+  onDeleteCancel: () => void;
+  onDeleteConfirm: () => void;
+}
+export function TargetGroupsListPresentation(props: TargetGroupsListProps) {
+  const t = useTranslation();
+  const locale = useLocale();
+  const date = useMemo(
+    () => new Intl.DateTimeFormat(locale, { dateStyle: "medium" }),
+    [locale],
+  );
+  const { onEdit, onDeleteRequest } = props;
+  const columns = useMemo<ColumnDef<TargetGroupListItemView>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: t("targetGroups.name"),
+        cell: ({ row }) => (
+          <button
+            type="button"
+            className={styles.name}
+            onClick={() => onEdit(row.original.id)}
+          >
+            <span className={styles.icon}>
+              <Users size={18} aria-hidden="true" />
+            </span>
+            {row.original.name}
+          </button>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: t("targetGroups.status"),
+        cell: ({ row }) => (
+          <Badge
+            tone={
+              row.original.status === "ACTIVE"
+                ? "success"
+                : row.original.status === "ARCHIVED"
+                  ? "warning"
+                  : "neutral"
+            }
+          >
+            {row.original.status === "ACTIVE"
+              ? t("common.active")
+              : row.original.status === "ARCHIVED"
+                ? t("targetGroups.archived")
+                : t("common.draft")}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "userCount",
+        header: t("targetGroups.userCount"),
+        enableSorting: false,
+        cell: ({ row }) => row.original.userCount.toLocaleString(locale),
+      },
+      {
+        id: "createdById",
+        header: t("targetGroups.createdBy"),
+        enableSorting: false,
+        cell: ({ row }) => row.original.createdBy.name,
+      },
+      {
+        accessorKey: "updatedAt",
+        header: t("targetGroups.updatedAt"),
+        cell: ({ row }) => date.format(new Date(row.original.updatedAt)),
+      },
+      {
+        id: "actions",
+        header: t("tableUi.actions"),
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className={styles.actions}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(row.original.id)}
+            >
+              <Pencil size={16} aria-hidden="true" />
+              {t("targetGroups.editGroup")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label={`${t("targetGroups.delete")}: ${row.original.name}`}
+              onClick={() => onDeleteRequest(row.original)}
+            >
+              <Trash2 size={16} aria-hidden="true" />
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [date, locale, onDeleteRequest, onEdit, t],
+  );
+  return (
+    <section className={styles.page}>
+      <PageHeader
+        title={t("targetGroups.title")}
+        description={t("targetGroups.subtitle")}
+        actions={
+          <Button onClick={props.onCreate}>
+            <Plus size={16} aria-hidden="true" />
+            {t("targetGroups.newGroup")}
+          </Button>
+        }
+      />
+      <DataTable
+        mode="server"
+        data={props.groups}
+        total={props.total}
+        getRowId={(row) => row.id}
+        columns={columns}
+        state={props.state}
+        onStateChange={props.onStateChange}
+        loading={props.loading}
+        error={props.error}
+        onRetry={props.onRetry}
+        caption={t("targetGroups.title")}
+        labels={{ ...uiTableLabels(t), search: t("targetGroups.searchGroups") }}
+        filters={[
+          {
+            field: "status",
+            label: t("targetGroups.status"),
+            type: "select",
+            options: [
+              { value: "DRAFT", label: t("common.draft") },
+              { value: "ACTIVE", label: t("common.active") },
+              { value: "ARCHIVED", label: t("targetGroups.archived") },
+            ],
+          },
+        ]}
+      />
+      <Dialog
+        open={Boolean(props.deleting)}
+        onOpenChange={(open) => {
+          if (!open && !props.deletePending) props.onDeleteCancel();
+        }}
+        title={t("targetGroups.deleteTitle")}
+        description={t("targetGroups.deleteConfirm", {
+          name: props.deleting?.name ?? "",
+        })}
+        closeLabel={t("common.close")}
+        dismissible={!props.deletePending}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              disabled={props.deletePending}
+              onClick={props.onDeleteCancel}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="danger"
+              loading={props.deletePending}
+              onClick={props.onDeleteConfirm}
+            >
+              {t("targetGroups.delete")}
+            </Button>
+          </>
+        }
+      >
+        {props.deleteError && (
+          <FormMessage variant="error">{props.deleteError}</FormMessage>
+        )}
+      </Dialog>
+    </section>
+  );
+}

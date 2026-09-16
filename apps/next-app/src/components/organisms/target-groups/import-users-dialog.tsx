@@ -1,171 +1,145 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-import { useTranslation } from "@/src/lib/i18n";
+import { useEffect, useRef } from "react";
+import { Formik, type FormikErrors } from "formik";
+import { importTargetGroupUsersSchema } from "@next-phish/shared";
+import { useFormStatus } from "@/src/hooks/use-form-status";
+import {
+  encodeImportFile,
+  useTargetGroupImport,
+} from "@/src/hooks/use-target-group-import";
+import { useTranslation } from "@/src/lib/i18n/client";
 import { trpc } from "@/src/lib/trpc";
-import { ImportUsersForm } from "./import-users-form";
-import { ImportUsersResult } from "./import-users-result";
+import {
+  ImportUsersPresentation,
+  type ImportProgress,
+} from "./import-users-presentation";
 
-interface ImportUsersDialogProps {
+interface Props {
   visible: boolean;
   onHide: () => void;
   targetGroupId: string;
 }
 
-interface ImportProgressData {
-  status: string;
-  progress: {
-    total: number;
-    processed: number;
-    inserted: number;
-    updated: number;
-    skipped: number;
-    errors: number;
-    currentBatch: number;
-    totalBatches: number;
-    validationErrors?: Array<{ row: number; field: string; message: string }>;
-  } | null;
+export interface ImportConfigValues {
+  mode: "insert" | "upsert";
+  file: File | null;
 }
 
-export function ImportUsersDialog({
-  visible,
-  onHide,
-  targetGroupId,
-}: ImportUsersDialogProps) {
+const initialValues: ImportConfigValues = { mode: "insert", file: null };
+const importModeSchema = importTargetGroupUsersSchema.pick({ mode: true });
+
+export function ImportUsersDialog({ visible, onHide, targetGroupId }: Props) {
   const t = useTranslation();
   const utils = trpc.useUtils();
-  const [mode, setMode] = useState<"insert" | "upsert">("insert");
-  const [file, setFile] = useState<File | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-
-  const uploadMutation = trpc.file.uploadFile.useMutation();
-  const importMutation = trpc.targetGroup.importUsers.useMutation({
-    onSuccess: (data) => setJobId(data.jobId),
-  });
-
-  const { data: progressData } = trpc.job.getById.useQuery(
-    { id: jobId! },
+  const importState = useTargetGroupImport();
+  const { state } = importState;
+  const { status, setError, reset: resetStatus } = useFormStatus();
+  const upload = trpc.file.uploadFile.useMutation();
+  const start = trpc.targetGroup.importUsers.useMutation();
+  const job = trpc.job.getById.useQuery(
+    { id: state.jobId ?? "" },
     {
-      enabled: !!jobId,
+      enabled: Boolean(state.jobId),
       refetchInterval: (query) => {
-        const status = query.state.data?.status;
-        if (status === "COMPLETED" || status === "FAILED") return false;
-        return 5000;
+        const current = query.state.data?.status;
+        return current === "COMPLETED" || current === "FAILED" ? false : 5000;
       },
     },
   );
+  const jobStatus = job.data?.status;
+  const step = !state.jobId
+    ? "configure"
+    : jobStatus === "COMPLETED" || jobStatus === "FAILED"
+      ? "done"
+      : "importing";
+  const invalidated = useRef<string | null>(null);
+  useEffect(() => {
+    if (state.jobId && step === "done" && invalidated.current !== state.jobId) {
+      invalidated.current = state.jobId;
+      void utils.targetGroup.invalidate();
+    }
+  }, [state.jobId, step, utils.targetGroup]);
 
-  const progress = progressData?.progress as
-    | ImportProgressData["progress"]
-    | null;
-  const jobStatus = progressData?.status;
+  function validate(values: ImportConfigValues) {
+    const errors: FormikErrors<ImportConfigValues> = {};
+    if (!importModeSchema.safeParse({ mode: values.mode }).success) {
+      errors.mode = t("targetGroups.importMode");
+    }
+    // The schema's file field is an uploaded id, not a browser File.
+    // FileUploader enforces the selected file's format, size, and count.
+    if (!values.file || !values.file.name) {
+      errors.file = t("targetGroups.fileRequired");
+    }
+    return errors;
+  }
 
-  const step = useMemo(() => {
-    if (!jobId) return "configure" as const;
-    if (jobStatus === "COMPLETED" || jobStatus === "FAILED")
-      return "done" as const;
-    return "importing" as const;
-  }, [jobId, jobStatus]);
-
-  const isDone = step === "done";
-  useMemo(() => {
-    if (isDone) utils.targetGroup.invalidate();
-  }, [isDone, utils.targetGroup]);
-
-  async function handleImport() {
-    if (!file) return;
-
-    setIsUploading(true);
+  async function handleImport(values: ImportConfigValues) {
+    if (!values.file) return;
+    resetStatus();
+    importState.setUploading(true);
     try {
-      const buffer = await file.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString("base64");
-
-      const uploaded = await uploadMutation.mutateAsync({
+      const file = values.file;
+      const uploaded = await upload.mutateAsync({
         name: file.name,
         size: file.size,
         format: file.type || "application/octet-stream",
         purpose: "IMPORT",
-        data: base64,
+        data: await encodeImportFile(file),
       });
-
-      importMutation.mutate({
+      const result = await start.mutateAsync({
         targetGroupId,
-        mode,
+        mode: values.mode,
         fileId: uploaded.id,
         fileName: file.name,
       });
+      importState.setJobId(result.jobId);
+    } catch {
+      setError(t("targetGroups.importError"));
     } finally {
-      setIsUploading(false);
+      importState.setUploading(false);
     }
   }
 
-  function handleClose() {
-    setFile(null);
-    setJobId(null);
-    setMode("insert");
-    onHide();
-  }
-
-  const resultStatus =
-    jobStatus === "COMPLETED"
-      ? "completed"
-      : jobStatus === "FAILED"
-        ? "failed"
-        : "importing";
-
-  const footer =
-    step === "configure" ? (
-      <div className="flex justify-end gap-3">
-        <Button
-          size="small"
-          label={t("common.cancel")}
-          severity="secondary"
-          onClick={handleClose}
-        />
-        <Button
-          size="small"
-          label={t("targetGroups.importStart")}
-          icon="pi pi-upload"
-          disabled={!file}
-          loading={isUploading || importMutation.isPending}
-          onClick={handleImport}
-          className="rounded-xl border-0 bg-(image:--brand-gradient) px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)]"
-        />
-      </div>
-    ) : (
-      <div className="flex justify-end">
-        <Button
-          size="small"
-          label={t("targetGroups.importDone")}
-          onClick={handleClose}
-        />
-      </div>
-    );
-
   return (
-    <Dialog
-      visible={visible}
-      onHide={handleClose}
-      header={t("targetGroups.importTitle")}
-      footer={footer}
-      className="w-full max-w-lg"
-      draggable={false}
-      dismissableMask={true}
+    <Formik
+      initialValues={initialValues}
+      validate={validate}
+      onSubmit={handleImport}
     >
-      {step === "configure" && (
-        <ImportUsersForm
-          mode={mode}
-          onModeChange={setMode}
-          file={file}
-          onFileChange={setFile}
-        />
-      )}
-      {(step === "importing" || step === "done") && (
-        <ImportUsersResult status={resultStatus} progress={progress} />
-      )}
-    </Dialog>
+      {(formik) => {
+        const busy =
+          state.uploading ||
+          upload.isPending ||
+          start.isPending ||
+          formik.isSubmitting;
+        const close = () => {
+          if (busy) return;
+          importState.reset();
+          formik.resetForm();
+          resetStatus();
+          onHide();
+        };
+        return (
+          <ImportUsersPresentation
+            visible={visible}
+            onHide={close}
+            step={step}
+            busy={busy}
+            error={status.type === "error" ? status.message : ""}
+            jobError={Boolean(job.error)}
+            onRetryJob={() => void job.refetch?.()}
+            resultStatus={
+              jobStatus === "COMPLETED"
+                ? "completed"
+                : jobStatus === "FAILED"
+                  ? "failed"
+                  : "importing"
+            }
+            progress={(job.data?.progress ?? null) as ImportProgress | null}
+          />
+        );
+      }}
+    </Formik>
   );
 }
