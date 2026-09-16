@@ -132,21 +132,23 @@ export function DataTable<T>({
   const pages = Math.max(1, table.getPageCount());
   return (
     <div className="np-card np-data-table" aria-busy={loading || undefined}>
-      <div className="np-table-toolbar">
-        {searchable && (
-          <div className="np-search">
-            <Search size={16} aria-hidden="true" />
-            <Input
-              aria-label={labels.search}
-              type="search"
-              value={state.search}
-              onChange={(e) => search(e.target.value)}
-              placeholder={labels.search}
-            />
-          </div>
-        )}
-        {toolbar}
-      </div>
+      {(searchable || toolbar) && (
+        <div className="np-table-toolbar">
+          {searchable && (
+            <div className="np-search">
+              <Search size={16} aria-hidden="true" />
+              <Input
+                aria-label={labels.search}
+                type="search"
+                value={state.search}
+                onChange={(e) => search(e.target.value)}
+                placeholder={labels.search}
+              />
+            </div>
+          )}
+          {toolbar}
+        </div>
+      )}
       {filters && (
         <FilterBar
           filters={filters}
