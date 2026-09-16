@@ -52,6 +52,7 @@ interface BaseProps<T> {
   searchable?: boolean;
   filters?: TableFilter[];
   emptyAction?: ReactNode;
+  renderRowDetails?: (row: T) => ReactNode;
   pageSizeOptions?: number[];
   labels?: Partial<DataTableLabels>;
 }
@@ -72,6 +73,7 @@ export function DataTable<T>({
   searchable = true,
   filters,
   emptyAction,
+  renderRowDetails,
   mode = "client",
   total,
   pageSizeOptions = [10, 25, 50, 100],
@@ -207,6 +209,7 @@ export function DataTable<T>({
                 pagination: { ...old.pagination, pageIndex: 0 },
               }))
             }
+            renderRowDetails={renderRowDetails}
             emptyAction={emptyAction}
           />
         </table>

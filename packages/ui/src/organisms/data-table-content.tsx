@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { flexRender, type Table, type Header } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Button } from "../atoms/button";
@@ -67,6 +67,7 @@ interface TableBodyProps<T> {
   filtered: boolean;
   onClearSearch: () => void;
   emptyAction?: ReactNode;
+  renderRowDetails?: (row: T) => ReactNode;
 }
 export function TableBody<T>({
   table,
@@ -77,6 +78,7 @@ export function TableBody<T>({
   filtered,
   onClearSearch,
   emptyAction,
+  renderRowDetails,
 }: TableBodyProps<T>) {
   const colSpan = Math.max(1, table.getVisibleLeafColumns().length);
   if (loading)
@@ -147,15 +149,25 @@ export function TableBody<T>({
     );
   return (
     <tbody>
-      {rows.map((row) => (
-        <tr key={row.id}>
-          {row.getVisibleCells().map((cell) => (
-            <td key={cell.id}>
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </td>
-          ))}
-        </tr>
-      ))}
+      {rows.map((row) => {
+        const details = renderRowDetails?.(row.original);
+        return (
+          <Fragment key={row.id}>
+            <tr>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+            {details != null && details !== false && (
+              <tr className="np-table-detail-row">
+                <td colSpan={colSpan}>{details}</td>
+              </tr>
+            )}
+          </Fragment>
+        );
+      })}
     </tbody>
   );
 }

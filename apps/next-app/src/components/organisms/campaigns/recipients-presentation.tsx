@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { useId, useMemo, type ReactNode } from "react";
 import { CheckCircle2, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Badge,
@@ -75,6 +75,7 @@ export function CampaignRecipientsPresentation({
   onRetry: () => void;
   renderTimeline: (recipientId: string) => ReactNode;
 }) {
+  const historyId = useId();
   const t = useTranslation();
   const locale = useLocale();
   const columns = useMemo<ColumnDef<Recipient>[]>(
@@ -91,6 +92,11 @@ export function CampaignRecipientsPresentation({
               email: row.original.email,
             })}
             aria-expanded={expanded.includes(row.original.id)}
+            aria-controls={
+              expanded.includes(row.original.id)
+                ? `${historyId}-${row.original.id}`
+                : undefined
+            }
             onClick={() => onToggle(row.original.id)}
           >
             {expanded.includes(row.original.id) ? (
@@ -166,7 +172,7 @@ export function CampaignRecipientsPresentation({
         enableSorting: false,
       },
     ],
-    [expanded, locale, onToggle, t, timeZone],
+    [expanded, historyId, locale, onToggle, t, timeZone],
   );
   return (
     <section className="grid min-w-0 gap-5 rounded-2xl border border-[var(--np-border)] bg-[var(--np-surface)] p-5">
@@ -190,6 +196,21 @@ export function CampaignRecipientsPresentation({
         loading={loading}
         error={error ? t("campaignsUi.recipientsError") : undefined}
         onRetry={onRetry}
+        renderRowDetails={(recipient) =>
+          expanded.includes(recipient.id) ? (
+            <article
+              id={`${historyId}-${recipient.id}`}
+              className="rounded-xl bg-[var(--np-tint)] p-5"
+            >
+              <h3 className="mb-4 font-semibold">
+                {t("campaignsUi.eventHistory", {
+                  name: `${recipient.firstName} ${recipient.lastName}`,
+                })}
+              </h3>
+              {renderTimeline(recipient.id)}
+            </article>
+          ) : null
+        }
         caption={t("campaignsUi.campaignRecipients")}
         labels={{
           ...uiTableLabels(t),
@@ -200,19 +221,6 @@ export function CampaignRecipientsPresentation({
           loading: t("campaignsUi.loadingRecipients"),
         }}
       />
-      {expanded.map((id) => {
-        const recipient = rows.find((row) => row.id === id);
-        return recipient ? (
-          <article key={id} className="rounded-xl bg-[var(--np-tint)] p-5">
-            <h3 className="mb-4 font-semibold">
-              {t("campaignsUi.eventHistory", {
-                name: `${recipient.firstName} ${recipient.lastName}`,
-              })}
-            </h3>
-            {renderTimeline(id)}
-          </article>
-        ) : null;
-      })}
     </section>
   );
 }
