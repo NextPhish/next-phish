@@ -106,7 +106,7 @@ export function TargetGroupFormPresentation({
               value={values.status}
               options={[
                 { value: "DRAFT", label: t("common.draft") },
-                { value: "ACTIVE", label: t("common.active") },
+                { value: "ACTIVE", label: t("targetGroups.active") },
                 { value: "ARCHIVED", label: t("targetGroups.archived") },
               ]}
               onValueChange={(value) => void setFieldValue("status", value)}
@@ -130,45 +130,48 @@ export function TargetGroupFormPresentation({
           )}
           {values.users.map((user, index) => (
             <div className={styles.userGrid} key={user._key}>
-              {(["email", "firstName", "lastName", "position"] as const).map(
-                (field) => {
-                  const name = `users.${index}.${field}`;
-                  const id = `target-group-user-${user._key}-${field}`;
-                  const issue = getIn(touched, name)
-                    ? (getIn(errors, name) as string | undefined)
-                    : undefined;
-                  return (
-                    <Field name={name} key={name}>
-                      {({
-                        field: input,
-                      }: {
-                        field: Record<string, unknown>;
-                      }) => (
-                        <FormField
-                          id={id}
-                          label={t(`targetGroups.${field}`)}
-                          error={issue}
-                          required={field !== "position"}
-                        >
-                          {(control) => (
-                            <Input
-                              {...control}
-                              {...input}
-                              type={field === "email" ? "email" : "text"}
-                              placeholder={
-                                field === "position"
-                                  ? t("targetGroups.positionPlaceholder")
-                                  : undefined
-                              }
-                            />
-                          )}
-                        </FormField>
-                      )}
-                    </Field>
-                  );
-                },
-              )}
+              <div className={styles.userFields}>
+                {(["email", "firstName", "lastName", "position"] as const).map(
+                  (field) => {
+                    const name = `users.${index}.${field}`;
+                    const id = `target-group-user-${user._key}-${field}`;
+                    const issue = getIn(touched, name)
+                      ? (getIn(errors, name) as string | undefined)
+                      : undefined;
+                    return (
+                      <Field name={name} key={field}>
+                        {({
+                          field: input,
+                        }: {
+                          field: Record<string, unknown>;
+                        }) => (
+                          <FormField
+                            id={id}
+                            label={t(`targetGroups.${field}`)}
+                            error={issue}
+                            required={field !== "position"}
+                          >
+                            {(control) => (
+                              <Input
+                                {...control}
+                                {...input}
+                                type={field === "email" ? "email" : "text"}
+                                placeholder={
+                                  field === "position"
+                                    ? t("targetGroups.positionPlaceholder")
+                                    : undefined
+                                }
+                              />
+                            )}
+                          </FormField>
+                        )}
+                      </Field>
+                    );
+                  },
+                )}
+              </div>
               <Button
+                className={styles.removeUser}
                 type="button"
                 variant="ghost"
                 onClick={() => removeUser(index)}

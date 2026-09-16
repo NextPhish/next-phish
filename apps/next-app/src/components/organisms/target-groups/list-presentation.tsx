@@ -73,7 +73,7 @@ export function TargetGroupsListPresentation(props: TargetGroupsListProps) {
             }
           >
             {row.original.status === "ACTIVE"
-              ? t("common.active")
+              ? t("targetGroups.active")
               : row.original.status === "ARCHIVED"
                 ? t("targetGroups.archived")
                 : t("common.draft")}
@@ -157,7 +157,7 @@ export function TargetGroupsListPresentation(props: TargetGroupsListProps) {
             type: "select",
             options: [
               { value: "DRAFT", label: t("common.draft") },
-              { value: "ACTIVE", label: t("common.active") },
+              { value: "ACTIVE", label: t("targetGroups.active") },
               { value: "ARCHIVED", label: t("targetGroups.archived") },
             ],
           },

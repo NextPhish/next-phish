@@ -705,7 +705,8 @@
     "fileTooLarge": "Choose a file smaller than 10 MB.",
     "fileInvalid": "Choose a CSV, XLSX or XLS file.",
     "rowError": "Row {row}: {field} — {message}",
-    "importJobError": "Could not load import progress. Try again."
+    "importJobError": "Could not load import progress. Try again.",
+    "active": "Active"
   },
   "sendingProfiles": {
     "title": "Sending Profiles",
