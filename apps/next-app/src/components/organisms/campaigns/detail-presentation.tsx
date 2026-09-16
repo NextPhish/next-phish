@@ -138,22 +138,26 @@ export function CampaignDetailPresentation(props: Props) {
       {props.actionStatus.type === "error" && !props.deleteOpen && (
         <FormMessage variant="error">{props.actionStatus.message}</FormMessage>
       )}
-      <Tabs defaultValue="overview">
-        <TabsList>
-          <TabsTrigger value="overview">
-            {t("campaignsUi.overview")}
-          </TabsTrigger>
-          <TabsTrigger value="statistics">
-            {t("campaignsUi.statistics")}
-          </TabsTrigger>
-          <TabsTrigger value="recipients">
-            {t("campaignsUi.recipients")}
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview">{props.overview}</TabsContent>
-        <TabsContent value="statistics">{props.statistics}</TabsContent>
-        <TabsContent value="recipients">{props.recipients}</TabsContent>
-      </Tabs>
+      {type === "TEMPLATE" ? (
+        props.overview
+      ) : (
+        <Tabs defaultValue="overview">
+          <TabsList>
+            <TabsTrigger value="overview">
+              {t("campaignsUi.overview")}
+            </TabsTrigger>
+            <TabsTrigger value="statistics">
+              {t("campaignsUi.statistics")}
+            </TabsTrigger>
+            <TabsTrigger value="recipients">
+              {t("campaignsUi.recipients")}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">{props.overview}</TabsContent>
+          <TabsContent value="statistics">{props.statistics}</TabsContent>
+          <TabsContent value="recipients">{props.recipients}</TabsContent>
+        </Tabs>
+      )}
       <Dialog
         open={props.deleteOpen}
         onOpenChange={props.onDeleteOpenChange}

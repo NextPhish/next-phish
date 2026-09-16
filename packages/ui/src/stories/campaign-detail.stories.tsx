@@ -105,13 +105,13 @@ function StatisticsFixture() {
   );
 }
 
-function Preview() {
+function Preview({ template = false }: { template?: boolean }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   return (
     <I18nProvider initialLocale="en">
       <CampaignDetailPresentation
         name={campaign.name}
-        type={campaign.type}
+        type={template ? "TEMPLATE" : campaign.type}
         status={campaign.status}
         statusLabel="Published"
         statusTone="success"
@@ -133,9 +133,18 @@ function Preview() {
         onSchedule={() => undefined}
         overview={
           <CampaignDetailContent
-            data={campaign}
-            recipientCount={248}
-            schedules={[schedule]}
+            data={
+              template
+                ? {
+                    ...campaign,
+                    type: "TEMPLATE",
+                    targetGroup: null,
+                    sourceCampaign: null,
+                  }
+                : campaign
+            }
+            recipientCount={template ? 0 : 248}
+            schedules={template ? [] : [schedule]}
             onNavigate={() => undefined}
           />
         }
@@ -159,4 +168,8 @@ export default meta;
 export const PublishedConcreteCampaign: StoryObj<typeof meta> = {};
 export const Mobile: StoryObj<typeof meta> = {
   globals: { viewport: { value: "mobile", isRotated: false } },
+};
+
+export const PublishedTemplate: StoryObj<typeof meta> = {
+  args: { template: true },
 };
