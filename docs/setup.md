@@ -22,7 +22,7 @@ cp .env.example .env
 pnpm setup
 ```
 
-Copy the example only if `.env` does not already exist. `pnpm setup` links the root `.env` to `packages/database/.env` for Prisma; it does not link environment files into the applications.
+Copy the example only if `.env` does not already exist. `pnpm setup` links the root `.env` into `apps/next-app`, `apps/static-server`, `apps/worker` and `packages/database`. Existing regular `.env` files are preserved. Next.js loads its environment file automatically; worker/content commands use `--env-file-if-exists`.
 
 Edit `.env` before starting anything:
 
@@ -61,7 +61,7 @@ There is currently no checked-in `packages/database/prisma/seed.ts`, despite the
 
 ### 3. Load the environment and start all application processes
 
-`pnpm dev:up` loads the root `.env` using Node.js, starts the three infrastructure containers, links the Prisma environment file, and runs Turbo in loose environment mode so all three applications receive their settings:
+`pnpm dev:up` loads the root `.env` using Node.js, starts the three infrastructure containers, links the application and Prisma environment files, and runs Turbo in loose environment mode so all three applications receive their settings:
 
 ```bash
 pnpm dev:up

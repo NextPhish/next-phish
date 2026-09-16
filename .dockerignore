@@ -10,5 +10,4 @@ node_modules
 **/coverage
 **/*.tsbuildinfo
 .pnpm-store
-packages/sdk
 *.log
