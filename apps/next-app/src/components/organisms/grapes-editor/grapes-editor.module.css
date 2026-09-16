@@ -1,0 +1,105 @@
+.editor {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #1c2945;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 24px 60px rgb(2 11 29 / 35%);
+  container-type: inline-size;
+}
+
+.surface {
+  height: 720px;
+  min-width: 0;
+}
+
+/* GrapesJS defaults its inspector to 15%, which is too narrow in app forms. */
+.editor :global(.gjs-editor) {
+  --gjs-left-width: clamp(280px, 28%, 360px);
+}
+
+.editor :global(.gjs-pn-views-container) {
+  box-sizing: border-box;
+}
+
+.editor :global(.gjs-pn-options .gjs-pn-buttons) {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@container (max-width: 820px) {
+  .surface {
+    height: 940px;
+  }
+
+  .editor :global(.gjs-editor) {
+    --gjs-left-width: 100%;
+  }
+
+  .editor :global(.gjs-pn-commands) {
+    width: 100%;
+    height: 42px;
+    padding-right: 0;
+  }
+
+  .editor :global(.gjs-pn-options) {
+    top: 42px;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 42px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .editor :global(.gjs-pn-options .gjs-pn-buttons) {
+    width: max-content;
+    min-width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  .editor :global(.gjs-cv-canvas) {
+    top: 84px;
+    bottom: auto;
+    width: 100%;
+    height: calc(100% - 444px);
+  }
+
+  .editor :global(.gjs-pn-views) {
+    top: calc(100% - 360px);
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 42px;
+  }
+
+  .editor :global(.gjs-pn-views-container) {
+    top: calc(100% - 360px);
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 360px;
+    padding-top: 42px;
+  }
+}
+
+.editor :global(.gjs-blocks-c) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+.editor :global(.gjs-block) {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  min-height: 100px;
+}
+.editor :global(.gjs-block__media svg) {
+  width: 100%;
+  height: 48px;
+}
+.editor :global(.gjs-block-label) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

@@ -431,7 +431,6 @@
     "uploadSuccess": "Файлът е качен успешно.",
     "namePlaceholder": "Въведете име на шаблона",
     "regeneratePreview": "Обнови прегледа",
-    "previewError": "Прегледът не можа да бъде обновен.",
     "addTag": "Добавяне на тагове",
     "selectedTags": "Избрани тагове",
     "removeTag": "Премахни {tag}",
@@ -449,7 +448,8 @@
     "unsupportedFile": "{name}: неподдържан тип файл.",
     "fileTooLarge": "{name}: файлът е по-голям от 10 MB.",
     "fileCount": "Изберете до {count} файла.",
-    "fileRequirements": "Изображения, PDF, Word, Excel или ZIP · Максимум {size} KB на файл"
+    "fileRequirements": "Приетите типове са показани по-горе · Максимум {size} KB на файл",
+    "previewError": "Прегледът не можа да бъде обновен."
   },
   "pages": {
     "title": "Страници",

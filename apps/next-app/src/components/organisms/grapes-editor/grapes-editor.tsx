@@ -9,6 +9,7 @@ import blocksFlexbox from "grapesjs-blocks-flexbox";
 import pluginForms from "grapesjs-plugin-forms";
 import styleGradient from "grapesjs-style-gradient";
 import grapesjsFonts from "@silexlabs/grapesjs-fonts";
+import styles from "./grapes-editor.module.css";
 
 export type EditorMode = "email" | "page";
 
@@ -139,19 +140,21 @@ export function GrapesEditor({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#1C2945] bg-white shadow-[0_24px_60px_rgba(2,11,29,0.35)]">
-      <GjsEditor
-        grapesjs={grapesjs}
-        grapesjsCss="https://unpkg.com/grapesjs/dist/css/grapes.min.css"
-        onEditor={handleEditor}
-        options={{
-          height: "720px",
-          storageManager: false,
-          noticeOnUnload: false,
-          plugins,
-          pluginsOpts,
-        }}
-      />
+    <div className={styles.editor}>
+      <div className={styles.surface}>
+        <GjsEditor
+          grapesjs={grapesjs}
+          grapesjsCss="https://unpkg.com/grapesjs/dist/css/grapes.min.css"
+          onEditor={handleEditor}
+          options={{
+            height: "100%",
+            storageManager: false,
+            noticeOnUnload: false,
+            plugins,
+            pluginsOpts,
+          }}
+        />
+      </div>
     </div>
   );
 }

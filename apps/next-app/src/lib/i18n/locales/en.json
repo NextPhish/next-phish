@@ -431,7 +431,6 @@
     "uploadSuccess": "File uploaded successfully.",
     "namePlaceholder": "Enter a template name",
     "regeneratePreview": "Regenerate preview",
-    "previewError": "Could not regenerate the preview.",
     "addTag": "Add tags",
     "selectedTags": "Selected tags",
     "removeTag": "Remove {tag}",
@@ -449,7 +448,8 @@
     "unsupportedFile": "{name}: unsupported file type.",
     "fileTooLarge": "{name}: file is larger than 10 MB.",
     "fileCount": "Choose up to {count} files.",
-    "fileRequirements": "Images, PDF, Word, Excel or ZIP · Maximum {size} KB per file"
+    "fileRequirements": "Accepted file types shown above · Maximum {size} KB per file",
+    "previewError": "Could not regenerate the preview."
   },
   "pages": {
     "title": "Pages",
