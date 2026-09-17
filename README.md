@@ -30,6 +30,7 @@ The checked-in Compose file targets development. The guide documents production 
 
 ## Documentation
 
+- **Documentation website:** run `pnpm --filter @next-phish/docs dev` and open <http://localhost:4321>. The Astro site contains the getting started guide, local and production setup, and app feature guides. Build its static output with `pnpm --filter @next-phish/docs build` (`apps/docs/dist/`). The website is deployed separately from the management app and the production Compose stack.
 - [Local development](docs/setup.md)
 - [Deployment and operations](docs/deployment.md)
 - [Architecture](docs/architecture.md)
@@ -39,7 +40,7 @@ The checked-in Compose file targets development. The guide documents production 
 
 ## MCP Server
 
-NextPhish includes an MCP (Model Context Protocol) server that lets AI assistants like Claude and Cursor interact with your instance through natural language. See [docs/mcp-setup.md](docs/mcp-setup.md) for setup instructions and the full tool reference.
+NextPhish includes an MCP (Model Context Protocol) server that lets compatible AI assistants interact with your instance. See the [MCP setup guide](apps/docs/src/content/docs/guides/mcp.md) for connection steps, permissions, and the current tool inventory.
 
 ## License
 
