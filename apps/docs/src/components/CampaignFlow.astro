@@ -1,0 +1,69 @@
+---
+import "../styles/campaign-flow.css";
+
+const stages = ["Build", "Send", "Interact", "Learn"];
+---
+
+<div
+  class="campaign-demo"
+  role="img"
+  aria-label="Animated campaign journey: prepare a landing page, email and audience; send the simulation; observe a recipient opening and clicking; then review delivery and engagement results."
+>
+  <div class="demo-header">
+    <span class="demo-brand"><span class="demo-brand-mark">N</span> CAMPAIGN JOURNEY</span>
+    <span class="demo-live"><span></span> FLOW PREVIEW</span>
+  </div>
+
+  <div class="demo-stage-rail" aria-hidden="true">
+    {stages.map((stage, index) => (
+      <div class={`demo-stage demo-stage-${index + 1}`}>
+        <span class="demo-stage-number">0{index + 1}</span>
+        <span>{stage}</span>
+      </div>
+    ))}
+  </div>
+
+  <div class="demo-screen" aria-hidden="true">
+    <div class="demo-scene demo-build">
+      <div class="scene-kicker">01 / PREPARE</div>
+      <h3>Everything in place.</h3>
+      <div class="build-canvas">
+        <div class="asset asset-email"><span class="asset-symbol">✉</span><span>Email template<small>Workspace invite</small></span><b>✓</b></div>
+        <div class="asset asset-page"><span class="asset-symbol">▣</span><span>Landing page<small>Sign-in preview</small></span><b>✓</b></div>
+        <div class="asset asset-audience"><span class="asset-symbol">◉</span><span>Target group<small>9 test recipients</small></span><b>✓</b></div>
+        <div class="build-connector"><span></span><span></span><span></span></div>
+        <div class="campaign-node"><span class="campaign-node-icon">↗</span><span>Awareness campaign</span></div>
+      </div>
+    </div>
+
+    <div class="demo-scene demo-send">
+      <div class="scene-kicker">02 / DELIVER</div>
+      <h3>The simulation goes out.</h3>
+      <div class="send-canvas">
+        <div class="send-source"><span class="send-envelope">✉</span><strong>Workspace invite</strong><small>Campaign email</small></div>
+        <div class="send-route"><span class="send-route-line"></span><span class="send-plane">➤</span></div>
+        <div class="send-inboxes"><div><span>A</span> Inbox</div><div><span>B</span> Inbox</div><div><span>C</span> Inbox</div></div>
+      </div>
+      <div class="scene-note"><span class="note-dot"></span> Scheduled delivery · worker running</div>
+    </div>
+
+    <div class="demo-scene demo-interact">
+      <div class="scene-kicker">03 / OBSERVE</div>
+      <h3>Every signal tells a story.</h3>
+      <div class="interact-canvas">
+        <div class="inbox-preview"><span class="preview-bar"></span><small>New message</small><strong>Your workspace is ready</strong><p>Open your invitation to get started.</p><span class="preview-button">View invitation →</span><span class="click-cursor">↖</span><span class="click-ripple"></span></div>
+        <div class="event-feed"><span><b>✓</b> Delivered</span><span><b>◉</b> Opened</span><span><b>↗</b> Clicked</span></div>
+      </div>
+    </div>
+
+    <div class="demo-scene demo-learn">
+      <div class="scene-kicker">04 / MEASURE</div>
+      <h3>Turn activity into insight.</h3>
+      <div class="results-canvas"><div class="results-title">Campaign engagement <span>LAST 30 DAYS</span></div><div class="result-row"><span>Delivered</span><div><i></i></div><strong>9</strong></div><div class="result-row"><span>Opened</span><div><i></i></div><strong>3</strong></div><div class="result-row"><span>Clicked</span><div><i></i></div><strong>3</strong></div><div class="result-row"><span>Reported</span><div><i></i></div><strong>0</strong></div></div>
+      <div class="scene-note"><span class="note-dot"></span> Review outcomes and improve the next run</div>
+    </div>
+  </div>
+
+  <div class="demo-footer"><span><span class="demo-footer-dot"></span> One campaign, four connected steps</span><span class="demo-duration">16 SEC LOOP</span></div>
+  <div class="demo-progress" aria-hidden="true"><span></span></div>
+</div>

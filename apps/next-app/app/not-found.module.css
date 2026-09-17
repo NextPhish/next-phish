@@ -1,0 +1,204 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  width: 100%;
+  background: var(--np-background);
+}
+
+.brandPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 50px 12%;
+  color: #fff;
+  background: var(--np-nav);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  width: fit-content;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  width: 31px;
+  height: 35px;
+  place-items: center;
+  color: #fff;
+  background: #7666ec;
+  border-radius: 9px 9px 13px 13px;
+}
+
+.routeArt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(440px, 100%);
+  height: 250px;
+}
+
+.routeStart,
+.routeEnd {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 16px;
+}
+
+.routeStart {
+  background: #7666ec;
+  box-shadow: 0 0 0 12px rgb(118 102 236 / 12%);
+}
+
+.routeStart::after {
+  width: 18px;
+  height: 18px;
+  border: 3px solid white;
+  border-radius: 50%;
+  content: "";
+}
+
+.routeLine {
+  flex: 1;
+  height: 2px;
+  margin: 0 13px;
+  background: repeating-linear-gradient(
+    90deg,
+    #8c7fee 0 8px,
+    transparent 8px 16px
+  );
+}
+
+.routeEnd {
+  border: 1px solid #5d577a;
+  color: #a99df7;
+  background: #29283f;
+  font-size: 29px;
+  font-weight: 600;
+}
+
+.errorCode {
+  position: absolute;
+  top: 145px;
+  left: 50%;
+  color: #8c7fee;
+  font-size: clamp(60px, 8vw, 112px);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 1;
+  opacity: 0.65;
+  transform: translateX(-50%);
+}
+
+.brandFooter {
+  color: #a0abc3;
+  font-size: 13px;
+}
+
+.contentPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.content {
+  width: min(410px, 100%);
+}
+
+.eyebrow {
+  color: var(--np-primary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.content h1 {
+  margin: 18px 0 0;
+  color: var(--np-ink);
+  font-size: clamp(34px, 3.2vw, 46px);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1.16;
+}
+
+.content p {
+  margin: 17px 0 0;
+  color: var(--np-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.homeLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 10px 17px;
+  border-radius: 9px;
+  color: #fff;
+  background: var(--np-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.homeLink:hover {
+  background: var(--np-primary-hover);
+  transform: translateY(-1px);
+}
+
+.homeLink:focus-visible,
+.brand:focus-visible {
+  outline: 3px solid #a99df7;
+  outline-offset: 4px;
+}
+
+@media (max-width: 700px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .brandPanel {
+    min-height: 165px;
+    padding: 28px;
+  }
+
+  .routeArt,
+  .brandFooter {
+    display: none;
+  }
+
+  .contentPanel {
+    padding: 54px 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homeLink {
+    transition: none;
+  }
+
+  .homeLink:hover {
+    transform: none;
+  }
+}

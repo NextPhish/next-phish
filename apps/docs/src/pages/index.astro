@@ -1,0 +1,56 @@
+---
+import '../styles/home.css';
+import CampaignFlow from '../components/CampaignFlow.astro';
+
+const docsHref = (path: string) => `${import.meta.env.BASE_URL.replace(/\/$/, '')}${path}`;
+const appUrl = import.meta.env.PUBLIC_APP_URL || (import.meta.env.DEV ? 'http://localhost:3000/' : undefined);
+const steps = [
+  { number: '01', icon: 'layers', title: 'Prepare your assets', description: 'Create landing pages, email templates, target groups, and sending profiles.' },
+  { number: '02', icon: 'calendar', title: 'Schedule a simulation', description: 'Bring the pieces together in a campaign and choose when it runs.' },
+  { number: '03', icon: 'pulse', title: 'Observe the journey', description: 'Follow delivery and recipient activity as the campaign progresses.' },
+  { number: '04', icon: 'chart', title: 'Learn from results', description: 'Review campaign outcomes and decide what to improve next.' },
+];
+const quickLinks = [
+  { kicker: 'START HERE', title: 'Local development', description: 'Install dependencies, configure services, and launch the workspace.', href: '/guides/local-development/', icon: 'terminal' },
+  { kicker: 'DEPLOY', title: 'Production setup', description: 'Build the services and prepare a production environment.', href: '/guides/production/', icon: 'server' },
+  { kicker: 'EXPLORE', title: 'Use the app', description: 'Learn the pages and workflows that make up NextPhish.', href: '/app/dashboard/', icon: 'compass' },
+  { kicker: 'AGENT READY', title: 'Connect an AI assistant', description: 'Use MCP to give an assistant controlled access to NextPhish tools.', href: '/guides/mcp/', icon: 'agent' },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="NextPhish documentation: set up the platform and run security awareness simulations from first asset to campaign insight." />
+    <meta name="theme-color" content="#f5f6fa" />
+    <link rel="icon" href={docsHref('/nextphish-mark.svg')} type="image/svg+xml" />
+    <title>NextPhish Docs — Simulate. Observe. Improve.</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="brand" href={docsHref('/')} aria-label="NextPhish Docs home"><img src={docsHref('/nextphish-mark.svg')} alt="" width="32" height="32" /><span>NextPhish <small>DOCS</small></span></a>
+        <nav aria-label="Main navigation"><a class="nav-docs" href={docsHref('/getting-started/')}>Documentation</a><a class="nav-github" href="https://github.com/NextPhish/next-phish" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>{appUrl && <a class="nav-app" href={appUrl}>Open app <span aria-hidden="true">↗</span></a>}</nav>
+      </header>
+      <main id="main">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="eyebrow-line"></span>THE NEXTPHISH HANDBOOK</p>
+            <h1 id="hero-title">Security simulations, <em>clearly understood.</em></h1>
+            <p class="hero-description">Follow a campaign from prepared assets to delivery, recipient activity, and the insights that shape your next simulation.</p>
+            <div class="hero-actions"><a class="button button-primary" href={docsHref('/getting-started/')}>Read the docs <span aria-hidden="true">→</span></a><a class="button button-secondary" href={docsHref('/guides/local-development/')}>Set up locally <span aria-hidden="true">↗</span></a></div>
+            <div class="hero-footnote"><span class="status-dot"></span>Open source · Built for measurable learning</div>
+          </div>
+          <CampaignFlow />
+        </section>
+        <section class="intro-strip" aria-label="What you can do with NextPhish"><div><strong>One connected workflow</strong><span>From the first landing page to the final campaign result.</span></div><div class="strip-steps"><span>Build</span><b>→</b><span>Launch</span><b>→</b><span>Measure</span></div></section>
+        <section class="section workflow" aria-labelledby="workflow-title"><div class="section-heading"><div><p class="eyebrow">THE WORKFLOW</p><h2 id="workflow-title">Understand the whole picture.</h2><p>NextPhish connects the building blocks of an awareness campaign in one place.</p></div><a class="section-link" href={docsHref('/getting-started/')}>Explore the platform <span aria-hidden="true">→</span></a></div><div class="workflow-grid">{steps.map((step) => <article class="workflow-card"><span class="card-number">{step.number}</span><div class={`card-icon icon-${step.icon}`} aria-hidden="true">{step.icon === 'layers' ? '▣' : step.icon === 'calendar' ? '▦' : step.icon === 'pulse' ? '⌁' : '▥'}</div><h3>{step.title}</h3><p>{step.description}</p></article>)}</div></section>
+        <section class="section start" aria-labelledby="start-title"><div class="section-heading"><div><p class="eyebrow">FIND YOUR WAY</p><h2 id="start-title">Where would you like to start?</h2><p>Go from first run to daily use with focused, practical guides.</p></div></div><div class="link-grid">{quickLinks.map((link) => <a class="link-card" href={docsHref(link.href)}><span class="link-icon" aria-hidden="true">{link.icon === 'terminal' ? '⌘' : link.icon === 'server' ? '▤' : link.icon === 'agent' ? '✦' : '◈'}</span><span class="link-content"><small>{link.kicker}</small><strong>{link.title}</strong><span>{link.description}</span></span><span class="link-arrow" aria-hidden="true">↗</span></a>)}</div></section>
+        <section class="bottom-cta"><div><p class="eyebrow">READY TO BEGIN?</p><h2>Make every simulation count.</h2><p>Start with the fundamentals, then build a workflow that fits your team.</p></div><a class="button button-light" href={docsHref('/getting-started/')}>Start reading <span aria-hidden="true">→</span></a></section>
+      </main>
+      <footer class="site-footer"><span>© {new Date().getFullYear()} NextPhish · Open source security awareness platform</span><div><a href={docsHref('/getting-started/')}>Documentation</a><a href="https://github.com/NextPhish/next-phish">GitHub</a></div></footer>
+    </div>
+  </body>
+</html>

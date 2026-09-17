@@ -1,6 +1,6 @@
 # Proposal: plugins for NextPhish
 
-Implementation plan: [issue #24](https://github.com/MartinAndreev/next-phish/issues/24).
+Implementation plan: [issue #24](https://github.com/NextPhish/next-phish/issues/24).
 
 Status: proposal for discussion, September 13, 2026. No runtime, configuration or SDK has been implemented. Names and example APIs below are proposed contracts, not existing exports.
 

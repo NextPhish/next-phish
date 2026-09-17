@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MartinAndreev/next-phish.git",
+    "url": "git+https://github.com/NextPhish/next-phish.git",
     "directory": "packages/sdk"
   },
   "publishConfig": {

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-labelledby="title">
+  <title id="title">NextPhish</title>
+  <rect width="48" height="48" rx="12" fill="#5146D9"/>
+  <path d="M13 14h7.5l9 13V14H35v20h-7.5l-9-13v13H13V14Z" fill="white"/>
+  <path d="m29.5 27 4.7 7H27l-4.7-7h7.2Z" fill="#A9A2FF"/>
+</svg>

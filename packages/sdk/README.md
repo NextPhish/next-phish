@@ -75,6 +75,6 @@ One-time setup:
 
 1. Ensure you own the `@next-phish` npm scope and bootstrap `@next-phish/sdk` with an authenticated first publish if the package does not exist yet. Build and test first, then run `npm publish --access public --ignore-scripts` from `packages/sdk`.
 2. Create a GitHub environment named `npm`, with any desired release approval/tag rules.
-3. In the npm package's **Settings → Trusted publishing**, configure GitHub Actions: owner `MartinAndreev`, repository `next-phish`, workflow `publish-sdk.yml`, environment `npm`, with publishing allowed. See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/). The workflow uses OIDC and automatic provenance; no npm token secret is needed.
+3. In the npm package's **Settings → Trusted publishing**, configure GitHub Actions: owner `NextPhish`, repository `next-phish`, workflow `publish-sdk.yml`, environment `npm`, with publishing allowed. See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/). The workflow uses OIDC and automatic provenance; no npm token secret is needed.
 
 For each release, update `packages/sdk/package.json`'s version, run the checks, commit the changes, and create the matching `sdk-vX.Y.Z` tag. Push the commit and tag when ready to publish. Existing npm versions cannot be overwritten. Prerelease versions are intentionally rejected by this workflow.

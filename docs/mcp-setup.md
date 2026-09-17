@@ -1,5 +1,7 @@
 # Setting Up the MCP Server
 
+> For the current setup flow and tool inventory, use the [Astro documentation guide](../apps/docs/src/content/docs/guides/mcp.md). The instructions below describe an earlier UI and may not match the current installation.
+
 This guide walks you through connecting AI assistants like Claude, ChatGPT, or other MCP-compatible tools to your NextPhish instance. Once connected, you can use natural language to manage your phishing simulations — create pages, templates, organizations, and more, all through conversation.
 
 ## What is MCP?

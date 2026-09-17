@@ -1,0 +1,147 @@
+:root {
+  --sl-color-accent-low: #eeecff;
+  --sl-color-accent: #5146d9;
+  --sl-color-accent-high: #30219e;
+  --sl-color-white: #192235;
+  --sl-color-gray-1: #293348;
+  --sl-color-gray-2: #465267;
+  --sl-color-gray-3: #626d80;
+  --sl-color-gray-4: #8b95a7;
+  --sl-color-gray-5: #d4d9e3;
+  --sl-color-gray-6: #e5e8ef;
+  --sl-color-black: #f5f6fa;
+  --sl-color-bg: #f5f6fa;
+  --sl-color-bg-nav: #ffffff;
+  --sl-color-bg-sidebar: #ffffff;
+  --sl-color-bg-inline-code: #eeecff;
+  --sl-color-hairline: #e5e8ef;
+  --sl-content-width: 72rem;
+  --sl-font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+:root[data-theme="dark"] {
+  --sl-color-accent-low: #29224d;
+  --sl-color-accent: #b2aaff;
+  --sl-color-accent-high: #ebe9ff;
+  --sl-color-white: #f5f6fa;
+  --sl-color-gray-1: #e6e9f2;
+  --sl-color-gray-2: #c6ccdb;
+  --sl-color-gray-3: #a2aabe;
+  --sl-color-gray-4: #778196;
+  --sl-color-gray-5: #3a4559;
+  --sl-color-gray-6: #252e40;
+  --sl-color-black: #151b2c;
+  --sl-color-bg: #161d2d;
+  --sl-color-bg-nav: #151b2c;
+  --sl-color-bg-sidebar: #111726;
+  --sl-color-bg-inline-code: #28233f;
+  --sl-color-hairline: #30394a;
+}
+.site-title {
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+.site-title img {
+  width: 32px;
+  height: 32px;
+}
+.sidebar-content {
+  color: #293348;
+}
+.sidebar-content a {
+  border-radius: 8px;
+}
+.sidebar-content a:not([aria-current="page"]) {
+  color: #465267;
+}
+.sidebar-content a:hover {
+  color: #30219e;
+  background: #eeecff;
+}
+.sidebar-content a[aria-current="page"] {
+  color: #fff;
+  background: #5146d9;
+}
+.sidebar-content .group-label {
+  color: #626d80;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.sidebar-content .group-label .large {
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+}
+:root[data-theme="dark"] .sidebar-content {
+  color: #c9d0df;
+}
+:root[data-theme="dark"] .sidebar-content a:not([aria-current="page"]) {
+  color: #c9d0df;
+}
+:root[data-theme="dark"] .sidebar-content a:hover {
+  color: #fff;
+  background: #ffffff14;
+}
+:root[data-theme="dark"] .sidebar-content .group-label {
+  color: #a2aabe;
+}
+.main-pane {
+  background: var(--sl-color-bg);
+}
+.content-panel {
+  border-color: var(--sl-color-hairline);
+}
+.sl-markdown-content a {
+  text-underline-offset: 3px;
+}
+.sl-markdown-content :is(.starlight-aside, pre, table) {
+  border-radius: 10px;
+}
+.sl-markdown-content :not(pre) > code {
+  border-radius: 5px;
+}
+/* Give screenshots room without stretching paragraphs across the wider content column. */
+.sl-markdown-content > :is(p:not(:has(img)), ul, ol) {
+  max-width: 72ch;
+}
+
+/* Leave enough room for annotated product images when both sidebars are visible. */
+@media (min-width: 72rem) and (max-width: 89.999rem) {
+  :root {
+    --sl-sidebar-width: 16rem;
+  }
+}
+
+/* Keep the reading column usable when the desktop sidebar shares space with the mobile TOC. */
+@media (min-width: 50rem) and (max-width: 71.999rem) {
+  :root {
+    --sl-sidebar-width: 14rem;
+    --sl-nav-height: 3.5rem;
+    --sl-mobile-toc-height: 2.75rem;
+  }
+
+  .site-title {
+    font-size: 1.125rem;
+  }
+
+  .site-title img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+@media (max-width: 49.999rem) {
+  .site-title {
+    font-size: 1rem;
+  }
+
+  .site-title img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+@media (max-width: 50rem) {
+  .sidebar-pane {
+    background: var(--sl-color-bg-sidebar);
+  }
+}
