@@ -1,13 +1,14 @@
 "use client";
 
 import { Formik } from "formik";
+import { useState } from "react";
 import {
   ignoredNetworkSchema,
   type IgnoredNetworkInput,
 } from "@next-phish/shared";
-import { IgnoredNetworksPresentation } from "@/src/components/organisms/organization-settings/ignored-networks-presentation";
+import { GlobalIgnoredNetworksPresentation } from "./global-ignored-networks-presentation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
+import { localizedZodValidation } from "@/src/components/organisms/organization-settings/organization-settings-validation";
 import { trpc } from "@/src/lib/trpc";
 import { useTranslation } from "@/src/lib/i18n";
 
@@ -15,8 +16,13 @@ export function GlobalIgnoredNetworksContainer() {
   const t = useTranslation();
   const utils = trpc.useUtils();
   const { status, setError, setSuccess, reset } = useFormStatus();
-  const { data: networks = [], isLoading } =
-    trpc.settings.listIgnoredNetworks.useQuery();
+  const [pendingDeleteId, setPendingDeleteId] = useState<string>();
+  const {
+    data: networks = [],
+    isLoading,
+    error: networksError,
+    refetch,
+  } = trpc.settings.listIgnoredNetworks.useQuery();
   const create = trpc.settings.createIgnoredNetwork.useMutation();
   const remove = trpc.settings.deleteIgnoredNetwork.useMutation();
 
@@ -37,12 +43,8 @@ export function GlobalIgnoredNetworksContainer() {
       helpers.resetForm();
       await refresh();
       setSuccess(t("settings.globalIgnoredNetworkAdded"));
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : t("settings.globalIgnoredNetworkError"),
-      );
+    } catch {
+      setError(t("settings.globalIgnoredNetworkError"));
     }
   }
 
@@ -52,29 +54,36 @@ export function GlobalIgnoredNetworksContainer() {
       await remove.mutateAsync({ id });
       await refresh();
       setSuccess(t("settings.globalIgnoredNetworkRemoved"));
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : t("settings.globalIgnoredNetworkDeleteError"),
-      );
+      setPendingDeleteId(undefined);
+    } catch {
+      setError(t("settings.globalIgnoredNetworkDeleteError"));
     }
   }
 
   return (
     <Formik<IgnoredNetworkInput>
       initialValues={{ network: "", description: "" }}
-      validate={toFormikValidation(ignoredNetworkSchema)}
+      validate={localizedZodValidation(ignoredNetworkSchema, t)}
       onSubmit={handleSubmit}
     >
-      <IgnoredNetworksPresentation
+      <GlobalIgnoredNetworksPresentation
         networks={networks}
         title={t("settings.globalIgnoredNetworks")}
         hint={t("settings.globalIgnoredNetworksHint")}
         isLoading={isLoading}
+        loadError={
+          networksError ? t("settings.globalIgnoredNetworkLoadError") : ""
+        }
         deletingId={remove.isPending ? remove.variables?.id : undefined}
+        pendingDeleteId={pendingDeleteId}
         status={status}
         onDelete={handleDelete}
+        onRequestDelete={(id) => {
+          reset();
+          setPendingDeleteId(id);
+        }}
+        onCancelDelete={() => setPendingDeleteId(undefined)}
+        onRetry={() => void refetch()}
       />
     </Formik>
   );

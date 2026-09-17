@@ -1,22 +1,45 @@
 "use client";
 
-import { useMemo } from "react";
-import Link from "next/link";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
+import { useMemo, useState, type ElementType } from "react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarDays,
+  Plus,
+  Search,
+  Settings2,
+} from "lucide-react";
+import {
+  Badge,
+  Button,
+  Card,
+  FilterBar,
+  FormMessage,
+  Input,
+  PageHeader,
+  Select,
+  type TableFilter,
+} from "@next-phish/ui";
 import type { useTaskBoard } from "@/src/hooks/use-task-board";
-import { useTranslation } from "@/src/lib/i18n/client";
-import { selectSmall } from "@/src/components/ui/theme-constants";
+import { useLocale, useTranslation } from "@/src/lib/i18n/client";
+import styles from "./tasks-board.module.css";
+import {
+  TaskDragAndDrop,
+  TaskDropColumn,
+  DraggableTask,
+} from "./task-drag-and-drop";
+import { TaskBoardSkeleton } from "./task-board-skeleton";
 
 type Board = ReturnType<typeof useTaskBoard>;
 type Task = Board["tasks"][number];
 interface Props {
+  linkComponent?: ElementType;
   board: Board;
   onCreate: (statusId?: string) => void;
-  onEdit: (task: Board["tasks"][number]) => void;
+  onEdit: (task: Task) => void;
   onManageStatuses: () => void;
 }
+
 const legacyColors: Record<string, string> = {
   neutral: "#64748b",
   blue: "#29b8ff",
@@ -24,11 +47,9 @@ const legacyColors: Record<string, string> = {
   violet: "#7b5cff",
   cyan: "#15e5d4",
 };
-
 function statusColor(value: string) {
   return legacyColors[value] ?? value;
 }
-
 function descriptionPreview(value: string) {
   return value
     .replace(/<[^>]*>/g, " ")
@@ -37,12 +58,19 @@ function descriptionPreview(value: string) {
 }
 
 export function TasksPresentation({
+  linkComponent: Link = "a",
   board,
   onCreate,
   onEdit,
   onManageStatuses,
 }: Props) {
   const t = useTranslation();
+  const locale = useLocale();
+  const dateFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { dateStyle: "medium" }),
+    [locale],
+  );
+  const [statusFilterAdded, setStatusFilterAdded] = useState(false);
   const visibleStatuses = useMemo(() => {
     if (!board.filters.statusIds.length) return board.statuses;
     const selected = new Set(board.filters.statusIds);
@@ -54,191 +82,219 @@ export function TasksPresentation({
       grouped.set(task.statusId, [...(grouped.get(task.statusId) ?? []), task]);
     return grouped;
   }, [board.tasks]);
-  if (board.isLoading)
-    return <div className="p-6 text-zinc-400">{t("tasks.loading")}</div>;
+  const statusOptions = useMemo(
+    () => board.statuses.map(({ id, name }) => ({ value: id, label: name })),
+    [board.statuses],
+  );
+  const filters = useMemo<TableFilter[]>(
+    () => [
+      {
+        field: "status",
+        label: t("tasks.status"),
+        type: "select",
+        options: statusOptions,
+      },
+    ],
+    [statusOptions, t],
+  );
+
+  if (board.isLoading) return <TaskBoardSkeleton label={t("tasks.loading")} />;
+
   return (
-    <section className="min-w-0 flex-1 p-4 sm:p-6">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">
-            {t("tasks.title")}
-          </h1>
-          <p className="mt-1 text-sm text-zinc-400">{t("tasks.subtitle")}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            label={t("tasks.manageStatuses")}
-            icon="pi pi-sliders-h"
-            outlined
-            size="small"
-            className="h-9 px-3 text-sm"
-            onClick={onManageStatuses}
-          />
-          <Button
-            label={t("tasks.createTask")}
-            icon="pi pi-plus"
-            size="small"
-            className="h-9 px-3 text-sm"
-            onClick={() => onCreate()}
-          />
-        </div>
-      </header>
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        <span className="relative w-full sm:w-72">
-          <i className="pi pi-search pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-sm text-zinc-500" />
-          <InputText
+    <section className={styles.root}>
+      <PageHeader
+        title={t("tasks.title")}
+        description={t("tasks.subtitle")}
+        actions={
+          <>
+            <Button variant="secondary" onClick={onManageStatuses}>
+              <Settings2 size={16} aria-hidden="true" />
+              {t("tasks.manageStatuses")}
+            </Button>
+            <Button onClick={() => onCreate()}>
+              <Plus size={16} aria-hidden="true" />
+              {t("tasks.createTask")}
+            </Button>
+          </>
+        }
+      />
+      <Card className={styles.toolbar}>
+        <div className={styles.search}>
+          <Search size={16} aria-hidden="true" />
+          <Input
             value={board.filters.search}
             onChange={(event) => board.setSearch(event.target.value)}
             placeholder={t("tasks.search")}
             aria-label={t("tasks.search")}
-            pt={{
-              root: {
-                className: "h-8 w-full py-2 pl-9 pr-3 text-sm",
-              },
-            }}
           />
-        </span>
-        <Dropdown
-          value={board.filters.statusIds[0] ?? ""}
-          options={[
-            { id: "", name: t("tasks.allStatuses") },
-            ...board.statuses,
-          ]}
-          optionLabel="name"
-          optionValue="id"
-          onChange={(event) =>
-            board.setStatusIds(event.value ? [event.value] : [])
+        </div>
+        <FilterBar
+          filters={filters}
+          values={
+            statusFilterAdded || board.filters.statusIds.length > 0
+              ? { status: board.filters.statusIds[0] ?? "" }
+              : {}
           }
-          aria-label={t("tasks.allStatuses")}
-          className="w-full sm:w-48"
-          pt={selectSmall}
+          onChange={(_field, value) => {
+            setStatusFilterAdded(true);
+            board.setStatusIds(value ? [String(value)] : []);
+          }}
+          onRemove={() => {
+            setStatusFilterAdded(false);
+            board.setStatusIds([]);
+          }}
+          onClear={() => {
+            setStatusFilterAdded(false);
+            board.setStatusIds([]);
+          }}
+          addLabel={t("tableUi.addFilter")}
+          clearLabel={t("tableUi.clearFilters")}
+          placeholder={t("tableUi.choose")}
+          removeLabel={(label) => t("tableUi.removeFilter", { label })}
         />
-      </div>
+      </Card>
       {board.error && (
-        <p className="mb-4 rounded-lg border border-red-900 bg-red-950/40 p-3 text-red-300">
-          {board.error.message}
-        </p>
+        <FormMessage
+          variant="error"
+          action={
+            <Button variant="secondary" size="sm" onClick={() => board.retry()}>
+              {t("tableUi.retry")}
+            </Button>
+          }
+        >
+          {t("tasks.loadFailed")}
+        </FormMessage>
       )}
-      <div className="flex gap-4 overflow-x-auto pb-4" aria-label="Task board">
-        {visibleStatuses.map((status) => {
-          const tasks = tasksByStatus.get(status.id) ?? [];
-          return (
-            <article
-              key={status.id}
-              className="w-[20rem] shrink-0 rounded-xl border border-[#1C2945] bg-brand-dark/80"
-              aria-labelledby={`status-${status.id}`}
-            >
-              <div className="flex items-center justify-between border-b border-[#1C2945] px-4 py-3">
-                <h2
-                  id={`status-${status.id}`}
-                  className="flex items-center gap-2 font-medium text-white"
-                >
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: statusColor(status.colorToken) }}
-                  />
-                  {status.name}
-                  <span className="text-xs text-zinc-500">{tasks.length}</span>
-                </h2>
-                <Button
-                  icon="pi pi-plus"
-                  text
-                  rounded
-                  size="small"
-                  className="h-8 w-8"
-                  aria-label={`Add task to ${status.name}`}
-                  onClick={() => onCreate(status.id)}
-                />
-              </div>
-              <div className="min-h-32 space-y-3 p-3">
-                {tasks.length === 0 ? (
-                  <button
-                    type="button"
+      {board.moveError && (
+        <FormMessage variant="error">{t("tasks.moveFailed")}</FormMessage>
+      )}
+      <TaskDragAndDrop
+        tasks={board.tasks}
+        statuses={visibleStatuses}
+        disabled={board.move.isPending}
+        onMove={(input) => board.move.mutate(input)}
+      >
+        <div className={styles.board} aria-label={t("tasks.title")}>
+          {visibleStatuses.map((status) => {
+            const tasks = tasksByStatus.get(status.id) ?? [];
+            return (
+              <TaskDropColumn
+                key={status.id}
+                status={status}
+                disabled={board.move.isPending}
+              >
+                <div className={styles.columnHeader}>
+                  <h2 id={`status-${status.id}`}>
+                    <span
+                      className={styles.statusDot}
+                      style={{
+                        backgroundColor: statusColor(status.colorToken),
+                      }}
+                    />
+                    {status.name}
+                    <Badge tone="neutral">{tasks.length}</Badge>
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={styles.iconButton}
+                    aria-label={`${t("tasks.addTask")}: ${status.name}`}
                     onClick={() => onCreate(status.id)}
-                    className="w-full rounded-lg border border-dashed border-[#2A3958] p-5 text-sm text-zinc-500 hover:border-brand-blue hover:text-brand-blue"
                   >
-                    {t("tasks.addTask")}
-                  </button>
-                ) : (
-                  tasks.map((task) => {
-                    const overdue = task.isOverdue;
-                    return (
-                      <div
+                    <Plus size={16} aria-hidden="true" />
+                  </Button>
+                </div>
+                <div className={styles.taskList}>
+                  {tasks.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => onCreate(status.id)}
+                      className={styles.emptyColumn}
+                    >
+                      <Plus size={16} aria-hidden="true" />
+                      {t("tasks.addTask")}
+                    </button>
+                  ) : (
+                    tasks.map((task) => (
+                      <DraggableTask
                         key={task.id}
-                        className="rounded-lg border border-[#253452] bg-brand-navy p-3 shadow-sm"
+                        task={task}
+                        disabled={board.move.isPending}
                       >
                         <button
                           type="button"
                           onClick={() => onEdit(task)}
-                          className="w-full text-left"
+                          className={styles.taskContent}
                         >
-                          <div className="mb-2 flex items-start justify-between gap-2">
-                            <h3 className="font-medium text-white">
-                              {task.title}
-                            </h3>
-                            <span
-                              className={`text-[10px] font-semibold ${task.priority === "HIGH" ? "text-red-400" : task.priority === "LOW" ? "text-zinc-500" : "text-brand-blue"}`}
+                          <div className={styles.taskTitleRow}>
+                            <h3>{task.title}</h3>
+                            <Badge
+                              tone={
+                                task.priority === "HIGH"
+                                  ? "danger"
+                                  : task.priority === "LOW"
+                                    ? "neutral"
+                                    : "info"
+                              }
                             >
-                              {task.priority}
-                            </span>
+                              {t(`tasks.${task.priority.toLowerCase()}`)}
+                            </Badge>
                           </div>
                           {task.description && (
-                            <p className="line-clamp-2 text-sm text-zinc-400">
-                              {descriptionPreview(task.description)}
-                            </p>
+                            <p>{descriptionPreview(task.description)}</p>
                           )}
                         </button>
-                        <div className="mt-3 flex flex-wrap items-center gap-2">
-                          {task.relation && (
-                            <Link
-                              href={task.relation.href}
-                              className="rounded bg-[#13213d] px-2 py-1 text-xs text-brand-blue hover:text-brand-azure"
-                            >
-                              {task.relation.name}
-                            </Link>
-                          )}
-                          {task.dueAt && (
-                            <span
-                              className={`text-xs ${overdue ? "text-red-400" : "text-zinc-500"}`}
-                            >
-                              {overdue ? `${t("tasks.overdue")} · ` : ""}
-                              {new Date(task.dueAt).toISOString().slice(0, 10)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-3 text-xs text-zinc-500">
+                        {(task.relation || task.dueAt) && (
+                          <div className={styles.meta}>
+                            {task.relation && (
+                              <Link href={task.relation.href}>
+                                {task.relation.name}
+                                <ArrowRight size={13} aria-hidden="true" />
+                              </Link>
+                            )}
+                            {task.dueAt && (
+                              <span
+                                className={task.isOverdue ? styles.overdue : ""}
+                              >
+                                {task.isOverdue ? (
+                                  <AlertTriangle size={13} aria-hidden="true" />
+                                ) : (
+                                  <CalendarDays size={13} aria-hidden="true" />
+                                )}
+                                {task.isOverdue
+                                  ? `${t("tasks.overdue")} · `
+                                  : ""}
+                                {dateFormatter.format(new Date(task.dueAt))}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <div className={styles.moveControl}>
                           <label htmlFor={`task-status-${task.id}`}>
                             {t("tasks.moveTo")}
                           </label>
-                          <Dropdown
-                            inputId={`task-status-${task.id}`}
+                          <Select
+                            id={`task-status-${task.id}`}
                             aria-label={`${t("tasks.moveTo")} ${task.title}`}
                             value={task.statusId}
-                            options={board.statuses}
-                            optionLabel="name"
-                            optionValue="id"
+                            options={statusOptions}
                             disabled={board.move.isPending}
-                            onChange={(event) =>
-                              board.move.mutate({
-                                id: task.id,
-                                statusId: event.value,
-                              })
+                            onValueChange={(statusId) =>
+                              board.move.mutate({ id: task.id, statusId })
                             }
-                            className="mt-1 w-full"
-                            pt={selectSmall}
                           />
                         </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </article>
-          );
-        })}
-      </div>
+                      </DraggableTask>
+                    ))
+                  )}
+                </div>
+              </TaskDropColumn>
+            );
+          })}
+        </div>
+      </TaskDragAndDrop>
       {board.total >= 100 && (
-        <p className="text-sm text-zinc-500">{t("tasks.showingLimit")}</p>
+        <p className={styles.limit}>{t("tasks.showingLimit")}</p>
       )}
     </section>
   );

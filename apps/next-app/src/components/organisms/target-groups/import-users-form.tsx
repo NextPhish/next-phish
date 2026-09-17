@@ -1,103 +1,87 @@
 "use client";
-
-import { RadioButton } from "primereact/radiobutton";
-import { FileUpload } from "primereact/fileupload";
-import { useTranslation } from "@/src/lib/i18n";
-
-interface ImportUsersFormProps {
-  mode: "insert" | "upsert";
-  onModeChange: (mode: "insert" | "upsert") => void;
-  file: File | null;
-  onFileChange: (file: File) => void;
+import { Form, useFormikContext } from "formik";
+import { FileUploader, FormMessage } from "@next-phish/ui";
+import { useTranslation } from "@/src/lib/i18n/client";
+import type { ImportConfigValues } from "./import-users-dialog";
+interface Props {
+  disabled?: boolean;
 }
-
-export function ImportUsersForm({
-  mode,
-  onModeChange,
-  file,
-  onFileChange,
-}: ImportUsersFormProps) {
+export function ImportUsersForm({ disabled }: Props) {
   const t = useTranslation();
-
+  const {
+    values,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldTouched,
+    submitCount,
+  } = useFormikContext<ImportConfigValues>();
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h4 className="mb-3 text-sm font-medium text-zinc-300">
+    <Form id="target-group-import-form" className="grid gap-6">
+      <fieldset className="m-0 grid min-w-0 gap-3 border-0 p-0">
+        <legend className="mb-2 text-sm font-medium text-[var(--np-ink)]">
           {t("targetGroups.importMode")}
-        </h4>
-        <div className="flex flex-col gap-3">
+        </legend>
+        {(["insert", "upsert"] as const).map((value) => (
           <label
-            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 ${
-              mode === "insert"
-                ? "border-brand-blue bg-brand-blue/10"
-                : "border-[#1C2945] bg-brand-navy/50"
-            }`}
+            key={value}
+            className="flex cursor-pointer gap-3 rounded-xl border border-[var(--np-border)] bg-[var(--np-surface-subtle)] p-4"
           >
-            <RadioButton
-              inputId="mode-insert"
-              name="importMode"
-              checked={mode === "insert"}
-              onChange={() => onModeChange("insert")}
+            <input
+              type="radio"
+              className="accent-[var(--np-primary)]"
+              name="target-import-mode"
+              checked={values.mode === value}
+              disabled={disabled}
+              onChange={() => void setFieldValue("mode", value)}
             />
-            <div>
-              <p className="font-medium text-white">
-                {t("targetGroups.importModeInsert")}
-              </p>
-              <p className="text-xs text-zinc-400">
-                {t("targetGroups.importModeInsertHint")}
-              </p>
-            </div>
+            <span>
+              <strong className="block text-sm text-[var(--np-ink)]">
+                {t(
+                  value === "insert"
+                    ? "targetGroups.importModeInsert"
+                    : "targetGroups.importModeUpsert",
+                )}
+              </strong>
+              <small className="text-[var(--np-muted)]">
+                {t(
+                  value === "insert"
+                    ? "targetGroups.importModeInsertHint"
+                    : "targetGroups.importModeUpsertHint",
+                )}
+              </small>
+            </span>
           </label>
-          <label
-            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 ${
-              mode === "upsert"
-                ? "border-brand-blue bg-brand-blue/10"
-                : "border-[#1C2945] bg-brand-navy/50"
-            }`}
-          >
-            <RadioButton
-              inputId="mode-upsert"
-              name="importMode"
-              checked={mode === "upsert"}
-              onChange={() => onModeChange("upsert")}
-            />
-            <div>
-              <p className="font-medium text-white">
-                {t("targetGroups.importModeUpsert")}
-              </p>
-              <p className="text-xs text-zinc-400">
-                {t("targetGroups.importModeUpsertHint")}
-              </p>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div>
-        <h4 className="mb-3 text-sm font-medium text-zinc-300">
-          {t("targetGroups.importFile")}
-        </h4>
-        <FileUpload
-          mode="basic"
-          auto
-          customUpload
-          accept=".csv,.xlsx,.xls"
-          maxFileSize={10_000_000}
-          chooseLabel={t("targetGroups.importFile")}
-          uploadHandler={(e) => {
-            const selected = e.files[0];
-            if (selected) onFileChange(selected);
-          }}
-        />
-        {file && (
-          <p className="mt-2 text-sm text-zinc-400">
-            {file.name} ({(file.size / 1024).toFixed(1)} KB)
-          </p>
-        )}
-        <p className="mt-2 text-xs text-zinc-500">
-          {t("targetGroups.importFileHint")}
-        </p>
-      </div>
-    </div>
+        ))}
+      </fieldset>
+      <FileUploader
+        files={values.file ? [values.file] : []}
+        onFilesChange={(files) => {
+          void setFieldValue("file", files[0] ?? null);
+          void setFieldTouched("file", true, false);
+        }}
+        accept=".csv,.xlsx,.xls"
+        maxFileSize={10_000_000}
+        maxFiles={1}
+        disabled={disabled}
+        label={t("targetGroups.importFile")}
+        labels={{
+          hint: "",
+          choose: t("targetGroups.importFile"),
+          upload: t("targetGroups.importStart"),
+          uploading: t("targetGroups.importProgress"),
+          complete: t("targetGroups.importComplete"),
+          failed: t("targetGroups.importError"),
+          remove: (name) => `${t("targetGroups.removeUser")}: ${name}`,
+          type: () => t("targetGroups.fileInvalid"),
+          size: () => t("targetGroups.fileTooLarge"),
+          count: () => t("targetGroups.fileRequired"),
+          summary: () => t("targetGroups.importFileHint"),
+        }}
+      />
+      {(touched.file || submitCount > 0) && errors.file && (
+        <FormMessage variant="error">{errors.file}</FormMessage>
+      )}
+    </Form>
   );
 }

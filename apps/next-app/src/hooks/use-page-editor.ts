@@ -91,9 +91,9 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
         // Preview generation is best-effort; the persisted page remains valid.
       }
       if (!pageId) router.push(`/pages/${saved.id}`);
-    } catch (error) {
+    } catch {
       const fallback = pageId ? t("pages.updateError") : t("pages.createError");
-      setError(error instanceof Error ? error.message : fallback);
+      setError(fallback);
     }
   }
 
@@ -137,13 +137,21 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     reset,
     handleSubmit,
     regeneratePreview: data
-      ? () =>
-          createCatalogPreview({
-            html: data.html,
-            resourceId: data.id,
-            sourceRevision: data.contentRevision,
-            upload: (preview) => previewMutation.mutateAsync(preview),
-          }).then(() => utils.page.list.invalidate())
+      ? async () => {
+          reset();
+          try {
+            await createCatalogPreview({
+              html: editorHtmlRef.current,
+              resourceId: data.id,
+              sourceRevision: data.contentRevision,
+              upload: (preview) => previewMutation.mutateAsync(preview),
+            });
+            await utils.page.list.invalidate();
+            setSuccess(t("pages.previewSuccess"));
+          } catch {
+            setError(t("pages.previewError"));
+          }
+        }
       : null,
     isGeneratingPreview: previewMutation.isPending,
     breadcrumbItems,

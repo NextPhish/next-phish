@@ -1,9 +1,10 @@
 "use client";
 
 import { ErrorMessage, useFormikContext } from "formik";
-import { InputText } from "primereact/inputtext";
-import { Skeleton } from "primereact/skeleton";
+import { CheckCircle2, Search } from "lucide-react";
+import { Input, Skeleton } from "@next-phish/ui";
 import type { CampaignFormValues } from "@next-phish/shared";
+import { useTranslation } from "@/src/lib/i18n/client";
 
 interface SendingProfileTabProps {
   profiles: Array<{
@@ -23,29 +24,36 @@ export function SendingProfileTab({
   search,
   onSearch,
 }: SendingProfileTabProps) {
+  const t = useTranslation();
   const { values, setFieldValue } = useFormikContext<CampaignFormValues>();
 
   return (
-    <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)]">
+    <section
+      id="campaign-field-mailSendingProfileId"
+      tabIndex={-1}
+      className="rounded-2xl border border-[var(--np-border)] bg-[var(--np-surface)] p-5 shadow-sm"
+    >
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Sending profile</h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            Choose the organization profile used to deliver this campaign.
+          <h2 className="text-lg font-semibold text-[var(--np-ink)]">
+            {t("campaignsUi.sendingProfile")}
+          </h2>
+          <p className="mt-1 text-sm text-[var(--np-muted)]">
+            {t("campaignsUi.profileDescription")}
           </p>
         </div>
         <div className="relative w-full sm:max-w-xs">
-          <i className="pi pi-search absolute left-3 top-1/2 z-10 -translate-y-1/2 text-sm text-zinc-400" />
-          <InputText
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--np-muted)]"
+            aria-hidden="true"
+          />
+          <Input
             value={search}
             onChange={(event) => onSearch(event.target.value)}
-            placeholder="Search sending profiles"
-            aria-label="Search sending profiles"
-            pt={{
-              root: {
-                className: "w-full py-2 pl-9 pr-3 text-xs",
-              },
-            }}
+            placeholder={t("campaignsUi.searchProfiles")}
+            aria-label={t("campaignsUi.searchProfiles")}
+            className="w-full pl-9"
           />
         </div>
       </div>
@@ -53,7 +61,10 @@ export function SendingProfileTab({
       {loading ? (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} height="7rem" borderRadius="0.75rem" />
+            <Skeleton
+              key={index}
+              style={{ height: "7rem", borderRadius: ".75rem" }}
+            />
           ))}
         </div>
       ) : profiles.length ? (
@@ -70,28 +81,29 @@ export function SendingProfileTab({
                 }
                 className={`rounded-xl border p-4 text-left transition ${
                   selected
-                    ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/20"
-                    : "border-white/10 bg-brand-navy/40 hover:border-brand-blue/50"
+                    ? "border-[var(--np-primary)] bg-[var(--np-tint)] ring-2 ring-[var(--np-tint)]"
+                    : "border-[var(--np-border)] bg-[var(--np-surface)] hover:border-[var(--np-primary)]"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-white">
+                    <p className="truncate font-medium text-[var(--np-ink)]">
                       {profile.name}
                     </p>
-                    <p className="mt-1 text-sm text-zinc-400">
+                    <p className="mt-1 text-sm text-[var(--np-muted)]">
                       {profile.providerType?.replaceAll("_", " ") ??
-                        "Sending profile"}
+                        t("campaignsUi.sendingProfile")}
                     </p>
                     {profile.fromEmail ? (
-                      <p className="mt-2 truncate text-xs text-zinc-500">
+                      <p className="mt-2 truncate text-xs text-[var(--np-muted)]">
                         {profile.fromEmail}
                       </p>
                     ) : null}
                   </div>
                   {selected ? (
-                    <i
-                      className="pi pi-check-circle text-brand-cyan"
+                    <CheckCircle2
+                      size={18}
+                      className="text-[var(--np-primary)]"
                       aria-hidden="true"
                     />
                   ) : null}
@@ -101,10 +113,10 @@ export function SendingProfileTab({
           })}
         </div>
       ) : (
-        <p className="rounded-xl border border-dashed border-white/10 px-5 py-12 text-center text-sm text-zinc-400">
+        <p className="rounded-xl border border-dashed border-[var(--np-border)] px-5 py-12 text-center text-sm text-[var(--np-muted)]">
           {search
-            ? "No sending profiles match this search."
-            : "No sending profiles are available."}
+            ? t("campaignsUi.noProfilesSearch")
+            : t("campaignsUi.noProfiles")}
         </p>
       )}
 

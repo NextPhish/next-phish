@@ -2,79 +2,101 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/src/lib/auth-client";
-import { VerifyOtpView } from "./verify-otp-view";
-import { ResetPasswordView } from "./reset-password-view";
+import { Formik } from "formik";
+import { resetPasswordSchema, verifyOtpSchema } from "@next-phish/shared";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { authClient } from "@/src/lib/auth-client";
 import { useTranslation } from "@/src/lib/i18n";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
+import {
+  ResetPasswordPresentation,
+  type ResetPasswordValues,
+  type VerifyOtpValues,
+} from "./presentation";
 
-interface ResetPasswordContainerProps {
-  email: string;
-}
-
-export function ResetPasswordContainer({ email }: ResetPasswordContainerProps) {
+export function ResetPasswordContainer({ email }: { email: string }) {
   const t = useTranslation();
   const router = useRouter();
   const { status, setError, reset } = useFormStatus();
   const [otpVerified, setOtpVerified] = useState(false);
   const otpRef = useRef("");
+  const error = status.type === "error" ? status.message : "";
+  const validateOtp = (values: VerifyOtpValues) => {
+    const errors = toFormikValidation(verifyOtpSchema.omit({ email: true }))(
+      values,
+    );
+    return errors.otp ? { otp: t("resetPassword.invalidOrExpiredCode") } : {};
+  };
+  const validatePassword = (values: ResetPasswordValues) => {
+    const errors = toFormikValidation(resetPasswordSchema)(values);
+    return {
+      ...(errors.newPassword
+        ? { newPassword: t("setup.validation.passwordTooShort") }
+        : {}),
+      ...(errors.confirmPassword
+        ? { confirmPassword: t("setup.validation.passwordMismatch") }
+        : {}),
+    };
+  };
 
-  async function handleVerifyOtp(values: { otp: string }) {
+  async function handleVerifyOtp(values: VerifyOtpValues) {
     reset();
-
-    const { error: err } = await authClient.emailOtp.checkVerificationOtp({
-      email,
-      type: "forget-password",
-      otp: values.otp,
-    });
-
-    if (err) {
-      setError(
-        err.message || err.code || t("resetPassword.invalidOrExpiredCode"),
-      );
-      return;
+    try {
+      const { error: verificationError } =
+        await authClient.emailOtp.checkVerificationOtp({
+          email,
+          type: "forget-password",
+          otp: values.otp,
+        });
+      if (verificationError) {
+        setError(t("resetPassword.invalidOrExpiredCode"));
+        return;
+      }
+      otpRef.current = values.otp;
+      setOtpVerified(true);
+    } catch {
+      setError(t("resetPassword.invalidOrExpiredCode"));
     }
-
-    otpRef.current = values.otp;
-    setOtpVerified(true);
   }
 
-  async function handleResetPassword(values: {
-    newPassword: string;
-    confirmPassword: string;
-  }) {
+  async function handleResetPassword(values: ResetPasswordValues) {
     reset();
-
-    const { error: err } = await authClient.emailOtp.resetPassword({
-      email,
-      otp: otpRef.current,
-      password: values.newPassword,
-    });
-
-    if (err) {
-      setError(
-        err.message || err.code || t("resetPassword.failedToResetPassword"),
-      );
-      return;
+    try {
+      const { error: resetError } = await authClient.emailOtp.resetPassword({
+        email,
+        otp: otpRef.current,
+        password: values.newPassword,
+      });
+      if (resetError) {
+        setError(t("resetPassword.failedToResetPassword"));
+        return;
+      }
+      router.push("/login?message=password-reset");
+    } catch {
+      setError(t("resetPassword.failedToResetPassword"));
     }
-
-    router.push("/login?message=password-reset");
   }
 
   if (!otpVerified) {
     return (
-      <VerifyOtpView
-        email={email}
-        error={status.type === "error" ? status.message : ""}
+      <Formik<VerifyOtpValues>
+        key="verify-otp"
+        initialValues={{ otp: "" }}
+        validate={validateOtp}
         onSubmit={handleVerifyOtp}
-      />
+      >
+        <ResetPasswordPresentation step="verify" error={error} />
+      </Formik>
     );
   }
-
   return (
-    <ResetPasswordView
-      error={status.type === "error" ? status.message : ""}
+    <Formik<ResetPasswordValues>
+      key="reset-password"
+      initialValues={{ newPassword: "", confirmPassword: "" }}
+      validate={validatePassword}
       onSubmit={handleResetPassword}
-    />
+    >
+      <ResetPasswordPresentation step="reset" error={error} />
+    </Formik>
   );
 }

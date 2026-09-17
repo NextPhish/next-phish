@@ -57,6 +57,9 @@ jobs:
       - name: Generate Prisma client
         run: pnpm db:generate
 
+      - name: Validate generated system emails
+        run: pnpm --filter @next-phish/backend emails:check
+
       - name: Build
         run: pnpm build
 

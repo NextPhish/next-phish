@@ -7,6 +7,7 @@ import { useTranslation } from "@/src/lib/i18n";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import type { AttachedFile } from "@/src/components/organisms/email-templates/file-attachment-panel";
 import { createCatalogPreview } from "@/src/lib/catalog-preview";
+import { buildEmailTemplatePayload } from "@/src/components/organisms/email-templates/email-template-payload";
 
 interface UseEmailTemplateEditorOptions {
   templateId?: string;
@@ -110,18 +111,11 @@ export function useEmailTemplateEditor({
       return;
     }
 
-    const payload = {
-      name: values.name.trim(),
-      tags: values.tags.flatMap((tag) => {
-        const normalizedTag = tag.trim();
-        return normalizedTag ? [normalizedTag] : [];
-      }),
-      html: editorHtmlRef.current,
-      design: editorDesignRef.current,
-      status: values.status,
-      trackingPixel: values.trackingPixel,
-      fileIds: values.fileIds,
-    };
+    const payload = buildEmailTemplatePayload(
+      values,
+      editorHtmlRef.current,
+      editorDesignRef.current,
+    );
 
     try {
       const saved = templateId

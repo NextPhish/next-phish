@@ -1,20 +1,15 @@
 "use client";
 
-import { Field, ErrorMessage, useFormikContext } from "formik";
-import { Dropdown } from "primereact/dropdown";
+import { useFormikContext } from "formik";
+import { FormField, Select } from "@next-phish/ui";
+import type { SendingProfileFormValues } from "@next-phish/shared";
 import { useTranslation } from "@/src/lib/i18n";
-import { selectSmall } from "@/src/components/ui/theme-constants";
-import { FormField } from "@/src/components/molecules/form-field";
-
-const errorCls = "mt-1 text-xs text-red-400";
-
-type ProfileFormValues = {
-  providerConfig: Record<string, string>;
-};
+import { ConfigInput } from "./config-input";
 
 export function GeneralApiConfigFields() {
   const t = useTranslation();
-  const { values } = useFormikContext<ProfileFormValues>();
+  const { values, setFieldValue } =
+    useFormikContext<SendingProfileFormValues>();
   const authMethod = values.providerConfig?.authMethod ?? "";
 
   const authMethodOptions = [
@@ -24,40 +19,34 @@ export function GeneralApiConfigFields() {
 
   return (
     <>
-      <FormField
+      <ConfigInput
         name="providerConfig.apiKey"
         label={t("sendingProfiles.generalApiKey")}
-        type="password"
+        secret
         autoComplete="off"
       />
-      <FormField
+      <ConfigInput
         name="providerConfig.sendEndpoint"
         label={t("sendingProfiles.generalSendEndpoint")}
         placeholder="https://api.example.com/send"
       />
-      <div>
-        <label
-          htmlFor="providerConfig.authMethod"
-          className="mb-2 block text-sm font-medium text-zinc-300"
-        >
-          {t("sendingProfiles.generalAuthMethod")}
-        </label>
-        <Field
-          as={Dropdown}
-          pt={selectSmall}
-          name="providerConfig.authMethod"
-          inputId="providerConfig.authMethod"
-          options={authMethodOptions}
-          className="w-full"
-        />
-        <ErrorMessage
-          name="providerConfig.authMethod"
-          component="p"
-          className={errorCls}
-        />
-      </div>
+      <FormField
+        id="sending-providerConfig-authMethod"
+        label={t("sendingProfiles.generalAuthMethod")}
+      >
+        {(control) => (
+          <Select
+            {...control}
+            value={authMethod}
+            options={authMethodOptions}
+            onValueChange={(value) =>
+              setFieldValue("providerConfig.authMethod", value)
+            }
+          />
+        )}
+      </FormField>
       {authMethod === "header" && (
-        <FormField
+        <ConfigInput
           name="providerConfig.authHeaderName"
           label={t("sendingProfiles.generalAuthHeaderName")}
           placeholder="X-API-Key"

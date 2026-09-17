@@ -1,70 +1,86 @@
 "use client";
 
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
+import { Field, Form, useFormikContext, type FieldInputProps } from "formik";
 import QRCode from "react-qr-code";
+import {
+  Button,
+  DialogClose,
+  FormField,
+  FormMessage,
+  Input,
+} from "@next-phish/ui";
+import { useTranslation } from "../../../../lib/i18n";
+import type { TwoFactorValues } from "./presentation";
 import { BackupCodes } from "./backup-codes";
-import { useTranslation } from "@/src/lib/i18n";
-
-const inputClassName =
-  "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
-
-interface TotpSetupProps {
-  totpUri: string;
-  backupCodes: string[];
-  verifyCode: string;
-  onVerifyCodeChange: (v: string) => void;
-  onVerify: () => void;
-  onCancel: () => void;
-}
+import styles from "../profile-settings.module.css";
 
 export function TotpSetup({
   totpUri,
   backupCodes,
-  verifyCode,
-  onVerifyCodeChange,
-  onVerify,
+  error,
   onCancel,
-}: TotpSetupProps) {
+}: {
+  totpUri: string;
+  backupCodes: string[];
+  error: string;
+  onCancel: () => void;
+}) {
   const t = useTranslation();
-
+  const { errors, touched, isSubmitting } = useFormikContext<TwoFactorValues>();
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <p className="text-sm text-zinc-400">{t("settings.scanQr")}</p>
-        <div className="inline-block rounded-xl bg-white p-4">
-          <QRCode value={totpUri} size={200} />
+    <Form
+      noValidate
+      className={styles.dialogForm}
+      aria-busy={isSubmitting || undefined}
+    >
+      <div className={styles.setupGrid}>
+        <div className={styles.qrPanel}>
+          <p>{t("settings.scanQr")}</p>
+          <span className={styles.qrCode}>
+            <QRCode value={totpUri} size={176} />
+          </span>
         </div>
+        {backupCodes.length > 0 && <BackupCodes codes={backupCodes} />}
       </div>
-
-      {backupCodes.length > 0 && <BackupCodes codes={backupCodes} />}
-
-      <div className="space-y-3">
-        <p className="text-sm text-zinc-400">{t("settings.verifySetupCode")}</p>
-        <InputText
-          size="small"
-          value={verifyCode}
-          onChange={(e) => onVerifyCodeChange(e.target.value)}
-          placeholder="000000"
-          className={inputClassName}
-        />
-        <div className="flex gap-2 mt-5">
+      <FormField
+        id="two-factor-code"
+        label={t("settings.verificationCode")}
+        hint={t("settings.verificationCodeHint")}
+        error={touched.verifyCode ? errors.verifyCode : undefined}
+        required
+      >
+        {(control) => (
+          <Field name="verifyCode">
+            {({ field }: { field: FieldInputProps<string> }) => (
+              <Input
+                {...control}
+                {...field}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                placeholder="000000"
+                disabled={isSubmitting}
+              />
+            )}
+          </Field>
+        )}
+      </FormField>
+      {error && <FormMessage variant="error">{error}</FormMessage>}
+      <div className={styles.dialogActions}>
+        <DialogClose asChild>
           <Button
-            size="small"
-            label={t("settings.verifyActivate")}
-            onClick={onVerify}
-            disabled={verifyCode.length < 6}
-            className="rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
-          />
-          <Button
-            size="small"
-            label={t("common.cancel")}
-            outlined
+            type="button"
+            variant="secondary"
+            disabled={isSubmitting}
             onClick={onCancel}
-            className="rounded-xl border-white/10 px-6 py-3 text-sm text-zinc-300"
-          />
-        </div>
+          >
+            {t("common.cancel")}
+          </Button>
+        </DialogClose>
+        <Button type="submit" loading={isSubmitting}>
+          {t("settings.verifyActivate")}
+        </Button>
       </div>
-    </div>
+    </Form>
   );
 }

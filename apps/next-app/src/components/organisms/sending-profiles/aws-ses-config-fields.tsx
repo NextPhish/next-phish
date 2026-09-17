@@ -1,26 +1,26 @@
 "use client";
 
 import { useTranslation } from "@/src/lib/i18n";
-import { FormField } from "@/src/components/molecules/form-field";
+import { ConfigInput } from "./config-input";
 
 export function AwsSesConfigFields() {
   const t = useTranslation();
 
   return (
     <>
-      <FormField
+      <ConfigInput
         name="providerConfig.region"
         label={t("sendingProfiles.sesRegion")}
       />
-      <FormField
+      <ConfigInput
         name="providerConfig.accessKeyId"
         label={t("sendingProfiles.sesAccessKeyId")}
         autoComplete="off"
       />
-      <FormField
+      <ConfigInput
         name="providerConfig.secretAccessKey"
         label={t("sendingProfiles.sesSecretAccessKey")}
-        type="password"
+        secret
         autoComplete="off"
       />
     </>

@@ -25,6 +25,8 @@ export class GetUserOrganizationsQuery implements IQueryHandler<
       search: input.search,
       limit: input.limit,
       offset: input.offset,
+      sort: input.sort,
+      filters: input.filters,
     });
 
     return {

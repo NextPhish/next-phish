@@ -33,6 +33,7 @@ export class GetMailSendingProfilesQuery implements IQueryHandler<
       data.organizationId,
       {
         search: data.search,
+        providerType: data.filters?.providerType,
         limit: data.limit,
         offset: data.offset,
         sort: data.sort,

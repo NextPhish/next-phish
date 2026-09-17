@@ -7,6 +7,8 @@ export {
   resetPasswordSchema,
   changePasswordSchema,
   updateProfileSchema,
+  twoFactorPasswordSchema,
+  twoFactorCodeSchema,
 } from "./auth.schema";
 export type { LoginInput, SetupInput } from "./auth.schema";
 
@@ -49,8 +51,13 @@ export {
   pagePathSchema,
   createPageSchema,
   updatePageSchema,
+  importWebsiteSchema,
 } from "./page.schema";
-export type { CreatePageInput, UpdatePageInput } from "./page.schema";
+export type {
+  CreatePageInput,
+  UpdatePageInput,
+  ImportWebsiteInput,
+} from "./page.schema";
 
 export {
   mcpListSchema,
@@ -133,3 +140,7 @@ export type {
   NegativeEventSeverity,
   ExecutionQueuePayload,
 } from "./execution.schema";
+export {
+  createApiKeyFormSchema,
+  type CreateApiKeyFormValues,
+} from "./api-key-form.schema";

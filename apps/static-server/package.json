@@ -4,15 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
-    "build": "tsc",
+    "build": "node ../../scripts/build-service.mjs static-server",
     "start": "node --env-file-if-exists=.env dist/index.js",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hono/node-server": "^2",
     "@next-phish/backend": "workspace:*",
     "@next-phish/database": "workspace:*",
-    "@hono/node-server": "^2",
+    "@prisma/client": "^6.19.3",
     "hono": "^4.12.25"
   },
   "devDependencies": {

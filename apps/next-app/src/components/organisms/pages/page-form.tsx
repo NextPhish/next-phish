@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Form, Formik } from "formik";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Button } from "primereact/button";
-import { createPageSchema } from "@next-phish/shared";
-import { FormMessage } from "@/src/components/atoms/form-message";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
+import { Form, useFormikContext } from "formik";
+import {
+  Button,
+  FormErrorSummary,
+  FormMessage,
+  PageHeader,
+} from "@next-phish/ui";
 import { ImportWebsiteDialog } from "./import-website-dialog";
 import { PageNameField } from "./page-name-field";
 import { PageEditorSection } from "./page-editor-section";
@@ -14,7 +15,7 @@ import { PageSettingsFields } from "./page-settings-fields";
 import type { Editor } from "grapesjs";
 import type { FormStatus } from "@/src/hooks/use-form-status";
 
-interface PageFormValues {
+export interface PageFormValues {
   name: string;
   path: string | null;
   type: "LANDING" | "REDIRECT";
@@ -26,37 +27,31 @@ interface PageFormValues {
 
 interface PageFormProps {
   pageId?: string;
-  initialValues: PageFormValues;
   status: FormStatus;
-  breadcrumbItems: Array<{ label: string; url?: string }>;
   editorHtmlRef: React.MutableRefObject<string>;
   editorDesignRef: React.MutableRefObject<unknown>;
   initialDesign?: object;
   initialHtml?: string;
   t: (key: string) => string;
-  onSubmit: (values: PageFormValues) => Promise<void>;
   onCancel: () => void;
   onRegeneratePreview?: () => Promise<void>;
   isGeneratingPreview?: boolean;
 }
 
-const breadcrumbHome = { icon: "pi pi-home", url: "/" };
-
 export function PageForm({
   pageId,
-  initialValues,
   status,
-  breadcrumbItems,
   editorHtmlRef,
   editorDesignRef,
   initialDesign,
   initialHtml,
   t,
-  onSubmit,
   onCancel,
   onRegeneratePreview,
   isGeneratingPreview,
 }: PageFormProps) {
+  const { isSubmitting, values, setFieldValue, errors, submitCount } =
+    useFormikContext<PageFormValues>();
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const editorRef = useRef<Editor | null>(null);
 
@@ -73,134 +68,107 @@ export function PageForm({
   }, []);
 
   return (
-    <div className="px-6 py-8">
-      <div className="mb-6">
-        <BreadCrumb home={breadcrumbHome} model={breadcrumbItems} />
-        <h1 className="mt-2 text-2xl font-semibold text-white">
-          {pageId ? t("pages.editPage") : t("pages.createTitle")}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          {pageId ? t("pages.editSubtitle") : t("pages.createSubtitle")}
-        </p>
-      </div>
-
-      <Formik<PageFormValues>
-        initialValues={initialValues}
-        enableReinitialize
-        validate={toFormikValidation(
-          createPageSchema.pick({
-            name: true,
-            path: true,
-            type: true,
-            status: true,
-          }),
+    <div className="grid min-w-0 gap-6 text-[var(--np-ink)]">
+      <PageHeader
+        title={pageId ? t("pages.editPage") : t("pages.createTitle")}
+        description={
+          pageId ? t("pages.editSubtitle") : t("pages.createSubtitle")
+        }
+      />
+      <Form noValidate className="space-y-6">
+        {submitCount > 0 && (
+          <FormErrorSummary
+            title={t("pages.validationSummary")}
+            errors={Object.entries(errors).flatMap(([field, message]) =>
+              typeof message === "string"
+                ? [{ id: field === "name" ? "name" : `page-${field}`, message }]
+                : [],
+            )}
+          />
         )}
-        onSubmit={onSubmit}
-      >
-        {({ isSubmitting, values, setFieldValue }) => (
-          <Form className="space-y-6">
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="space-y-6">
-                <PageNameField t={t} />
+        <div className="grid gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="space-y-6">
+            <PageNameField t={t} />
 
-                <PageEditorSection
-                  pageId={pageId}
-                  initialDesign={initialDesign}
-                  initialHtml={initialHtml}
-                  editorHtmlRef={editorHtmlRef}
-                  editorDesignRef={editorDesignRef}
-                  onEditorRef={handleEditorRef}
-                  t={t}
-                />
-
-                {values.type === "LANDING" && (
-                  <div>
-                    <Button
-                      size="small"
-                      type="button"
-                      outlined
-                      icon="pi pi-download"
-                      label={t("pages.importWebsite")}
-                      onClick={() => setImportDialogVisible(true)}
-                      className="rounded-xl border-white/10 px-5 py-3 text-sm font-medium text-white"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-6">
-                <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)] sticky top-3">
-                  <PageSettingsFields
-                    pageId={pageId}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    t={t}
-                  />
-
-                  <div className="flex flex-col gap-3">
-                    {pageId && onRegeneratePreview ? (
-                      <Button
-                        type="button"
-                        size="small"
-                        outlined
-                        icon="pi pi-image"
-                        label="Regenerate preview"
-                        loading={isGeneratingPreview}
-                        onClick={() => void onRegeneratePreview()}
-                        className="rounded-xl border-white/10 px-5 py-3 text-sm font-medium text-white"
-                      />
-                    ) : null}
-                    <Button
-                      size="small"
-                      type="submit"
-                      loading={isSubmitting}
-                      disabled={isSubmitting}
-                      label={
-                        pageId
-                          ? t("pages.updatePage")
-                          : values.status === "ACTIVE"
-                            ? t("pages.savePage")
-                            : t("pages.saveDraft")
-                      }
-                      className="rounded-xl border-0 bg-(image:--brand-gradient) px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)]"
-                    />
-                    <Button
-                      size="small"
-                      type="button"
-                      outlined
-                      label={t("common.cancel")}
-                      onClick={onCancel}
-                      className="rounded-xl border-white/10 px-5 py-3 text-sm font-medium text-white"
-                    />
-                  </div>
-
-                  {status.type === "error" ? (
-                    <div className="mt-3">
-                      <FormMessage variant="error">
-                        {status.message}
-                      </FormMessage>
-                    </div>
-                  ) : null}
-                  {status.type === "success" ? (
-                    <div className="mt-3">
-                      <FormMessage variant="success">
-                        {status.message}
-                      </FormMessage>
-                    </div>
-                  ) : null}
-                </section>
-              </div>
-            </div>
-
-            <ImportWebsiteDialog
-              visible={importDialogVisible}
+            <PageEditorSection
+              pageId={pageId}
+              initialDesign={initialDesign}
+              initialHtml={initialHtml}
+              editorHtmlRef={editorHtmlRef}
+              editorDesignRef={editorDesignRef}
+              onEditorRef={handleEditorRef}
               t={t}
-              onImportComplete={handleImportComplete}
-              onHide={() => setImportDialogVisible(false)}
             />
-          </Form>
-        )}
-      </Formik>
+
+            {values.type === "LANDING" && (
+              <div>
+                <Button
+                  type="button"
+                  onClick={() => setImportDialogVisible(true)}
+                  variant="secondary"
+                >
+                  {t("pages.importWebsite")}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <section className="np-card sticky top-3 p-5">
+              <PageSettingsFields
+                pageId={pageId}
+                values={values}
+                setFieldValue={setFieldValue}
+                t={t}
+              />
+
+              <div className="flex flex-col gap-3">
+                {pageId && onRegeneratePreview ? (
+                  <Button
+                    type="button"
+                    loading={isGeneratingPreview}
+                    onClick={() => void onRegeneratePreview()}
+                    variant="secondary"
+                  >
+                    {t("pages.regeneratePreview")}
+                  </Button>
+                ) : null}
+                <Button
+                  type="submit"
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                >
+                  {pageId
+                    ? t("pages.updatePage")
+                    : values.status === "ACTIVE"
+                      ? t("pages.savePage")
+                      : t("pages.saveDraft")}
+                </Button>
+                <Button type="button" onClick={onCancel} variant="secondary">
+                  {t("common.cancel")}
+                </Button>
+              </div>
+
+              {status.type === "error" ? (
+                <div className="mt-3">
+                  <FormMessage variant="error">{status.message}</FormMessage>
+                </div>
+              ) : null}
+              {status.type === "success" ? (
+                <div className="mt-3">
+                  <FormMessage variant="success">{status.message}</FormMessage>
+                </div>
+              ) : null}
+            </section>
+          </div>
+        </div>
+      </Form>
+      <ImportWebsiteDialog
+        visible={importDialogVisible}
+        t={t}
+        onImportComplete={handleImportComplete}
+        onHide={() => setImportDialogVisible(false)}
+      />
     </div>
   );
 }

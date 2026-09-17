@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="440" viewBox="0 0 1600 440" role="img" aria-labelledby="title description">
+  <title id="title">nextphish. — Phishing simulation engine</title>
+  <desc id="description">NextPhish shield logo on a dark navy background with indigo accents. Simulate. Educate. Strengthen.</desc>
+  <!-- V1 brand: packages/ui/src/styles.css (.np-theme and .np-brand-mark). -->
+  <defs>
+    <clipPath id="frame"><rect width="1600" height="440" rx="24"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <path fill="#151b2c" d="M0 0h1600v440H0z"/>
+    <path fill="#f5f6fa" d="M1120 0h480v440h-480z"/>
+    <circle cx="1360" cy="220" r="252" fill="none" stroke="#e5e8ef" stroke-width="2"/>
+    <circle cx="1360" cy="220" r="190" fill="#eeecff"/>
+    <circle cx="1360" cy="220" r="140" fill="#fff" stroke="#e5e8ef" stroke-width="2"/>
+    <rect x="80" y="92" width="80" height="90" rx="25" fill="#7666ec"/>
+    <!-- Lucide Shield path, matching the application's AppShell brand mark. -->
+    <g transform="translate(95 111) scale(2.08)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+    </g>
+    <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+      <text x="188" y="159" fill="#fff" font-size="76" font-weight="650" letter-spacing="-2">nextphish.</text>
+      <text x="80" y="253" fill="#fff" font-size="35" font-weight="500">Phishing simulation engine</text>
+      <text x="80" y="311" fill="#c2c7d5" font-size="25">Simulate. Educate. Strengthen.</text>
+      <rect x="80" y="357" width="64" height="5" rx="2.5" fill="#7666ec"/>
+      <text x="162" y="367" fill="#c2c7d5" font-size="19" letter-spacing="2">OPEN SOURCE</text>
+    </g>
+    <rect x="1304" y="156" width="112" height="128" rx="34" fill="#5146d9"/>
+    <g transform="translate(1320 180) scale(3.33)" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+    </g>
+  </g>
+</svg>

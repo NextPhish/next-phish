@@ -1,18 +1,23 @@
 "use client";
 
 import { useRef } from "react";
-import { Form, Field } from "formik";
-import type { FieldInputProps } from "formik";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
-import { Button } from "primereact/button";
-import { FormMessage } from "@/src/components/atoms/form-message";
 import Link from "next/link";
+import { Field, Form, useFormikContext, type FieldInputProps } from "formik";
+import { ArrowRight } from "lucide-react";
+import {
+  Button,
+  FormField,
+  FormMessage,
+  Input,
+  PasswordInput,
+} from "@next-phish/ui";
 import { useTranslation } from "@/src/lib/i18n";
+import styles from "@/app/(auth)/login/login.module.css";
 
-const inputClassName =
-  "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
-
+interface LoginValues {
+  email: string;
+  password: string;
+}
 interface LoginPresentationProps {
   useMagicLink: boolean;
   onToggleMagicLink: () => void;
@@ -34,92 +39,95 @@ export function LoginPresentation({
 }: LoginPresentationProps) {
   const t = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
+  const { errors, touched } = useFormikContext<LoginValues>();
 
   return (
-    <Form ref={formRef} className="flex flex-col gap-5">
-      <div className="space-y-2">
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-zinc-100"
-        >
-          {t("common.email")}
-        </label>
-        <Field name="email">
-          {({ field }: { field: FieldInputProps<string> }) => (
-            <InputText
-              size="small"
-              id="email"
-              {...field}
-              type="email"
-              className={inputClassName}
-              placeholder="you@example.com"
-            />
-          )}
-        </Field>
-        <p className="text-xs text-zinc-400 mt-2">
-          {useMagicLink
+    <Form ref={formRef} className={styles.form} noValidate>
+      <FormField
+        id="email"
+        label={t("common.email")}
+        hint={
+          useMagicLink
             ? t("login.emailHintMagicLink")
-            : t("login.emailHintPassword")}
-        </p>
-      </div>
-
-      {!useMagicLink && (
-        <div className="space-y-2">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-zinc-100"
-          >
-            {t("common.password")}
-          </label>
-          <Field name="password">
+            : t("login.emailHintPassword")
+        }
+        error={
+          touched.email && errors.email
+            ? t("login.validation.invalidEmail")
+            : undefined
+        }
+        required
+      >
+        {(controlProps) => (
+          <Field name="email">
             {({ field }: { field: FieldInputProps<string> }) => (
-              <Password
-                size={"small" as never}
-                id="password"
+              <Input
+                {...controlProps}
                 {...field}
-                feedback={false}
-                toggleMask
-                className="w-full"
-                inputClassName={inputClassName}
-                pt={{ iconField: { root: { className: "w-full" } } }}
-                placeholder={t("login.passwordPlaceholder")}
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
               />
             )}
           </Field>
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-zinc-400">{t("login.passwordHint")}</p>
-            <Link
-              href="/forgot-password"
-              className="text-xs font-medium text-cyan-300 transition-colors hover:text-cyan-200"
-            >
+        )}
+      </FormField>
+      {!useMagicLink && (
+        <>
+          <FormField
+            id="password"
+            label={t("common.password")}
+            error={
+              touched.password && errors.password
+                ? t("login.validation.passwordRequired")
+                : undefined
+            }
+            required
+          >
+            {(controlProps) => (
+              <Field name="password">
+                {({ field }: { field: FieldInputProps<string> }) => (
+                  <PasswordInput
+                    {...controlProps}
+                    {...field}
+                    autoComplete="current-password"
+                    placeholder={t("login.passwordPlaceholder")}
+                    showLabel={t("login.showPassword")}
+                    hideLabel={t("login.hidePassword")}
+                  />
+                )}
+              </Field>
+            )}
+          </FormField>
+          <div className={styles.passwordMeta}>
+            <span>{t("login.passwordHint")}</span>
+            <Link href="/forgot-password" className={styles.authLink}>
               {t("login.forgotPassword")}
             </Link>
           </div>
-        </div>
+        </>
       )}
-
       {authSuccess && (
         <FormMessage variant="success">{authSuccess}</FormMessage>
       )}
       {authError && <FormMessage variant="error">{authError}</FormMessage>}
       {error && <FormMessage variant="error">{error}</FormMessage>}
       {success && <FormMessage variant="success">{success}</FormMessage>}
-
       <Button
-        size="small"
         type="submit"
-        label={useMagicLink ? t("login.sendMagicLink") : t("common.signIn")}
         loading={isSubmitting}
-        className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
+        className={styles.submitButton}
         disabled={isSubmitting}
-      />
-
+      >
+        {useMagicLink ? t("login.sendMagicLink") : t("common.signIn")}
+        {!isSubmitting && <ArrowRight size={16} aria-hidden="true" />}
+      </Button>
       <Button
-        size="small"
-        outlined
+        variant="secondary"
         type="button"
         onClick={onToggleMagicLink}
-        className="w-full rounded-xl px-4 py-2.5 justify-center text-sm font-medium text-cyan-200 transition-colors hover:bg-white/5 hover:text-cyan-100"
+        className={styles.secondaryButton}
+        disabled={isSubmitting}
       >
         {useMagicLink
           ? t("login.signInWithPasswordInstead")

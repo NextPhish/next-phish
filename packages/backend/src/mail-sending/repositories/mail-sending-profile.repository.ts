@@ -40,6 +40,7 @@ export interface UpdateMailSendingProfileData {
 
 interface FindByOrganizationIdInput {
   search?: string;
+  providerType?: MailProviderType;
   limit: number;
   offset: number;
   sort?: Array<{
@@ -82,6 +83,7 @@ export class MailSendingProfileRepository {
     if (input.search) {
       where.OR = [{ name: { contains: input.search, mode: "insensitive" } }];
     }
+    if (input.providerType) where.providerType = input.providerType;
 
     const orderBy = input.sort?.length
       ? input.sort.map((sort) => ({ [sort.field]: sort.order }))

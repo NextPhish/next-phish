@@ -1,140 +1,87 @@
 "use client";
-
-import { Formik, Form } from "formik";
-import { Button } from "primereact/button";
+import { Formik } from "formik";
 import { useRouter } from "next/navigation";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import { useFormStatus } from "@/src/hooks/use-form-status";
-import { useTranslation } from "@/src/lib/i18n";
-import { trpc } from "@/src/lib/trpc";
-import { TargetGroupFormPresentation } from "./target-group-form-presentation";
 import { createTargetGroupSchema } from "@next-phish/shared";
-
-interface FormUser {
-  _key: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  position: string;
-}
-
-interface TargetGroupFormProps {
+import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n/client";
+import { trpc } from "@/src/lib/trpc";
+import {
+  TargetGroupFormPresentation,
+  type TargetGroupFormValues,
+} from "./target-group-form-presentation";
+import { validateTargetGroup } from "./target-group-validation";
+interface Props {
   mode?: "create" | "edit";
   groupId?: string;
   initialName?: string;
-  initialStatus?: string;
+  initialStatus?: "DRAFT" | "ACTIVE" | "ARCHIVED";
   onSuccess?: () => void;
 }
-
 export function TargetGroupForm({
   mode = "create",
   groupId,
   initialName = "",
   initialStatus = "DRAFT",
   onSuccess,
-}: TargetGroupFormProps) {
+}: Props) {
   const t = useTranslation();
   const router = useRouter();
   const utils = trpc.useUtils();
-  const { status, setError } = useFormStatus();
-
-  const createMutation = trpc.targetGroup.create.useMutation({
-    onSuccess: () => {
-      utils.targetGroup.list.invalidate();
-      if (onSuccess) {
-        onSuccess();
+  const { status, setError, setSuccess, reset } = useFormStatus();
+  const create = trpc.targetGroup.create.useMutation();
+  const update = trpc.targetGroup.update.useMutation();
+  async function submit(values: TargetGroupFormValues) {
+    reset();
+    try {
+      if (mode === "edit" && groupId) {
+        await update.mutateAsync({
+          id: groupId,
+          name: values.name.trim(),
+          status: values.status,
+        });
+        await utils.targetGroup.invalidate();
+        onSuccess?.();
+        setSuccess(t("targetGroups.updated"));
       } else {
-        router.push("/target-groups");
+        await create.mutateAsync({
+          name: values.name.trim(),
+          status: values.status,
+          users: values.users.map(
+            ({ email, firstName, lastName, position }) => ({
+              email,
+              firstName,
+              lastName,
+              position: position || undefined,
+            }),
+          ),
+        });
+        await utils.targetGroup.list.invalidate();
+        onSuccess?.();
+        if (!onSuccess) router.push("/target-groups");
       }
-    },
-    onError: (err) => setError(err.message),
-  });
-
-  const updateMutation = trpc.targetGroup.update.useMutation({
-    onSuccess: () => {
-      utils.targetGroup.invalidate();
-      onSuccess?.();
-    },
-    onError: (err) => setError(err.message),
-  });
-
-  async function handleSubmit(values: {
-    name: string;
-    status: string;
-    users: FormUser[];
-  }) {
-    if (mode === "edit" && groupId) {
-      updateMutation.mutate({
-        id: groupId,
-        name: values.name,
-        status: values.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
-      });
-    } else {
-      createMutation.mutate({
-        name: values.name,
-        status: values.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
-        users: values.users.reduce<
-          Array<{
-            email: string;
-            firstName: string;
-            lastName: string;
-            position?: string;
-          }>
-        >((acc, u) => {
-          if (u.email && u.firstName && u.lastName) {
-            acc.push({
-              email: u.email,
-              firstName: u.firstName,
-              lastName: u.lastName,
-              position: u.position || undefined,
-            });
-          }
-          return acc;
-        }, []),
-      });
+    } catch {
+      setError(
+        mode === "edit"
+          ? t("targetGroups.updateError")
+          : t("targetGroups.createError"),
+      );
     }
   }
-
-  const isEdit = mode === "edit";
-
   return (
-    <Formik
-      initialValues={{
-        name: initialName,
-        status: initialStatus,
-        users: [] as FormUser[],
-      }}
-      validate={toFormikValidation(createTargetGroupSchema)}
-      onSubmit={handleSubmit}
+    <Formik<TargetGroupFormValues>
+      initialValues={{ name: initialName, status: initialStatus, users: [] }}
+      validate={(values) =>
+        validateTargetGroup(createTargetGroupSchema, values, t)
+      }
+      onSubmit={submit}
       enableReinitialize
     >
-      {({ isSubmitting }) => (
-        <Form className="flex flex-col gap-6">
-          <TargetGroupFormPresentation
-            error={status.type === "error" ? status.message : ""}
-            isEdit={isEdit}
-          />
-
-          <div className="flex justify-end gap-3">
-            {!onSuccess && (
-              <Button
-                size="small"
-                type="button"
-                label={t("common.cancel")}
-                severity="secondary"
-                onClick={() => router.push("/target-groups")}
-              />
-            )}
-            <Button
-              size="small"
-              type="submit"
-              label={isEdit ? t("common.saveChanges") : t("common.create")}
-              loading={isSubmitting}
-              className="rounded-xl border-0 bg-(image:--brand-gradient) px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)]"
-            />
-          </div>
-        </Form>
-      )}
+      <TargetGroupFormPresentation
+        error={status.type === "error" ? status.message : ""}
+        success={status.type === "success" ? status.message : ""}
+        isEdit={mode === "edit"}
+        onCancel={onSuccess ? undefined : () => router.push("/target-groups")}
+      />
     </Formik>
   );
 }

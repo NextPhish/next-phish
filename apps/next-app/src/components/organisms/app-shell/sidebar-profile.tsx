@@ -1,106 +1,77 @@
 "use client";
 
 import Link from "next/link";
-import { Avatar } from "primereact/avatar";
-import { OrgSwitcher } from "./org-switcher";
+import { LogOut, UserRound, ChevronsUpDown } from "lucide-react";
 import { useTranslation } from "@/src/lib/i18n";
-import type { OrganizationView } from "@next-phish/backend";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@next-phish/ui";
+import styles from "./app-shell.module.css";
 
 interface SidebarProfileProps {
-  user: {
-    name: string;
-    email: string;
-    image?: string | null;
-  };
-  collapsed?: boolean;
-  organizations?: OrganizationView[];
-  organizationTotal?: number;
+  user: { name: string; email: string; image?: string | null };
 }
 
-export function SidebarProfile({
-  user,
-  collapsed,
-  organizations,
-  organizationTotal,
-}: SidebarProfileProps) {
+export function SidebarProfile({ user }: SidebarProfileProps) {
   const t = useTranslation();
-
-  if (collapsed) {
-    return (
-      <div className="border-t border-white/10 p-2">
-        <div className="flex flex-col items-center gap-2">
-          <Avatar
-            image={user.image || undefined}
-            label={user.image ? undefined : user.name.charAt(0).toUpperCase()}
-            size="normal"
-            shape="circle"
-            className="profile-avatar bg-cyan-600 text-white"
-          />
-          <Link
-            href="/profile"
-            prefetch={false}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-            title={t("settings.accountTitle")}
-          >
-            <i className="pi pi-cog text-sm" />
-          </Link>
-          <form action="/api/signout" method="post">
-            <button
-              type="submit"
-              aria-label={t("common.signOut")}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-              title={t("common.signOut")}
-            >
-              <i className="pi pi-sign-out text-sm" />
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="border-t border-white/10">
-      <OrgSwitcher
-        organizations={organizations}
-        organizationTotal={organizationTotal}
-      />
-      <div className="border-t border-white/10 p-4">
-        <div className="flex items-center gap-3">
-          <Avatar
-            image={user.image || undefined}
-            label={user.image ? undefined : user.name.charAt(0).toUpperCase()}
-            size="normal"
-            shape="circle"
-            className="bg-cyan-600 text-white"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="truncate text-sm font-medium text-zinc-100">
-              {user.name}
-            </p>
-            <p className="truncate text-xs text-zinc-400">{user.email}</p>
-          </div>
-        </div>
-        <div className="mt-3 flex gap-2">
-          <Link
-            href="/profile"
-            prefetch={false}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={styles.profileTrigger}
+          aria-label={`${t("settings.accountTitle")}: ${user.name}`}
+        >
+          <span
+            className={styles.avatar}
+            style={
+              user.image ? { backgroundImage: `url(${user.image})` } : undefined
+            }
+            aria-hidden="true"
           >
-            <i className="pi pi-user text-xs" />
+            {user.image ? null : user.name.charAt(0).toUpperCase()}
+          </span>
+          <span className={styles.triggerIdentity}>
+            <strong>{user.name}</strong>
+            <span>{t("settings.account")}</span>
+          </span>
+          <ChevronsUpDown
+            size={15}
+            className={styles.triggerChevron}
+            aria-hidden="true"
+          />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="start">
+        <DropdownMenuLabel>
+          <strong className={styles.menuUserName}>{user.name}</strong>
+          {user.email}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/profile" prefetch={false}>
+            <UserRound size={16} aria-hidden="true" />
             {t("settings.account")}
           </Link>
-          <form action="/api/signout" method="post" className="flex flex-1">
-            <button
-              type="submit"
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <i className="pi pi-sign-out text-xs" />
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <form action="/api/signout" method="post">
+          <DropdownMenuItem
+            asChild
+            onSelect={(event) => event.preventDefault()}
+          >
+            <button type="submit">
+              <LogOut size={16} aria-hidden="true" />
               {t("common.signOut")}
             </button>
-          </form>
-        </div>
-      </div>
-    </div>
+          </DropdownMenuItem>
+        </form>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

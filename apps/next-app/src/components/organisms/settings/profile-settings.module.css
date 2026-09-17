@@ -1,0 +1,172 @@
+.tabs {
+  width: 100%;
+}
+
+.tabList {
+  gap: 28px;
+}
+
+.tabList :global(.np-tabs-trigger) {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.cardStack {
+  display: grid;
+  gap: 20px;
+}
+
+.form,
+.dialogForm {
+  display: grid;
+  gap: 20px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.passwordGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.passwordGrid > :first-child {
+  grid-column: 1 / -1;
+}
+
+.actions,
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.securityRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.securityIcon,
+.emptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--np-tint);
+  color: var(--np-primary);
+}
+
+.securityCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.securityCopy strong,
+.backupPanel strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.securityCopy p,
+.backupPanel p,
+.qrPanel p {
+  margin-top: 4px;
+  color: var(--np-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.inlineMessage {
+  margin-top: 18px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  gap: 14px;
+  color: var(--np-muted);
+  text-align: center;
+}
+
+.setupGrid {
+  display: grid;
+  gap: 18px;
+}
+
+.qrPanel {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--np-border);
+  border-radius: 10px;
+  background: var(--np-tint);
+  text-align: center;
+}
+
+.qrCode {
+  display: inline-flex;
+  padding: 12px;
+  border-radius: 8px;
+  background: white;
+}
+
+.backupPanel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--np-border);
+  border-radius: 10px;
+}
+
+.codeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--np-tint);
+}
+
+.codeGrid code {
+  color: var(--np-ink);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 700px) {
+  .tabList {
+    gap: 20px;
+  }
+
+  .formGrid,
+  .passwordGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .passwordGrid > :first-child {
+    grid-column: auto;
+  }
+
+  .securityRow {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .securityCopy {
+    min-width: calc(100% - 60px);
+  }
+}

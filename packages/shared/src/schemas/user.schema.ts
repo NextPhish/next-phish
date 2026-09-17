@@ -3,10 +3,14 @@ import { z } from "zod";
 export const adminCreateUserSchema = z
   .object({
     name: z.string().trim().min(1, "Name is required"),
-    email: z.string().trim().email("Enter a valid email address"),
+    email: z
+      .string()
+      .trim()
+      .email("Invalid email")
+      .transform((value) => value.toLowerCase()),
     role: z.enum(["admin", "user"]),
     organizationMode: z.enum(["existing", "self"]),
-    organizationId: z.string().optional(),
+    organizationId: z.string().min(1).optional(),
   })
   .superRefine((value, ctx) => {
     if (value.organizationMode === "existing" && !value.organizationId) {

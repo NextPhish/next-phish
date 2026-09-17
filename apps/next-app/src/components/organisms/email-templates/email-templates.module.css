@@ -1,0 +1,24 @@
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  min-width: 0;
+}
+.nameLink {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--np-ink);
+  font-weight: 650;
+}
+.nameLink:hover {
+  color: var(--np-primary);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.muted {
+  color: var(--np-muted);
+}

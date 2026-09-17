@@ -1,305 +1,305 @@
 "use client";
-
-import { useMemo } from "react";
+import { Form, Field, useFormikContext } from "formik";
 import {
-  Form,
-  Field,
-  ErrorMessage,
-  useFormikContext,
-  type FieldInputProps,
-} from "formik";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
-import { MultiSelect } from "primereact/multiselect";
-import { FormMessage } from "@/src/components/atoms/form-message";
-import { useTranslation } from "@/src/lib/i18n";
-import { selectSmall } from "@/src/components/ui/theme-constants";
-import { PERMISSION_GROUPS, TIME_WINDOW_OPTIONS } from "@next-phish/shared";
+  Dialog,
+  Input,
+  Select,
+  Button,
+  Checkbox,
+  MultiSelect,
+  FormField,
+  FormMessage,
+} from "@next-phish/ui";
+import {
+  PERMISSION_GROUPS,
+  TIME_WINDOW_OPTIONS,
+  type CreateApiKeyFormValues,
+} from "@next-phish/shared";
+import { useTranslation } from "../../../lib/i18n";
 
-interface Organization {
-  id: string;
-  name: string;
-}
-
-interface CreateApiKeyValues {
-  name: string;
-  limitToOrganizations: boolean;
-  organizationIds: string[];
-  permissions: Record<string, boolean>;
-  expiresInDays: number | null;
-  rateLimitEnabled: boolean;
-  rateLimitMax: number | null;
-  rateLimitTimeWindow: number | null;
-}
-
-interface CreateApiKeyPresentationProps {
+interface Props {
   visible: boolean;
   onHide: () => void;
   error: string;
-  organizations: Organization[];
+  organizations: { id: string; name: string }[];
+  organizationsLoading?: boolean;
+  organizationsError?: boolean;
 }
-
 export function ApiKeyForm({
   visible,
   onHide,
   error,
   organizations,
-}: CreateApiKeyPresentationProps) {
+  organizationsLoading,
+  organizationsError,
+}: Props) {
   const t = useTranslation();
-  const { values, setFieldValue, isSubmitting } =
-    useFormikContext<CreateApiKeyValues>();
-
-  const timeWindowOptions = useMemo(
-    () =>
-      TIME_WINDOW_OPTIONS.map((opt) => ({
-        label: t(opt.translationKey),
-        value: opt.value,
-      })),
-    [t],
-  );
-
-  const orgOptions = useMemo(
-    () => organizations.map((org) => ({ label: org.name, value: org.id })),
-    [organizations],
-  );
-
-  const expiresOptions = useMemo(
-    () => [
-      { label: t("apiKeys.neverExpires"), value: null },
-      { label: `30 ${t("apiKeys.days")}`, value: 30 },
-      { label: `60 ${t("apiKeys.days")}`, value: 60 },
-      { label: `90 ${t("apiKeys.days")}`, value: 90 },
-      { label: `365 ${t("apiKeys.days")}`, value: 365 },
-    ],
-    [t],
-  );
-
+  const { values, setFieldValue, isSubmitting, errors, touched } =
+    useFormikContext<CreateApiKeyFormValues>();
+  const fieldError = (name: keyof CreateApiKeyFormValues, key: string) =>
+    touched[name] && errors[name] ? t(key) : undefined;
   return (
     <Dialog
-      header={t("apiKeys.createTitle")}
-      visible={visible}
-      onHide={onHide}
-      style={{ width: "32rem" }}
-      modal
+      title={t("apiKeys.createTitle")}
+      description={t("apiKeys.subtitle")}
+      closeLabel={t("common.cancel")}
+      open={visible}
+      onOpenChange={(open) => {
+        if (!open && !isSubmitting) onHide();
+      }}
     >
-      <Form className="flex flex-col gap-4">
-        <div>
-          <label
-            htmlFor="api-key-name"
-            className="mb-1 block text-sm font-medium text-zinc-300"
-          >
-            {t("apiKeys.name")}
-          </label>
-          <Field
-            id="api-key-name"
-            as={InputText}
-            name="name"
-            placeholder={t("apiKeys.namePlaceholder")}
-            className="w-full"
-            size="small"
-          />
-          <ErrorMessage
-            name="name"
-            component="p"
-            className="mt-1 text-sm text-red-400"
-          />
-        </div>
-
-        <div>
-          <div className="flex items-center gap-2">
+      <Form noValidate className="grid gap-5">
+        <FormField
+          label={t("apiKeys.name")}
+          error={fieldError("name", "apiKeys.validation.nameTooLong")}
+        >
+          {(control) => (
+            <Field
+              as={Input}
+              {...control}
+              name="name"
+              placeholder={t("apiKeys.namePlaceholder")}
+              disabled={isSubmitting}
+            />
+          )}
+        </FormField>
+        <div className="space-y-3">
+          <label className="flex items-center gap-3">
             <Checkbox
-              inputId="limitToOrganizations"
               checked={values.limitToOrganizations}
-              onChange={() =>
-                setFieldValue(
-                  "limitToOrganizations",
-                  !values.limitToOrganizations,
+              onCheckedChange={(checked) =>
+                void setFieldValue("limitToOrganizations", checked === true)
+              }
+              disabled={isSubmitting}
+            />
+            {t("apiKeys.limitToOrganizations")}
+          </label>
+          {values.limitToOrganizations && (
+            <FormField
+              label={t("apiKeys.organizations")}
+              error={fieldError(
+                "organizationIds",
+                "apiKeys.validation.organizationsRequired",
+              )}
+            >
+              {(control) => (
+                <MultiSelect
+                  {...control}
+                  value={values.organizationIds}
+                  onValueChange={(value) =>
+                    void setFieldValue("organizationIds", value)
+                  }
+                  options={organizations.map((org) => ({
+                    label: org.name,
+                    value: org.id,
+                  }))}
+                  loading={organizationsLoading}
+                  loadingLabel={t("common.loading")}
+                  disabled={isSubmitting || organizationsError}
+                  placeholder={t("apiKeys.selectOrganizations")}
+                  labels={{
+                    search: t("common.search"),
+                    empty: t("common.noRecordsFound"),
+                    selected: (count) => t("tableUi.selected", { count }),
+                    remove: (label) => t("tableUi.remove", { label }),
+                    clear: t("tableUi.clearSelection"),
+                    done: t("apiKeys.done"),
+                    options: t("apiKeys.organizations"),
+                  }}
+                />
+              )}
+            </FormField>
+          )}
+          {values.limitToOrganizations && organizationsError && (
+            <FormMessage variant="error">
+              {t("apiKeys.organizationsError")}
+            </FormMessage>
+          )}
+        </div>
+        <fieldset className="m-0 min-w-0 rounded-lg border border-ui-border p-4">
+          <legend className="px-1 text-sm font-semibold">
+            {t("apiKeys.permissions")}
+          </legend>
+          <table
+            className="w-full border-collapse text-sm"
+            aria-label={t("apiKeys.permissions")}
+          >
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                  className="pb-3 text-left font-medium text-ui-muted"
+                >
+                  {t("apiKeys.resource")}
+                </th>
+                <th
+                  scope="col"
+                  className="w-20 pb-3 text-center font-medium text-ui-muted"
+                >
+                  {t("apiKeys.read")}
+                </th>
+                <th
+                  scope="col"
+                  className="w-20 pb-3 text-center font-medium text-ui-muted"
+                >
+                  {t("apiKeys.write")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {PERMISSION_GROUPS.map((group) => (
+                <tr key={group.resource}>
+                  <th
+                    scope="row"
+                    className="py-2 text-left font-normal text-ui-muted"
+                  >
+                    {t(`apiKeys.resources.${group.resource}`)}
+                  </th>
+                  {[group.read, group.write].map((scope, index) => (
+                    <td
+                      key={scope ?? "unavailable"}
+                      className="py-2 text-center"
+                    >
+                      {scope ? (
+                        <Checkbox
+                          aria-label={`${t(`apiKeys.resources.${group.resource}`)}: ${t(index === 0 ? "apiKeys.read" : "apiKeys.write")}`}
+                          checked={!!values.permissions[scope]}
+                          disabled={isSubmitting}
+                          onCheckedChange={(checked) =>
+                            void setFieldValue(
+                              `permissions.${scope}`,
+                              checked === true,
+                            )
+                          }
+                        />
+                      ) : (
+                        <span aria-hidden="true">—</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </fieldset>
+        <FormField
+          label={t("apiKeys.expiration")}
+          error={fieldError(
+            "expiresInDays",
+            "apiKeys.validation.expirationInvalid",
+          )}
+        >
+          {(control) => (
+            <Select
+              {...control}
+              disabled={isSubmitting}
+              value={
+                values.expiresInDays === null
+                  ? "never"
+                  : String(values.expiresInDays)
+              }
+              onValueChange={(value) =>
+                void setFieldValue(
+                  "expiresInDays",
+                  value === "never" ? null : Number(value),
                 )
               }
+              options={[
+                { label: t("apiKeys.neverExpires"), value: "never" },
+                ...[30, 60, 90, 365].map((days) => ({
+                  label: `${days} ${t("apiKeys.days")}`,
+                  value: String(days),
+                })),
+              ]}
             />
-            <label
-              htmlFor="limitToOrganizations"
-              className="text-sm font-medium text-zinc-300"
-            >
-              {t("apiKeys.limitToOrganizations")}
-            </label>
-          </div>
-        </div>
-
-        {values.limitToOrganizations && (
-          <div>
-            <label
-              htmlFor="api-key-organizations"
-              className="mb-1 block text-sm font-medium text-zinc-300"
-            >
-              {t("apiKeys.organizations")}
-            </label>
-            <MultiSelect
-              inputId="api-key-organizations"
-              pt={selectSmall}
-              value={values.organizationIds}
-              options={orgOptions}
-              placeholder={t("apiKeys.selectOrganizations")}
-              onChange={(e) => setFieldValue("organizationIds", e.value)}
-              className="w-full"
-              display="chip"
-            />
-          </div>
-        )}
-
-        <div>
-          <p className="mb-2 text-sm font-medium text-zinc-300">
-            {t("apiKeys.permissions")}
-          </p>
-          <div className="space-y-3 rounded-lg border border-white/10 bg-white/5 p-3">
-            {PERMISSION_GROUPS.map((group) => (
-              <div key={group.resource}>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  {group.resource}
-                </p>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      inputId={`perm-${group.read}`}
-                      checked={!!values.permissions[group.read]}
-                      onChange={() =>
-                        setFieldValue(
-                          `permissions.${group.read}`,
-                          !values.permissions[group.read],
-                        )
-                      }
-                    />
-                    <label
-                      htmlFor={`perm-${group.read}`}
-                      className="text-sm text-zinc-300"
-                    >
-                      read
-                    </label>
-                  </div>
-                  {group.write && (
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        inputId={`perm-${group.write}`}
-                        checked={!!values.permissions[group.write]}
-                        onChange={() => {
-                          const writeKey = group.write!;
-                          setFieldValue(
-                            `permissions.${writeKey}`,
-                            !values.permissions[writeKey],
-                          );
-                        }}
-                      />
-                      <label
-                        htmlFor={`perm-${group.write}`}
-                        className="text-sm text-zinc-300"
-                      >
-                        write
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="api-key-expiration"
-            className="mb-1 block text-sm font-medium text-zinc-300"
-          >
-            {t("apiKeys.expiration")}
-          </label>
-          <Dropdown
-            inputId="api-key-expiration"
-            pt={selectSmall}
-            value={values.expiresInDays}
-            options={expiresOptions}
-            onChange={(e) => setFieldValue("expiresInDays", e.value)}
-            className="w-full"
-          />
-        </div>
-
-        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-          <div className="mb-3 flex items-center gap-2">
+          )}
+        </FormField>
+        <div className="space-y-4 rounded-lg border border-ui-border p-4">
+          <label className="flex items-center gap-3">
             <Checkbox
-              inputId="rateLimitEnabled"
               checked={values.rateLimitEnabled}
-              onChange={() =>
-                setFieldValue("rateLimitEnabled", !values.rateLimitEnabled)
+              disabled={isSubmitting}
+              onCheckedChange={(checked) =>
+                void setFieldValue("rateLimitEnabled", checked === true)
               }
             />
-            <label
-              htmlFor="rateLimitEnabled"
-              className="text-sm font-medium text-zinc-300"
-            >
-              {t("apiKeys.rateLimit")}
-            </label>
-          </div>
-
+            {t("apiKeys.rateLimit")}
+          </label>
           {values.rateLimitEnabled && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label
-                  htmlFor="api-key-rate-limit-max"
-                  className="mb-1 block text-xs text-zinc-400"
-                >
-                  {t("apiKeys.maxRequests")}
-                </label>
-                <Field name="rateLimitMax">
-                  {({ field }: { field: FieldInputProps<string> }) => (
-                    <InputText
-                      id="api-key-rate-limit-max"
-                      size="small"
-                      {...field}
-                      className="w-full"
-                    />
-                  )}
-                </Field>
-              </div>
-              <div>
-                <label
-                  htmlFor="api-key-rate-limit-window"
-                  className="mb-1 block text-xs text-zinc-400"
-                >
-                  {t("apiKeys.timeWindow")}
-                </label>
-                <Dropdown
-                  inputId="api-key-rate-limit-window"
-                  pt={selectSmall}
-                  value={values.rateLimitTimeWindow}
-                  options={timeWindowOptions}
-                  onChange={(e) =>
-                    setFieldValue("rateLimitTimeWindow", e.value)
-                  }
-                  className="w-full"
-                />
-              </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                label={t("apiKeys.maxRequests")}
+                error={fieldError(
+                  "rateLimitMax",
+                  "apiKeys.validation.requestsInvalid",
+                )}
+                required
+              >
+                {(control) => (
+                  <Input
+                    {...control}
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={values.rateLimitMax ?? ""}
+                    disabled={isSubmitting}
+                    onChange={(event) =>
+                      void setFieldValue(
+                        "rateLimitMax",
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
+                      )
+                    }
+                    name="rateLimitMax"
+                  />
+                )}
+              </FormField>
+              <FormField
+                label={t("apiKeys.timeWindow")}
+                error={fieldError(
+                  "rateLimitTimeWindow",
+                  "apiKeys.validation.windowInvalid",
+                )}
+                required
+              >
+                {(control) => (
+                  <Select
+                    {...control}
+                    disabled={isSubmitting}
+                    value={
+                      values.rateLimitTimeWindow === null
+                        ? ""
+                        : String(values.rateLimitTimeWindow)
+                    }
+                    onValueChange={(value) =>
+                      void setFieldValue("rateLimitTimeWindow", Number(value))
+                    }
+                    options={TIME_WINDOW_OPTIONS.map((option) => ({
+                      label: t(option.translationKey),
+                      value: String(option.value),
+                    }))}
+                  />
+                )}
+              </FormField>
             </div>
           )}
         </div>
-
         {error && <FormMessage variant="error">{error}</FormMessage>}
-
-        <div className="mt-2 flex justify-end gap-2">
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={onHide} disabled={isSubmitting}>
+            {t("common.cancel")}
+          </Button>
           <Button
-            size="small"
-            label={t("common.cancel")}
-            severity="danger"
-            outlined
-            type="button"
-            onClick={onHide}
-          />
-          <Button
-            size="small"
-            className="bg-(image:--brand-gradient)"
-            label={t("apiKeys.create")}
-            loading={isSubmitting}
             type="submit"
-          />
+            loading={isSubmitting}
+            disabled={
+              values.limitToOrganizations &&
+              (organizationsLoading || organizationsError)
+            }
+          >
+            {t("apiKeys.create")}
+          </Button>
         </div>
       </Form>
     </Dialog>

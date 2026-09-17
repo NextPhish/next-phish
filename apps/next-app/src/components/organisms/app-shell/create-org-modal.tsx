@@ -1,56 +1,67 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog } from "primereact/dialog";
+import { Formik } from "formik";
+import { Dialog, type DialogProps } from "@next-phish/ui";
+import { createOrganizationSchema } from "@next-phish/shared";
 import { CreateOrgForm } from "./create-org-form";
 import { useMyOrganizations } from "@/src/hooks/use-my-organizations";
+import { useFormStatus } from "@/src/hooks/use-form-status";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { useTranslation } from "@/src/lib/i18n";
 
 interface CreateOrgModalProps {
   visible: boolean;
   onHide: () => void;
+  onCloseAutoFocus?: DialogProps["onCloseAutoFocus"];
 }
 
-export function CreateOrgModal({ visible, onHide }: CreateOrgModalProps) {
+export function CreateOrgModal({
+  visible,
+  onHide,
+  onCloseAutoFocus,
+}: CreateOrgModalProps) {
   const t = useTranslation();
   const { create, setActive } = useMyOrganizations();
-  const [error, setError] = useState("");
+  const { status, setError, reset } = useFormStatus();
 
   async function handleSubmit(values: { name: string; slug: string }) {
-    setError("");
-
-    create.mutate(values, {
-      onSuccess: async (org) => {
-        if (org && "id" in org) {
-          await setActive(org.id as string);
-        }
-        onHide();
-      },
-      onError: (err) => {
-        setError(err.message || t("organizations.createError"));
-      },
-    });
+    reset();
+    try {
+      const org = await create.mutateAsync(values);
+      if (org && "id" in org) await setActive(org.id as string);
+      onHide();
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : t("organizations.createError"),
+      );
+    }
   }
-
+  function close() {
+    if (create.isPending) return;
+    reset();
+    onHide();
+  }
   return (
     <Dialog
-      visible={visible}
-      onHide={onHide}
-      header={t("organizations.createTitle")}
-      className="w-full max-w-md"
-      draggable={false}
-      pt={{
-        header: { className: "bg-brand-dark border-b border-white/10 p-4" },
-        content: { className: "bg-brand-dark" },
-        footer: { className: "bg-brand-dark border-t border-white/10" },
+      onCloseAutoFocus={onCloseAutoFocus}
+      open={visible}
+      onOpenChange={(open) => {
+        if (!open) close();
       }}
+      title={t("organizations.createTitle")}
+      description={t("onboarding.subtitle")}
+      closeLabel={t("common.cancel")}
     >
-      <CreateOrgForm
-        error={error}
-        isSubmitting={create.isPending}
+      <Formik
+        initialValues={{ name: "", slug: "" }}
+        validate={toFormikValidation(createOrganizationSchema)}
         onSubmit={handleSubmit}
-        onCancel={onHide}
-      />
+      >
+        <CreateOrgForm
+          error={status.type === "error" ? status.message : ""}
+          onCancel={close}
+        />
+      </Formik>
     </Dialog>
   );
 }

@@ -1,4 +1,4 @@
-import type { Locale } from "@/src/lib/i18n/config";
+import type { Locale } from "./i18n/config";
 
 export const SUPPORTED_LANGUAGES = [
   { label: "English", value: "en" as Locale },

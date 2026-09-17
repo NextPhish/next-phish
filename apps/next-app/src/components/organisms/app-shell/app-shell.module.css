@@ -1,0 +1,152 @@
+.v1Boundary,
+.legacyBoundary {
+  min-height: 100dvh;
+}
+.legacyBoundary :global(.np-content) {
+  max-width: none;
+  min-height: calc(100dvh - 76px);
+  padding: 0;
+  background: #020b1d;
+  color: #ededed;
+  color-scheme: dark;
+}
+.breadcrumbSeparator {
+  margin: 0 8px;
+}
+.currentBreadcrumb {
+  color: var(--np-ink);
+  font-weight: 600;
+}
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--np-muted);
+}
+.languageSelect {
+  width: auto;
+  min-height: 34px;
+  border-color: var(--np-border);
+  background: var(--np-surface);
+  padding: 5px 28px 5px 9px;
+  font-size: 12px;
+}
+.settingsLink {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+}
+.settingsLink:hover {
+  background: var(--np-tint);
+  color: var(--np-primary);
+}
+
+/* Let the full organization trigger own its surface, including in the mobile portal. */
+.organizationTrigger,
+.profileTrigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #eff1f6;
+  background: transparent;
+  text-align: left;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.organizationTrigger {
+  background: #202739;
+  border-color: #343c50;
+}
+.organizationTrigger:hover,
+.organizationTrigger[data-state="open"],
+.profileTrigger:hover,
+.profileTrigger[data-state="open"] {
+  background: #2a3247;
+  border-color: #434d66;
+}
+.organizationIcon,
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #ffffff09;
+  color: #b8c1d5;
+}
+.avatar {
+  border-radius: 50%;
+  background: #dcd8ff;
+  background-position: center;
+  background-size: cover;
+  color: #4e40be;
+  font-size: 12px;
+  font-weight: 650;
+}
+.triggerIdentity {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+.triggerIdentity strong,
+.triggerIdentity > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.triggerIdentity strong {
+  color: #f0f2f8;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 19px;
+}
+.triggerIdentity > span {
+  color: #9da9c1;
+  font-size: 11px;
+  line-height: 16px;
+}
+.triggerChevron {
+  flex: none;
+  color: #9da9c1;
+}
+.organizationSkeleton {
+  height: 52px;
+  background: #ffffff12;
+}
+.menuOrganizationName {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.menuUserName {
+  display: block;
+  color: var(--np-ink);
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+@media (max-width: 600px) {
+  .breadcrumbRoot,
+  .breadcrumbSeparator {
+    display: none;
+  }
+  .legacyBoundary :global(.np-content) {
+    min-height: calc(100dvh - 65px);
+  }
+  .headerActions > svg {
+    display: none;
+  }
+  .languageSelect {
+    max-width: 112px;
+  }
+}

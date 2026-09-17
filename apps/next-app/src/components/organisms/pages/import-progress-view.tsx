@@ -1,7 +1,5 @@
 "use client";
 
-import { ProgressBar } from "primereact/progressbar";
-
 interface ImportProgressViewProps {
   progress: {
     status: string;
@@ -15,19 +13,19 @@ interface ImportProgressViewProps {
 export function ImportProgressView({ progress, t }: ImportProgressViewProps) {
   return (
     <div className="space-y-4 py-4">
-      <p className="text-sm text-zinc-300">{t("pages.importProgress")}</p>
-
-      <ProgressBar
-        mode="indeterminate"
-        className="h-2"
-        pt={{
-          container: { className: "bg-[#1C2945] rounded-full" },
-          value: { className: "bg-(image:--brand-gradient)" },
-        }}
-      />
+      <p className="text-sm text-[var(--np-ink)]">
+        {t("pages.importProgress")}
+      </p>
+      <div
+        className="h-2 overflow-hidden rounded-full bg-[var(--np-border)]"
+        role="progressbar"
+        aria-label={t("pages.importProgress")}
+      >
+        <div className="h-full w-1/2 animate-pulse rounded-full bg-[var(--np-primary)]" />
+      </div>
 
       {progress && (
-        <div className="space-y-2 text-sm text-zinc-400">
+        <div className="space-y-2 text-sm text-[var(--np-muted)]">
           <p>
             {progress.discovered > 0
               ? t("pages.importDownloadingAssets")
@@ -41,7 +39,12 @@ export function ImportProgressView({ progress, t }: ImportProgressViewProps) {
               {progress.failed > 0 && (
                 <span className="text-amber-400">
                   {" "}
-                  ({progress.failed} failed)
+                  (
+                  {t("pages.failedAssets").replace(
+                    "{count}",
+                    String(progress.failed),
+                  )}
+                  )
                 </span>
               )}
             </p>

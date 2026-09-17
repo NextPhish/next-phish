@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox } from "primereact/checkbox";
+import { Checkbox } from "@next-phish/ui";
 
 interface AssetsToggleProps {
   checked: boolean;
@@ -10,20 +10,20 @@ interface AssetsToggleProps {
 
 export function AssetsToggle({ checked, t, onChange }: AssetsToggleProps) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-[#1C2945] bg-brand-dark p-3">
+    <div className="flex items-start gap-3 rounded-xl border border-[var(--np-border)] bg-[var(--np-surface-subtle)] p-3">
       <Checkbox
-        inputId="includeAssets"
+        id="includeAssets"
         checked={checked}
-        onChange={(e) => onChange(e.checked ?? false)}
+        onCheckedChange={(value) => onChange(value === true)}
       />
       <div>
         <label
           htmlFor="includeAssets"
-          className="block text-sm font-medium text-zinc-100 cursor-pointer"
+          className="block cursor-pointer text-sm font-medium text-[var(--np-ink)]"
         >
           {t("pages.includeAssets")}
         </label>
-        <p className="mt-1 text-xs text-zinc-400">
+        <p className="mt-1 text-xs text-[var(--np-muted)]">
           {t("pages.includeAssetsHint")}
         </p>
       </div>

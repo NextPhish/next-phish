@@ -10,4 +10,5 @@ echo "Setting up environment..."
 bash "$ROOT_DIR/scripts/symlink-env.sh"
 
 echo "Starting dev server..."
-exec pnpm dev
+cd "$ROOT_DIR"
+exec node --env-file="$ROOT_DIR/.env" "$ROOT_DIR/node_modules/turbo/bin/turbo" dev --env-mode=loose

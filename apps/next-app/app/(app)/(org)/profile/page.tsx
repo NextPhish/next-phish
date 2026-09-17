@@ -1,3 +1,4 @@
+import { PageHeader } from "@next-phish/ui";
 import { UserSettingsContainer } from "@/src/components/organisms/settings";
 import { getRequiredSession } from "@/src/server/get-required-session";
 import { getTranslator } from "@/src/lib/i18n/server";
@@ -11,10 +12,11 @@ export default async function ProfilePage() {
   ]);
 
   return (
-    <div className="px-6 py-8">
-      <h1 className="mb-6 text-2xl font-semibold text-white">
-        {t("settings.accountTitle")}
-      </h1>
+    <div>
+      <PageHeader
+        title={t("settings.accountTitle")}
+        description={t("settings.accountDescription")}
+      />
       <UserSettingsContainer user={session.user} />
     </div>
   );

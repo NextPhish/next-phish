@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "start": "turbo start",
+    "start": "pnpm --parallel --filter @next-phish/next-app --filter @next-phish/worker --filter @next-phish/static-server start",
     "lint": "turbo lint",
     "test": "turbo test",
     "typecheck": "turbo typecheck",
@@ -20,7 +20,10 @@
     "db:seed": "pnpm --filter @next-phish/database exec prisma db seed",
     "dev:up": "bash scripts/dev.sh",
     "setup": "bash scripts/symlink-env.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "pnpm --filter @next-phish/ui storybook",
+    "storybook:build": "pnpm --filter @next-phish/ui build",
+    "build:production": "pnpm db:generate && pnpm --filter @next-phish/backend emails:check && pnpm --filter @next-phish/worker build && pnpm --filter @next-phish/static-server build && pnpm --filter @next-phish/next-app build"
   },
   "packageManager": "pnpm@10.33.4",
   "devDependencies": {
@@ -28,6 +31,7 @@
     "@commitlint/config-conventional": "^21",
     "@eslint/js": "^9",
     "@hkdobrev/run-if-changed": "^0.6",
+    "esbuild": "^0.25.12",
     "eslint": "^9",
     "globals": "^17.6.0",
     "husky": "^9",

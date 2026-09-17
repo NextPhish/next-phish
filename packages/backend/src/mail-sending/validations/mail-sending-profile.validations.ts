@@ -26,6 +26,9 @@ const sortSchema = z.object({
 
 export const GetMailSendingProfilesSchema = z.object({
   search: z.string().optional(),
+  filters: z
+    .object({ providerType: mailProviderTypeSchema.optional() })
+    .optional(),
   limit: z.number().min(1).max(100).default(50),
   offset: z.number().min(0).default(0),
   sort: z.array(sortSchema).optional(),

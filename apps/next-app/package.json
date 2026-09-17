@@ -7,14 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:auth": "node --test tests/two-factor-enrollment.test.mjs"
   },
   "dependencies": {
     "@better-auth/api-key": "^1.6.22",
+    "@dnd-kit/core": "^6.3.1",
     "@grapesjs/react": "^2.0.0",
     "@next-phish/backend": "workspace:*",
     "@next-phish/database": "workspace:*",
     "@next-phish/shared": "workspace:*",
+    "@next-phish/ui": "workspace:*",
     "@silexlabs/grapesjs-fonts": "^1.2.2",
     "@tanstack/react-query": "^5.101.0",
     "@trpc/react-query": "^11.13.0",
@@ -31,6 +34,7 @@
     "grapesjs-style-gradient": "^3.0.3",
     "html-to-image": "^1.11.13",
     "ioredis": "5.10.1",
+    "lucide-react": "^1.45.0",
     "mcp-handler": "^1.1.0",
     "next": "^16.2.9",
     "primeicons": "^7.0.0",

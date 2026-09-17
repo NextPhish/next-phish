@@ -8,6 +8,7 @@ export const sendingProfileFormSchema = z.object({
   replyToEmail: z
     .string()
     .email()
+    .or(z.literal(""))
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
   isDefault: z.boolean(),

@@ -1,0 +1,19 @@
+.content,
+.form {
+  display: grid;
+  gap: 24px;
+}
+.slugStatus {
+  margin-top: -12px;
+  font-weight: 600;
+}
+
+.actions {
+  display: grid;
+}
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}

@@ -40,7 +40,7 @@ export function LoginContainer({
           errorCallbackURL: "/login",
         });
         if (err) {
-          setError(err.message || err.code || t("login.somethingWentWrong"));
+          setError(t("login.somethingWentWrong"));
           return;
         }
         setSuccess(t("login.magicLinkSent"));
@@ -50,7 +50,7 @@ export function LoginContainer({
           password: values.password,
         });
         if (err) {
-          setError(err.message || err.code || t("login.invalidCredentials"));
+          setError(t("login.invalidCredentials"));
           return;
         }
         router.push("/");
@@ -73,10 +73,13 @@ export function LoginContainer({
       )}
       onSubmit={handleSubmit}
     >
-      {({ isSubmitting }) => (
+      {({ isSubmitting, resetForm, values }) => (
         <LoginPresentation
           useMagicLink={useMagicLink}
-          onToggleMagicLink={toggleMagicLink}
+          onToggleMagicLink={() => {
+            resetForm({ values: { email: values.email, password: "" } });
+            toggleMagicLink();
+          }}
           error={status.type === "error" ? status.message : ""}
           success={status.type === "success" ? status.message : ""}
           authError={authError}

@@ -1,165 +1,133 @@
 "use client";
-
-import { ErrorMessage, useFormikContext } from "formik";
-import { Calendar } from "primereact/calendar";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { InputSwitch } from "primereact/inputswitch";
+import { useFormikContext } from "formik";
 import type { CampaignFormValues } from "@next-phish/shared";
-import { FormMessage } from "@/src/components/atoms/form-message";
 import {
-  inputNumberSmall,
-  selectSmall,
-} from "@/src/components/ui/theme-constants";
-
+  Autocomplete,
+  Checkbox,
+  FormField,
+  FormMessage,
+  Input,
+  Select,
+} from "@next-phish/ui";
+import styles from "./campaign-form.module.css";
+import { useTranslation } from "@/src/lib/i18n/client";
 interface ScheduleTabProps {
   recipientCount: number;
   hasExistingSchedule: boolean;
 }
-
-function getTimezones(): string[] {
+const timezones = (() => {
   try {
     return Intl.supportedValuesOf("timeZone");
   } catch {
     return ["UTC"];
   }
-}
-
-const timezoneOptions = getTimezones().map((timeZone) => ({
-  label: timeZone,
-  value: timeZone,
-}));
-
-function toLocalFormValue(date: Date): string {
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
-  return local.toISOString().slice(0, 16);
-}
-
+})();
 export function ScheduleTab({
   recipientCount,
   hasExistingSchedule,
 }: ScheduleTabProps) {
-  const { values, setFieldValue } = useFormikContext<CampaignFormValues>();
-
+  const t = useTranslation();
+  const { values, errors, touched, setFieldValue } =
+    useFormikContext<CampaignFormValues>();
+  const error = (field: keyof CampaignFormValues) =>
+    touched[field] && typeof errors[field] === "string"
+      ? errors[field]
+      : undefined;
   return (
-    <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)]">
-      <div className="flex items-start gap-3">
-        <InputSwitch
-          inputId="campaign-schedule-enabled"
-          aria-label="Enable campaign schedule"
+    <section
+      id="campaign-field-scheduleName"
+      tabIndex={-1}
+      className={styles.card}
+    >
+      <label
+        id="campaign-field-scheduleEnabled"
+        tabIndex={-1}
+        className={styles.check}
+      >
+        <Checkbox
           checked={values.scheduleEnabled}
           disabled={hasExistingSchedule}
-          onChange={(event) => {
-            void setFieldValue("scheduleEnabled", event.value);
-            if (event.value) void setFieldValue("status", "PUBLISHED");
+          onCheckedChange={(checked) => {
+            const enabled = checked === true;
+            void setFieldValue("scheduleEnabled", enabled);
+            if (enabled) void setFieldValue("status", "PUBLISHED");
           }}
         />
-        <label htmlFor="campaign-schedule-enabled" className="cursor-pointer">
-          <span className="block text-base font-medium text-white">
-            Schedule campaign
-          </span>
-          <span className="mt-0.5 block text-sm text-zinc-400">
-            Create a one-time schedule when this concrete campaign is saved.
-          </span>
-        </label>
-      </div>
-
-      {hasExistingSchedule ? (
-        <p className="mt-3 text-xs text-zinc-500">
-          This campaign already has a schedule. Edit its settings below or
-          cancel it from the Schedule area.
-        </p>
-      ) : null}
-
+        <span>
+          <strong>{t("campaignsUi.scheduleCampaign")}</strong>
+          <small>{t("campaignsUi.scheduleDescription")}</small>
+        </span>
+      </label>
+      {hasExistingSchedule && <p>{t("campaignsUi.existingSchedule")}</p>}
       {values.scheduleEnabled ? (
-        <div className="mt-6 max-w-4xl space-y-5">
-          {recipientCount > 600 ? (
-            <FormMessage variant="success">
-              This group contains {recipientCount} recipients. Drip at 60 emails
-              per minute is recommended, but remains configurable.
-            </FormMessage>
-          ) : null}
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <label
-                htmlFor="campaign-schedule-start"
-                className="block text-sm font-medium text-zinc-300"
-              >
-                Start date and time
-              </label>
-              <Calendar
-                inputId="campaign-schedule-start"
-                value={
-                  values.scheduleStartsAt
-                    ? new Date(values.scheduleStartsAt)
-                    : null
-                }
-                onChange={(event) => {
-                  if (event.value instanceof Date)
-                    void setFieldValue(
-                      "scheduleStartsAt",
-                      toLocalFormValue(event.value),
-                    );
-                }}
-                dateFormat="mm/dd/yy"
-                showTime
-                hourFormat="12"
-                showIcon
-                className="w-full"
-              />
-              <ErrorMessage
-                name="scheduleStartsAt"
-                component="p"
-                className="text-sm text-red-400"
-              />
+        <div className={styles.grid}>
+          {recipientCount > 600 && (
+            <div className={styles.wide}>
+              <FormMessage variant="success">
+                {t("campaignsUi.largeAudience", { count: recipientCount })}
+              </FormMessage>
             </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="campaign-schedule-timezone"
-                className="block text-sm font-medium text-zinc-300"
-              >
-                Schedule timezone
-              </label>
-              <Dropdown
-                inputId="campaign-schedule-timezone"
-                pt={selectSmall}
-                value={values.scheduleTargetTimezone}
-                options={timezoneOptions}
-                filter
-                filterPlaceholder="Search timezones"
-                checkmark
+          )}
+          <FormField
+            id="campaign-field-scheduleStartsAt"
+            label={t("campaignsUi.startDateTime")}
+            required
+            error={error("scheduleStartsAt")}
+          >
+            {(field) => (
+              <Input
+                {...field}
+                type="datetime-local"
+                value={values.scheduleStartsAt}
                 onChange={(event) =>
-                  void setFieldValue("scheduleTargetTimezone", event.value)
+                  void setFieldValue("scheduleStartsAt", event.target.value)
                 }
-                className="w-full"
               />
-              <ErrorMessage
-                name="scheduleTargetTimezone"
-                component="p"
-                className="text-sm text-red-400"
+            )}
+          </FormField>
+          <FormField
+            id="campaign-field-scheduleTargetTimezone"
+            label={t("campaignsUi.scheduleTimezone")}
+            required
+            error={error("scheduleTargetTimezone")}
+          >
+            {(field) => (
+              <Autocomplete
+                {...field}
+                value={values.scheduleTargetTimezone}
+                options={timezones.map((zone) => ({
+                  value: zone,
+                  label: zone,
+                }))}
+                onValueChange={(zone) =>
+                  void setFieldValue("scheduleTargetTimezone", zone)
+                }
+                placeholder={t("campaignsUi.searchTimezones")}
               />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="campaign-delivery-mode"
-                className="block text-sm font-medium text-zinc-300"
-              >
-                Delivery mode
-              </label>
-              <Dropdown
-                inputId="campaign-delivery-mode"
-                pt={selectSmall}
+            )}
+          </FormField>
+          <FormField
+            id="campaign-field-scheduleDeliveryMode"
+            label={t("campaignsUi.deliveryMode")}
+            required
+            error={error("scheduleDeliveryMode")}
+          >
+            {(field) => (
+              <Select
+                {...field}
                 value={values.scheduleDeliveryMode}
                 options={[
-                  { label: "Blast", value: "BLAST" },
-                  { label: "Drip", value: "DRIP" },
-                  { label: "Batch", value: "BATCH" },
+                  {
+                    value: "BLAST",
+                    label: t("campaignsUi.deliveryModes.BLAST"),
+                  },
+                  { value: "DRIP", label: t("campaignsUi.deliveryModes.DRIP") },
+                  {
+                    value: "BATCH",
+                    label: t("campaignsUi.deliveryModes.BATCH"),
+                  },
                 ]}
-                onChange={(event) => {
-                  const mode = event.value;
+                onValueChange={(mode) => {
                   void setFieldValue("scheduleDeliveryMode", mode);
                   void setFieldValue(
                     "scheduleDripEmailsPerMinute",
@@ -178,84 +146,78 @@ export function ScheduleTab({
                       : null,
                   );
                 }}
-                className="w-full"
               />
-            </div>
-
-            {values.scheduleDeliveryMode === "DRIP" ? (
-              <div className="space-y-2">
-                <label
-                  htmlFor="campaign-drip-rate"
-                  className="block text-sm font-medium text-zinc-300"
-                >
-                  Emails per minute
-                </label>
-                <InputNumber
-                  inputId="campaign-drip-rate"
-                  value={values.scheduleDripEmailsPerMinute}
+            )}
+          </FormField>
+          {values.scheduleDeliveryMode === "DRIP" && (
+            <FormField
+              id="campaign-field-scheduleDripEmailsPerMinute"
+              label={t("campaignsUi.emailsPerMinute")}
+              error={error("scheduleDripEmailsPerMinute")}
+            >
+              {(field) => (
+                <Input
+                  {...field}
+                  type="number"
                   min={1}
-                  onValueChange={(event) =>
+                  value={values.scheduleDripEmailsPerMinute ?? ""}
+                  onChange={(event) =>
                     void setFieldValue(
                       "scheduleDripEmailsPerMinute",
-                      event.value ?? null,
+                      event.target.value ? Number(event.target.value) : null,
                     )
                   }
-                  pt={inputNumberSmall}
                 />
-              </div>
-            ) : null}
-
-            {values.scheduleDeliveryMode === "BATCH" ? (
-              <>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="campaign-batch-size"
-                    className="block text-sm font-medium text-zinc-300"
-                  >
-                    Batch size
-                  </label>
-                  <InputNumber
-                    inputId="campaign-batch-size"
-                    value={values.scheduleBatchSize}
+              )}
+            </FormField>
+          )}
+          {values.scheduleDeliveryMode === "BATCH" && (
+            <>
+              <FormField
+                id="campaign-field-scheduleBatchSize"
+                label={t("campaignsUi.batchSize")}
+                error={error("scheduleBatchSize")}
+              >
+                {(field) => (
+                  <Input
+                    {...field}
+                    type="number"
                     min={1}
-                    onValueChange={(event) =>
+                    value={values.scheduleBatchSize ?? ""}
+                    onChange={(event) =>
                       void setFieldValue(
                         "scheduleBatchSize",
-                        event.value ?? null,
+                        event.target.value ? Number(event.target.value) : null,
                       )
                     }
-                    pt={inputNumberSmall}
                   />
-                </div>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="campaign-batch-interval"
-                    className="block text-sm font-medium text-zinc-300"
-                  >
-                    Interval in minutes
-                  </label>
-                  <InputNumber
-                    inputId="campaign-batch-interval"
-                    value={values.scheduleBatchIntervalMinutes}
+                )}
+              </FormField>
+              <FormField
+                id="campaign-field-scheduleBatchIntervalMinutes"
+                label={t("campaignsUi.batchInterval")}
+                error={error("scheduleBatchIntervalMinutes")}
+              >
+                {(field) => (
+                  <Input
+                    {...field}
+                    type="number"
                     min={1}
-                    onValueChange={(event) =>
+                    value={values.scheduleBatchIntervalMinutes ?? ""}
+                    onChange={(event) =>
                       void setFieldValue(
                         "scheduleBatchIntervalMinutes",
-                        event.value ?? null,
+                        event.target.value ? Number(event.target.value) : null,
                       )
                     }
-                    pt={inputNumberSmall}
                   />
-                </div>
-              </>
-            ) : null}
-          </div>
+                )}
+              </FormField>
+            </>
+          )}
         </div>
       ) : (
-        <p className="mt-5 max-w-4xl rounded-xl border border-dashed border-white/10 px-5 py-8 text-center text-sm text-zinc-400">
-          The campaign will be saved without a schedule. It can be scheduled
-          later from its detail page.
-        </p>
+        <p>{t("campaignsUi.withoutSchedule")}</p>
       )}
     </section>
   );

@@ -1,94 +1,109 @@
 "use client";
 
-import { ErrorMessage, Form, useFormikContext } from "formik";
-import { Button } from "primereact/button";
-import { ColorPicker } from "primereact/colorpicker";
-import { Checkbox } from "primereact/checkbox";
+import { Field, Form, useFormikContext, type FieldInputProps } from "formik";
+import {
+  Button,
+  Checkbox,
+  FormField,
+  FormMessage,
+  Input,
+} from "@next-phish/ui";
 import type { TaskStatusFormValues } from "@next-phish/shared";
 import { useTranslation } from "@/src/lib/i18n/client";
-import { FormField } from "@/src/components/molecules/form-field";
+import styles from "./task-forms.module.css";
 
 export function StatusFormPresentation({
   onCancel,
   submitLabel,
+  error,
 }: {
   onCancel: () => void;
   submitLabel: string;
+  error?: string;
 }) {
-  const { isSubmitting, values, setFieldValue, setFieldTouched } =
-    useFormikContext<TaskStatusFormValues>();
+  const {
+    errors,
+    isSubmitting,
+    setFieldTouched,
+    setFieldValue,
+    touched,
+    values,
+  } = useFormikContext<TaskStatusFormValues>();
   const t = useTranslation();
+
   return (
-    <Form className="space-y-4">
-      <FormField name="name" label={t("tasks.name")} />
-      <div className="rounded-lg border border-[#1C2945] bg-brand-navy p-3">
-        <div className="flex items-center gap-3">
-          <Checkbox
-            inputId="status-marks-done"
-            name="marksTaskDone"
-            checked={values.marksTaskDone}
-            onChange={(event) =>
-              setFieldValue("marksTaskDone", Boolean(event.checked))
-            }
-          />
-          <label
-            htmlFor="status-marks-done"
-            className="cursor-pointer text-sm font-medium text-white"
-          >
-            {t("tasks.marksDone")}
-          </label>
+    <Form
+      noValidate
+      className={styles.form}
+      aria-busy={isSubmitting || undefined}
+    >
+      <FormField
+        id="status-name"
+        label={t("tasks.name")}
+        error={touched.name ? errors.name : undefined}
+        required
+      >
+        {(control) => (
+          <Field name="name">
+            {({ field }: { field: FieldInputProps<string> }) => (
+              <Input
+                {...control}
+                {...field}
+                disabled={isSubmitting}
+                autoFocus
+              />
+            )}
+          </Field>
+        )}
+      </FormField>
+
+      <div className={styles.checkRow}>
+        <Checkbox
+          id="status-marks-done"
+          name="marksTaskDone"
+          checked={values.marksTaskDone}
+          onCheckedChange={(checked) =>
+            void setFieldValue("marksTaskDone", checked === true)
+          }
+          disabled={isSubmitting}
+        />
+        <div>
+          <label htmlFor="status-marks-done">{t("tasks.marksDone")}</label>
+          <p>{t("tasks.marksDoneHint")}</p>
         </div>
-        <p className="ml-8 mt-1 text-xs text-zinc-500">
-          {t("tasks.marksDoneHint")}
-        </p>
       </div>
-      <div>
-        <label htmlFor="status-color" className="block text-sm text-zinc-300">
-          {t("tasks.color")}
-        </label>
-        <div className="mt-1 flex h-11 items-center gap-3 rounded-lg border border-[#1C2945] bg-brand-navy px-3">
-          <ColorPicker
-            inputId="status-color"
-            name="colorToken"
-            format="hex"
-            value={values.colorToken.replace("#", "")}
-            onChange={(event) =>
-              setFieldValue("colorToken", `#${String(event.value)}`)
-            }
-            onBlur={() => setFieldTouched("colorToken", true)}
-            inputClassName="h-7 w-10 cursor-pointer rounded border border-[#344565]"
-            panelClassName="task-color-picker-panel"
-            pt={{
-              panel: { className: "task-color-picker-panel" },
-            }}
-          />
-          <span className="font-mono text-sm uppercase text-zinc-300">
-            {values.colorToken}
-          </span>
-        </div>
-        <ErrorMessage
-          name="colorToken"
-          component="p"
-          className="mt-1 text-xs text-red-400"
-        />
-      </div>
-      <p className="text-xs text-zinc-500">{t("tasks.statusPermission")}</p>
-      <div className="flex justify-end gap-2">
-        <Button
-          type="button"
-          label={t("tasks.cancel")}
-          severity="secondary"
-          size="small"
-          className="h-9 px-3 text-sm"
-          onClick={onCancel}
-        />
-        <Button
-          type="submit"
-          label={submitLabel}
-          size="small"
-          className="h-9 px-3 text-sm"
-          loading={isSubmitting}
-        />
+
+      <FormField
+        id="status-color"
+        label={t("tasks.color")}
+        error={touched.colorToken ? errors.colorToken : undefined}
+        required
+      >
+        {(control) => (
+          <div className={styles.colorField}>
+            <Input
+              {...control}
+              name="colorToken"
+              type="color"
+              value={values.colorToken}
+              onChange={(event) =>
+                void setFieldValue("colorToken", event.currentTarget.value)
+              }
+              onBlur={() => void setFieldTouched("colorToken", true)}
+              disabled={isSubmitting}
+            />
+            <span>{values.colorToken}</span>
+          </div>
+        )}
+      </FormField>
+      {error && <FormMessage variant="error">{error}</FormMessage>}
+      <div className={styles.actions}>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          {t("tasks.cancel")}
+        </Button>
+        <Button type="submit" loading={isSubmitting}>
+          {submitLabel}
+        </Button>
       </div>
     </Form>
   );

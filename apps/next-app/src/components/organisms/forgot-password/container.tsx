@@ -21,18 +21,18 @@ export function ForgotPasswordContainer() {
   async function handleSubmit(values: ForgotPasswordValues) {
     reset();
 
-    const { error: err } = await authClient.emailOtp.requestPasswordReset({
-      email: values.email,
-    });
-
-    if (err) {
-      setError(
-        err.message || err.code || t("forgotPassword.somethingWentWrong"),
-      );
-      return;
+    try {
+      const { error } = await authClient.emailOtp.requestPasswordReset({
+        email: values.email,
+      });
+      if (error) {
+        setError(t("forgotPassword.somethingWentWrong"));
+        return;
+      }
+      router.push(`/reset-password?email=${encodeURIComponent(values.email)}`);
+    } catch {
+      setError(t("forgotPassword.somethingWentWrong"));
     }
-
-    router.push(`/reset-password?email=${encodeURIComponent(values.email)}`);
   }
 
   return (
@@ -41,13 +41,9 @@ export function ForgotPasswordContainer() {
       validate={toFormikValidation(forgotPasswordSchema)}
       onSubmit={handleSubmit}
     >
-      {({ isSubmitting }) => (
-        <ForgotPasswordPresentation
-          error={status.type === "error" ? status.message : ""}
-          success={status.type === "success" ? status.message : ""}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      <ForgotPasswordPresentation
+        error={status.type === "error" ? status.message : ""}
+      />
     </Formik>
   );
 }

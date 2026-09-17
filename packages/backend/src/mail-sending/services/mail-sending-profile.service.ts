@@ -48,7 +48,16 @@ export class MailSendingProfileService {
       const existing = await this.repo.findById(id, organizationId);
       if (!existing) return null;
       provider = this.registry.get(existing.providerType);
-      const validConfig = await provider.validateConfig(data.providerConfig);
+      const mergedConfig = { ...data.providerConfig };
+      const decrypted = this.cache.decryptSensitiveFields(
+        existing.providerConfig,
+        provider,
+      );
+      for (const field of provider.sensitiveFields) {
+        if (mergedConfig[field] === "[REDACTED]")
+          mergedConfig[field] = decrypted[field];
+      }
+      const validConfig = await provider.validateConfig(mergedConfig);
       const encrypted = this.cache.encryptSensitiveFields(
         validConfig as Record<string, unknown>,
         provider,

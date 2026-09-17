@@ -180,10 +180,10 @@ export function useImportDialog({
       } else {
         pollJobStatus(result.jobId);
       }
-    } catch (e) {
+    } catch {
       dispatch({
         type: "IMPORT_ERROR",
-        error: e instanceof Error ? e.message : t("pages.importWebsiteError"),
+        error: t("pages.importWebsiteError"),
       });
     }
   }

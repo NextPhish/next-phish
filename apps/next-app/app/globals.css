@@ -1,4 +1,5 @@
-@layer theme, base, utilities;
+@layer theme, base, components, utilities;
+@import "@next-phish/ui/styles.css";
 @import "tailwindcss/theme" layer(theme);
 @import "tailwindcss/preflight" layer(base);
 @source "../node_modules/primereact/**/*.{js,mjs,cjs,jsx,tsx}";

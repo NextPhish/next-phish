@@ -1,8 +1,9 @@
 "use client";
 
 import { Chart } from "primereact/chart";
-import { Skeleton } from "primereact/skeleton";
+import { Skeleton } from "@next-phish/ui";
 import { trpc } from "@/src/lib/trpc";
+import { useTranslation } from "@/src/lib/i18n/client";
 
 const deliveryColors: Record<string, string> = {
   PLANNED: "#64748B",
@@ -20,17 +21,10 @@ const chartOptions = {
   plugins: {
     legend: {
       position: "bottom" as const,
-      labels: { color: "#D4D4D8", usePointStyle: true, padding: 20 },
+      labels: { color: "#626D80", usePointStyle: true, padding: 20 },
     },
   },
 };
-
-function formatLabel(value: string): string {
-  return value
-    .toLowerCase()
-    .replaceAll("_", " ")
-    .replace(/^./, (letter) => letter.toUpperCase());
-}
 
 function MetricCard({
   label,
@@ -47,9 +41,9 @@ function MetricCard({
 }) {
   const percentage = total ? Math.round((value / total) * 100) : 0;
   return (
-    <article className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
+    <article className="rounded-2xl border border-[var(--np-border)] bg-[var(--np-surface)] p-5">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <p className="text-xs font-medium uppercase tracking-wide text-[var(--np-muted)]">
           {label}
         </p>
         <span
@@ -58,34 +52,42 @@ function MetricCard({
           aria-hidden="true"
         />
       </div>
-      <p className="mt-3 text-3xl font-semibold text-white">
+      <p className="mt-3 text-3xl font-semibold text-[var(--np-ink)]">
         {value}
-        <span className="ml-1 text-base font-normal text-zinc-500">
+        <span className="ml-1 text-base font-normal text-[var(--np-muted)]">
           / {total}
         </span>
       </p>
-      <p className="mt-1 text-sm font-medium text-zinc-300">{percentage}%</p>
-      <p className="mt-3 text-xs leading-5 text-zinc-500">{description}</p>
+      <p className="mt-1 text-sm font-medium text-[var(--np-ink)]">
+        {percentage}%
+      </p>
+      <p className="mt-3 text-xs leading-5 text-[var(--np-muted)]">
+        {description}
+      </p>
     </article>
   );
 }
 
 export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
+  const t = useTranslation();
   const summary = trpc.campaign.executionSummary.useQuery({ campaignId });
 
   if (summary.isLoading)
     return (
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {["sent", "opened", "clicked", "submitted", "reported"].map((key) => (
-          <Skeleton key={key} height="11rem" borderRadius="1rem" />
+          <Skeleton
+            key={key}
+            style={{ height: "11rem", borderRadius: "1rem" }}
+          />
         ))}
       </div>
     );
 
   if (!summary.data)
     return (
-      <p className="rounded-2xl border border-white/10 bg-brand-dark p-6 text-sm text-zinc-400">
-        Statistics are not available for this campaign.
+      <p className="rounded-2xl border border-[var(--np-border)] bg-[var(--np-surface)] p-6 text-sm text-[var(--np-muted)]">
+        {t("campaignsUi.statisticsUnavailable")}
       </p>
     );
 
@@ -116,14 +118,20 @@ export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
     ([, count]) => count > 0,
   );
   const chartData = {
-    labels: deliveryEntries.map(([status]) => formatLabel(status)),
+    labels: deliveryEntries.map(([status]) =>
+      t(
+        status in deliveryColors
+          ? `campaignsUi.deliveryStatuses.${status}`
+          : "campaignsUi.unknownDelivery",
+      ),
+    ),
     datasets: [
       {
         data: deliveryEntries.map(([, count]) => count),
         backgroundColor: deliveryEntries.map(
           ([status]) => deliveryColors[status] ?? "#64748B",
         ),
-        borderColor: "#0B1426",
+        borderColor: "#FFFFFF",
         borderWidth: 2,
       },
     ],
@@ -134,57 +142,59 @@ export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
         <div>
           <h2
             id="engagement-summary-heading"
-            className="text-lg font-semibold text-white"
+            className="text-lg font-semibold text-[var(--np-ink)]"
           >
-            Engagement summary
+            {t("campaignsUi.engagementSummary")}
           </h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            Unique recipients reaching each campaign milestone.
+          <p className="mt-1 text-sm text-[var(--np-muted)]">
+            {t("campaignsUi.engagementDescription")}
           </p>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricCard
-            label="Emails sent"
+            label={t("campaignsUi.emailsSent")}
             value={sent}
             total={total}
-            description="Recipients accepted by the configured sending provider."
+            description={t("campaignsUi.sentDescription")}
             color="#15E5D4"
           />
           <MetricCard
-            label="Opened"
+            label={t("campaignsUi.opened")}
             value={opened}
             total={total}
-            description="Recipients who loaded the campaign tracking pixel."
+            description={t("campaignsUi.openedDescription")}
             color="#8B5CF6"
           />
           <MetricCard
-            label="Clicked"
+            label={t("campaignsUi.clicked")}
             value={clicked}
             total={total}
-            description="Recipients who clicked a tracked campaign link."
+            description={t("campaignsUi.clickedDescription")}
             color="#29B8FF"
           />
           <MetricCard
-            label="Submitted"
+            label={t("campaignsUi.submitted")}
             value={submitted}
             total={total}
-            description="Recipients who submitted the campaign landing page."
+            description={t("campaignsUi.submittedDescription")}
             color="#F59E0B"
           />
           <MetricCard
-            label="Reported"
+            label={t("campaignsUi.reported")}
             value={summary.data.reported}
             total={total}
-            description="Recipients who reported the simulation as suspicious."
+            description={t("campaignsUi.reportedDescription")}
             color="#EF4444"
           />
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
-        <h2 className="text-lg font-semibold text-white">Delivery status</h2>
-        <p className="mt-1 text-sm text-zinc-400">
-          Current delivery state across all materialized recipients.
+      <section className="rounded-2xl border border-[var(--np-border)] bg-[var(--np-surface)] p-5">
+        <h2 className="text-lg font-semibold text-[var(--np-ink)]">
+          {t("campaignsUi.deliveryStatus")}
+        </h2>
+        <p className="mt-1 text-sm text-[var(--np-muted)]">
+          {t("campaignsUi.deliveryDescription")}
         </p>
         {deliveryEntries.length ? (
           <div className="mt-5 h-80">
@@ -196,8 +206,8 @@ export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
             />
           </div>
         ) : (
-          <p className="mt-5 rounded-xl border border-dashed border-white/10 px-5 py-10 text-center text-sm text-zinc-500">
-            Delivery data will appear after recipients are materialized.
+          <p className="mt-5 rounded-xl border border-dashed border-[var(--np-border)] px-5 py-10 text-center text-sm text-[var(--np-muted)]">
+            {t("campaignsUi.deliveryEmpty")}
           </p>
         )}
       </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer } from "react";
 import type { AttachedFile } from "@/src/components/organisms/email-templates/file-attachment-panel";
 
 interface UseAttachmentManagerOptions {
@@ -9,53 +9,105 @@ interface UseAttachmentManagerOptions {
   ) => Promise<{ id: string; name: string; size: number; format: string }>;
   onDeleteFile: (fileId: string) => Promise<void>;
   initialAttachedFiles: AttachedFile[];
+  errorMessage: string;
 }
 
 export function useAttachmentManager({
   onUploadFile,
   onDeleteFile,
   initialAttachedFiles,
+  errorMessage,
 }: UseAttachmentManagerOptions) {
-  const [uploading, setUploading] = useState(false);
-  const [locallyAdded, setLocallyAdded] = useState<AttachedFile[]>([]);
-  const [locallyRemovedIds, setLocallyRemovedIds] = useState<Set<string>>(
-    new Set(),
+  type State = {
+    pendingCount: number;
+    locallyAdded: AttachedFile[];
+    locallyRemovedIds: Set<string>;
+    error: string;
+  };
+  type Action =
+    | { type: "patch"; value: Partial<State> }
+    | { type: "start" }
+    | { type: "finish" }
+    | { type: "add"; file: AttachedFile }
+    | { type: "remove"; id: string };
+  const [state, update] = useReducer(
+    (current: State, action: Action): State =>
+      action.type === "start"
+        ? {
+            ...current,
+            pendingCount: current.pendingCount + 1,
+            error: current.pendingCount ? current.error : "",
+          }
+        : action.type === "finish"
+          ? { ...current, pendingCount: current.pendingCount - 1 }
+          : action.type === "patch"
+            ? { ...current, ...action.value }
+            : action.type === "add"
+              ? {
+                  ...current,
+                  locallyAdded: [...current.locallyAdded, action.file],
+                }
+              : {
+                  ...current,
+                  locallyRemovedIds: new Set(current.locallyRemovedIds).add(
+                    action.id,
+                  ),
+                },
+    {
+      pendingCount: 0,
+      locallyAdded: [],
+      locallyRemovedIds: new Set<string>(),
+      error: "",
+    },
   );
 
   const attachedFiles: AttachedFile[] = [
-    ...initialAttachedFiles.filter((f) => !locallyRemovedIds.has(f.id)),
-    ...locallyAdded.filter(
-      (f) => !initialAttachedFiles.some((e) => e.id === f.id),
+    ...initialAttachedFiles.filter((f) => !state.locallyRemovedIds.has(f.id)),
+    ...state.locallyAdded.filter(
+      (f) =>
+        !state.locallyRemovedIds.has(f.id) &&
+        !initialAttachedFiles.some((e) => e.id === f.id),
     ),
   ];
 
   async function handleUpload(file: File) {
-    setUploading(true);
+    update({ type: "start" });
     try {
       const fileView = await onUploadFile(file);
-      setLocallyAdded((prev) => [
-        ...prev,
-        {
+      update({
+        type: "add",
+        file: {
           id: fileView.id,
           name: fileView.name,
           size: fileView.size,
           format: fileView.format,
         },
-      ]);
+      });
+    } catch {
+      update({ type: "patch", value: { error: errorMessage } });
+      throw new Error(errorMessage);
     } finally {
-      setUploading(false);
+      update({ type: "finish" });
     }
   }
 
   async function handleRemove(fileId: string) {
-    await onDeleteFile(fileId);
-    setLocallyRemovedIds((prev) => new Set(prev).add(fileId));
+    update({ type: "start" });
+    try {
+      await onDeleteFile(fileId);
+      update({ type: "remove", id: fileId });
+    } catch {
+      update({ type: "patch", value: { error: errorMessage } });
+    } finally {
+      update({ type: "finish" });
+    }
   }
 
   return {
-    uploading,
+    uploading: state.pendingCount > 0,
     attachedFiles,
     handleUpload,
     handleRemove,
+    error: state.error,
   };
 }

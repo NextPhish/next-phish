@@ -1,119 +1,119 @@
 "use client";
-
-import { Skeleton } from "primereact/skeleton";
+import {
+  Card,
+  CardBody,
+  Skeleton,
+  FormMessage,
+  Button,
+  HelpPopover,
+} from "@next-phish/ui";
 import { trpc } from "@/src/lib/trpc";
-
-function formatLag(milliseconds: number): string {
-  if (milliseconds < 1_000) return "Current";
-  const minutes = Math.floor(milliseconds / 60_000);
-  if (minutes < 1) return `${Math.floor(milliseconds / 1_000)}s`;
-  if (minutes < 60) return `${minutes}m`;
-  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-}
-
+import { useTranslation } from "@/src/lib/i18n";
+import styles from "./schedule-overview.module.css";
 export function ExecutionOperations() {
+  const t = useTranslation();
   const operations = trpc.campaign.executionOperations.useQuery(undefined, {
-    refetchInterval: 10_000,
+    refetchInterval: 10000,
   });
-
-  if (operations.isLoading)
-    return (
-      <section aria-labelledby="delivery-health-heading" className="space-y-3">
-        <div>
-          <h2
-            id="delivery-health-heading"
-            className="text-lg font-semibold text-white"
-          >
-            Delivery health
-          </h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            Live execution backlogs and recipient outcomes. Updated every 10
-            seconds.
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-4">
-          {["due", "outbox", "unknown", "failed"].map((key) => (
-            <Skeleton key={key} height="9.5rem" borderRadius="1rem" />
+  function lag(ms: number) {
+    if (ms < 1000) return t("scheduleUi.current");
+    const minutes = Math.floor(ms / 60000);
+    if (minutes < 1)
+      return t("scheduleUi.seconds", { count: Math.floor(ms / 1000) });
+    if (minutes < 60) return t("scheduleUi.minutes", { count: minutes });
+    return t("scheduleUi.hoursMinutes", {
+      hours: Math.floor(minutes / 60),
+      minutes: minutes % 60,
+    });
+  }
+  const data = operations.data;
+  const cards = data
+    ? [
+        {
+          key: "due",
+          value: data.dueSchedules,
+          detail: data.dueSchedules
+            ? t("scheduleUi.oldestWait", { lag: lag(data.scheduleLagMs) })
+            : t("scheduleUi.noWaiting"),
+          alert: data.scheduleLagMs > 60000,
+        },
+        {
+          key: "pending",
+          value: data.pendingOutbox,
+          detail: data.pendingOutbox
+            ? t("scheduleUi.oldestWait", { lag: lag(data.outboxLagMs) })
+            : t("scheduleUi.noWaiting"),
+          alert: data.outboxLagMs > 60000,
+        },
+        {
+          key: "unknown",
+          value: data.deliveryUnknown,
+          detail: t(
+            data.deliveryUnknown
+              ? "scheduleUi.manualReview"
+              : "scheduleUi.noReview",
+          ),
+          alert: data.deliveryUnknown > 0,
+        },
+        {
+          key: "failed",
+          value: data.failedRecipients,
+          detail: t(
+            data.failedRecipients
+              ? "scheduleUi.noRetry"
+              : "scheduleUi.noFailures",
+          ),
+          alert: data.failedRecipients > 0,
+        },
+      ]
+    : [];
+  return (
+    <section aria-labelledby="delivery-health-heading">
+      <div className={styles.sectionHeading}>
+        <h2 id="delivery-health-heading">{t("scheduleUi.healthTitle")}</h2>
+        <p>{t("scheduleUi.healthDescription")}</p>
+      </div>
+      {operations.isLoading ? (
+        <div
+          className={styles.metrics}
+          aria-label={t("common.loading")}
+          role="status"
+        >
+          {["due", "pending", "unknown", "failed"].map((key) => (
+            <Skeleton key={key} className={styles.metricSkeleton} />
           ))}
         </div>
-      </section>
-    );
-
-  if (!operations.data) return null;
-  const cards = [
-    {
-      label: "Due schedules",
-      value: String(operations.data.dueSchedules),
-      detail: `Oldest wait: ${formatLag(operations.data.scheduleLagMs)}`,
-      description:
-        "Schedules past their run time and waiting for the execution poller.",
-      alert: operations.data.scheduleLagMs > 60_000,
-    },
-    {
-      label: "Pending publications",
-      value: String(operations.data.pendingOutbox),
-      detail: `Oldest wait: ${formatLag(operations.data.outboxLagMs)}`,
-      description:
-        "Committed delivery jobs waiting to be published to the worker queue.",
-      alert: operations.data.outboxLagMs > 60_000,
-    },
-    {
-      label: "Unknown outcomes",
-      value: String(operations.data.deliveryUnknown),
-      detail: "Manual review required",
-      description:
-        "Recipients whose provider acceptance could not be confirmed. Review before retrying.",
-      alert: operations.data.deliveryUnknown > 0,
-    },
-    {
-      label: "Failed recipients",
-      value: String(operations.data.failedRecipients),
-      detail: "Not scheduled for retry",
-      description:
-        "Recipients stopped by a permanent provider error or an exhausted retry budget.",
-      alert: operations.data.failedRecipients > 0,
-    },
-  ];
-
-  return (
-    <section aria-labelledby="delivery-health-heading" className="space-y-3">
-      <div>
-        <h2
-          id="delivery-health-heading"
-          className="text-lg font-semibold text-white"
+      ) : operations.error ? (
+        <FormMessage
+          variant="error"
+          action={
+            <Button variant="secondary" onClick={() => operations.refetch()}>
+              {t("tableUi.retry")}
+            </Button>
+          }
         >
-          Delivery health
-        </h2>
-        <p className="mt-1 text-sm text-zinc-400">
-          Live execution backlogs and recipient outcomes. Updated every 10
-          seconds.
-        </p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        {cards.map((card) => (
-          <article
-            key={card.label}
-            className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5"
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
-              {card.label}
-            </p>
-            <p
-              className={`mt-2 text-3xl font-semibold ${
-                card.alert ? "text-amber-300" : "text-white"
-              }`}
-            >
-              {card.value}
-            </p>
-            <p className="mt-1 text-xs font-medium text-zinc-400">
-              {card.detail}
-            </p>
-            <p className="mt-3 text-xs leading-5 text-zinc-500">
-              {card.description}
-            </p>
-          </article>
-        ))}
-      </div>
+          {t("scheduleUi.healthFailed")}
+        </FormMessage>
+      ) : (
+        <div className={styles.metrics}>
+          {cards.map((card) => (
+            <Card key={card.key}>
+              <CardBody className={styles.metricBody}>
+                <div className={styles.metricLabel}>
+                  <span>{t(`scheduleUi.health.${card.key}.label`)}</span>
+                  <HelpPopover label={t(`scheduleUi.health.${card.key}.label`)}>
+                    {t(`scheduleUi.health.${card.key}.description`)}
+                  </HelpPopover>
+                </div>
+                <strong className={card.alert ? styles.warning : undefined}>
+                  {card.value}
+                </strong>
+                <span className={styles.metricDetail}>{card.detail}</span>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
