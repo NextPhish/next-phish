@@ -15,12 +15,12 @@ Starlight builds a static `dist/` directory, including search. Add future transl
 
 ## GitHub Pages
 
-The [Documentation Pages workflow](../../.github/workflows/docs-pages.yml) checks the site on pull requests and publishes it after changes land on `main`. In the repository settings, select **GitHub Actions** as the Pages build and deployment source. The published address is `https://martinandreev.github.io/next-phish/`.
+The [Documentation Pages workflow](../../.github/workflows/docs-pages.yml) checks the site on pull requests and publishes it after changes land on `main`. In the repository settings, select **GitHub Actions** as the Pages build and deployment source. The published address is `https://nextphish.github.io/next-phish/`.
 
-GitHub Pages hosts this repository below `/next-phish/`, so the workflow builds with `DOCS_BASE_PATH=/next-phish` and `DOCS_SITE_URL=https://martinandreev.github.io`. To check the same output locally, run:
+GitHub Pages hosts this repository below `/next-phish/`, so the workflow builds with `DOCS_BASE_PATH=/next-phish` and `DOCS_SITE_URL=https://nextphish.github.io`. To check the same output locally, run:
 
 ```sh
-DOCS_BASE_PATH=/next-phish DOCS_SITE_URL=https://martinandreev.github.io pnpm --filter @next-phish/docs build
+DOCS_BASE_PATH=/next-phish DOCS_SITE_URL=https://nextphish.github.io pnpm --filter @next-phish/docs build
 ```
 
 The optional repository Actions variable `NEXTPHISH_APP_URL` sets the **Open app** destination. Leave it unset if the deployed application has no public address yet. The workflow can also be started manually from the Actions tab.

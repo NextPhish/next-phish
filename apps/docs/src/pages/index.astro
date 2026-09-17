@@ -32,7 +32,7 @@ const quickLinks = [
     <div class="site-shell">
       <header class="site-header">
         <a class="brand" href={docsHref('/')} aria-label="NextPhish Docs home"><img src={docsHref('/nextphish-mark.svg')} alt="" width="32" height="32" /><span>NextPhish <small>DOCS</small></span></a>
-        <nav aria-label="Main navigation"><a class="nav-docs" href={docsHref('/getting-started/')}>Documentation</a><a class="nav-github" href="https://github.com/MartinAndreev/next-phish" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>{appUrl && <a class="nav-app" href={appUrl}>Open app <span aria-hidden="true">↗</span></a>}</nav>
+        <nav aria-label="Main navigation"><a class="nav-docs" href={docsHref('/getting-started/')}>Documentation</a><a class="nav-github" href="https://github.com/NextPhish/next-phish" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>{appUrl && <a class="nav-app" href={appUrl}>Open app <span aria-hidden="true">↗</span></a>}</nav>
       </header>
       <main id="main">
         <section class="hero" aria-labelledby="hero-title">
@@ -50,7 +50,7 @@ const quickLinks = [
         <section class="section start" aria-labelledby="start-title"><div class="section-heading"><div><p class="eyebrow">FIND YOUR WAY</p><h2 id="start-title">Where would you like to start?</h2><p>Go from first run to daily use with focused, practical guides.</p></div></div><div class="link-grid">{quickLinks.map((link) => <a class="link-card" href={docsHref(link.href)}><span class="link-icon" aria-hidden="true">{link.icon === 'terminal' ? '⌘' : link.icon === 'server' ? '▤' : link.icon === 'agent' ? '✦' : '◈'}</span><span class="link-content"><small>{link.kicker}</small><strong>{link.title}</strong><span>{link.description}</span></span><span class="link-arrow" aria-hidden="true">↗</span></a>)}</div></section>
         <section class="bottom-cta"><div><p class="eyebrow">READY TO BEGIN?</p><h2>Make every simulation count.</h2><p>Start with the fundamentals, then build a workflow that fits your team.</p></div><a class="button button-light" href={docsHref('/getting-started/')}>Start reading <span aria-hidden="true">→</span></a></section>
       </main>
-      <footer class="site-footer"><span>© {new Date().getFullYear()} NextPhish · Open source security awareness platform</span><div><a href={docsHref('/getting-started/')}>Documentation</a><a href="https://github.com/MartinAndreev/next-phish">GitHub</a></div></footer>
+      <footer class="site-footer"><span>© {new Date().getFullYear()} NextPhish · Open source security awareness platform</span><div><a href={docsHref('/getting-started/')}>Documentation</a><a href="https://github.com/NextPhish/next-phish">GitHub</a></div></footer>
     </div>
   </body>
 </html>

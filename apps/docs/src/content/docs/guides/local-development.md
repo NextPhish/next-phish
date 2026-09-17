@@ -52,4 +52,4 @@ pnpm lint
 pnpm typecheck
 ```
 
-Storybook runs separately at `http://localhost:6006`. After pulling schema or dependency changes, rerun `pnpm install --frozen-lockfile`, `pnpm db:generate` and `pnpm db:migrate:deploy`. For troubleshooting and the host/container networking table, see the [repository setup guide](https://github.com/MartinAndreev/next-phish/blob/main/docs/setup.md).
+Storybook runs separately at `http://localhost:6006`. After pulling schema or dependency changes, rerun `pnpm install --frozen-lockfile`, `pnpm db:generate` and `pnpm db:migrate:deploy`. For troubleshooting and the host/container networking table, see the [repository setup guide](https://github.com/NextPhish/next-phish/blob/main/docs/setup.md).

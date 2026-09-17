@@ -5,7 +5,7 @@ import { prefixLocalLinks } from "./src/plugins/prefix-local-links.mjs";
 const base = process.env.DOCS_BASE_PATH || "/";
 
 export default defineConfig({
-  site: process.env.DOCS_SITE_URL || "https://martinandreev.github.io",
+  site: process.env.DOCS_SITE_URL || "https://nextphish.github.io",
   base,
   markdown: {
     rehypePlugins: [[prefixLocalLinks, { base }]],
@@ -20,7 +20,7 @@ export default defineConfig({
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/MartinAndreev/next-phish",
+          href: "https://github.com/NextPhish/next-phish",
         },
       ],
       customCss: ["./src/styles/starlight.css"],

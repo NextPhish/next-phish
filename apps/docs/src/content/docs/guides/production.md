@@ -47,4 +47,4 @@ docker compose -f docker-compose.production.yml up -d --force-recreate worker
 
 The environment `SMTP_*` sends authentication/system mail; campaign delivery uses application sending profiles. `DELIVERY_ENABLED=false` gates campaign delivery, not every outgoing message or job.
 
-For upgrades, backups, rollback and non-Docker deployment, follow the detailed [repository deployment guide](https://github.com/MartinAndreev/next-phish/blob/main/docs/deployment.md). Back up PostgreSQL, R2 objects, Redis state and secrets before upgrading; database migrations are not undone by rolling back application images.
+For upgrades, backups, rollback and non-Docker deployment, follow the detailed [repository deployment guide](https://github.com/NextPhish/next-phish/blob/main/docs/deployment.md). Back up PostgreSQL, R2 objects, Redis state and secrets before upgrading; database migrations are not undone by rolling back application images.

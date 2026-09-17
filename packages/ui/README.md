@@ -1,6 +1,6 @@
 # NextPhish UI — V1 foundation
 
-The selected V1 design is now a React component library. The original application still uses PrimeReact; this package is the independently reviewable foundation for gradual migration. Tracking: [issue #23](https://github.com/MartinAndreev/next-phish/issues/23).
+The selected V1 design is now a React component library. The original application still uses PrimeReact; this package is the independently reviewable foundation for gradual migration. Tracking: [issue #23](https://github.com/NextPhish/next-phish/issues/23).
 
 ## Run
 

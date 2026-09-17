@@ -1,6 +1,6 @@
 # V1 component library
 
-Selected direction: V1 from the static prototypes in `next-phish-redesign/v1`. Implementation starts in `packages/ui`, on branch `codex/v1-component-library`, tracked in [issue #23](https://github.com/MartinAndreev/next-phish/issues/23). This delivers the foundation and Storybook, not a completed application migration.
+Selected direction: V1 from the static prototypes in `next-phish-redesign/v1`. Implementation starts in `packages/ui`, on branch `codex/v1-component-library`, tracked in [issue #23](https://github.com/NextPhish/next-phish/issues/23). This delivers the foundation and Storybook, not a completed application migration.
 
 ## Review and component mapping
 
