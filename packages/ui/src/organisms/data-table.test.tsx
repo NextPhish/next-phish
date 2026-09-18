@@ -28,6 +28,31 @@ function Demo({ server = false }: { server?: boolean }) {
   );
 }
 describe("DataTable", () => {
+  it("marks the actions header and cells as the sticky column", () => {
+    function ActionsDemo() {
+      const model = useDataTableState();
+      return (
+        <DataTable
+          {...model}
+          data={rows}
+          columns={[
+            ...columns,
+            { id: "actions", header: "Actions", cell: () => "More" },
+          ]}
+          getRowId={(row) => row.id}
+          caption="Records"
+        />
+      );
+    }
+    render(<ActionsDemo />);
+    expect(screen.getByRole("columnheader", { name: "Actions" })).toHaveClass(
+      "np-table-actions",
+    );
+    expect(screen.getAllByRole("cell", { name: "More" })).toHaveLength(3);
+    screen
+      .getAllByRole("cell", { name: "More" })
+      .forEach((cell) => expect(cell).toHaveClass("np-table-actions"));
+  });
   it("sorts and paginates locally, resetting to page one when searching", async () => {
     const user = userEvent.setup();
     render(<Demo />);

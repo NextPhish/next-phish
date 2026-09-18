@@ -90,7 +90,8 @@ it("confirms deletion with the exact row id and closes after success", async () 
       <PagesListContainer />
     </I18nProvider>,
   );
-  await user.click(screen.getByRole("button", { name: "Delete: Sign in" }));
+  await user.click(screen.getByRole("button", { name: "Actions: Sign in" }));
+  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Delete" }));
   expect(mocks.remove).toHaveBeenCalledWith({ id: "p1" });

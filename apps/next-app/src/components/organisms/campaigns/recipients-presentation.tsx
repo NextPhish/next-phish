@@ -4,7 +4,7 @@ import { useId, useMemo, type ReactNode } from "react";
 import { CheckCircle2, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Badge,
-  Button,
+  RowActionsMenu,
   DataTable,
   type ColumnDef,
   type DataTableState,
@@ -81,33 +81,6 @@ export function CampaignRecipientsPresentation({
   const columns = useMemo<ColumnDef<Recipient>[]>(
     () => [
       {
-        id: "expand",
-        header: "",
-        enableSorting: false,
-        cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label={t("campaignsUi.toggleHistory", {
-              email: row.original.email,
-            })}
-            aria-expanded={expanded.includes(row.original.id)}
-            aria-controls={
-              expanded.includes(row.original.id)
-                ? `${historyId}-${row.original.id}`
-                : undefined
-            }
-            onClick={() => onToggle(row.original.id)}
-          >
-            {expanded.includes(row.original.id) ? (
-              <ChevronDown size={16} />
-            ) : (
-              <ChevronRight size={16} />
-            )}
-          </Button>
-        ),
-      },
-      {
         id: "recipient",
         header: t("campaignsUi.recipient"),
         enableSorting: false,
@@ -170,6 +143,36 @@ export function CampaignRecipientsPresentation({
         accessorKey: "attemptCount",
         header: t("campaignsUi.attempts"),
         enableSorting: false,
+      },
+      {
+        id: "actions",
+        header: t("tableUi.actions"),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const isExpanded = expanded.includes(row.original.id);
+          return (
+            <RowActionsMenu
+              label={`${t("tableUi.actions")}: ${row.original.email}`}
+              items={[
+                {
+                  label: t("campaignsUi.toggleHistory", {
+                    email: row.original.email,
+                  }),
+                  icon: isExpanded ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  ),
+                  onSelect: () => onToggle(row.original.id),
+                  ariaExpanded: isExpanded,
+                  ariaControls: isExpanded
+                    ? `${historyId}-${row.original.id}`
+                    : undefined,
+                },
+              ]}
+            />
+          );
+        },
       },
     ],
     [expanded, historyId, locale, onToggle, t, timeZone],

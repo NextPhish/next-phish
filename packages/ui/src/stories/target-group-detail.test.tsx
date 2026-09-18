@@ -84,8 +84,9 @@ it("queries member pages and removes only the confirmed group member", async () 
     }),
   );
   await user.click(
-    screen.getByRole("button", { name: "Remove: alex@example.com" }),
+    screen.getByRole("button", { name: "Actions: alex@example.com" }),
   );
+  await user.click(screen.getByRole("menuitem", { name: "Remove" }));
   expect(screen.getByRole("dialog")).toHaveTextContent("Remove Alex Morgan");
   await user.click(screen.getByRole("button", { name: "Remove" }));
   expect(mocks.remove).toHaveBeenCalledWith({

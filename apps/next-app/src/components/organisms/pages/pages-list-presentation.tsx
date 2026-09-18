@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   DataTable,
+  RowActionsMenu,
   Dialog,
   FormMessage,
   PageHeader,
@@ -108,24 +109,22 @@ export function PagesListPresentation(props: PagesListPresentationProps) {
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <div className={styles.actions}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(row.original.id)}
-            >
-              <Pencil size={16} aria-hidden="true" />
-              {t("pages.openEditor")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={`${t("pages.delete")}: ${row.original.name}`}
-              onClick={() => onDeleteRequest(row.original)}
-            >
-              <Trash2 size={16} aria-hidden="true" />
-            </Button>
-          </div>
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.name}`}
+            items={[
+              {
+                label: t("pages.openEditor"),
+                icon: <Pencil size={16} />,
+                onSelect: () => onEdit(row.original.id),
+              },
+              {
+                label: t("pages.delete"),
+                icon: <Trash2 size={16} />,
+                onSelect: () => onDeleteRequest(row.original),
+                destructive: true,
+              },
+            ]}
+          />
         ),
       },
     ],

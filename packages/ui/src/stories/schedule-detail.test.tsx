@@ -17,7 +17,8 @@ it("renders generated campaigns and delegates campaign navigation", async () => 
   expect(screen.getByText("September awareness")).toBeInTheDocument();
   expect(screen.getByText("June awareness")).toBeInTheDocument();
   await user.click(
-    screen.getByRole("button", { name: "View campaign: September awareness" }),
+    screen.getByRole("button", { name: "Actions: September awareness" }),
   );
+  await user.click(screen.getByRole("menuitem", { name: "View campaign" }));
   expect(onNavigate).toHaveBeenCalledWith("/campaigns/campaign-september");
 });

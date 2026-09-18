@@ -74,3 +74,8 @@ export {
 } from "./molecules/dropdown-menu";
 
 export { HelpTooltip } from "./molecules/help-tooltip";
+export {
+  RowActionsMenu,
+  type RowActionItem,
+  type RowActionsMenuProps,
+} from "./molecules/row-actions-menu";

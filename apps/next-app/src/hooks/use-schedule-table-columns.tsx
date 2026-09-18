@@ -2,25 +2,8 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Copy,
-  EllipsisVertical,
-  Eye,
-  Pencil,
-  Play,
-  Trash2,
-  X,
-} from "lucide-react";
-import {
-  Badge,
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  type ColumnDef,
-} from "@next-phish/ui";
+import { Copy, Eye, Pencil, Play, Trash2, X } from "lucide-react";
+import { Badge, RowActionsMenu, type ColumnDef } from "@next-phish/ui";
 import { useLocale, useTranslation } from "@/src/lib/i18n";
 import type { ScheduleRow } from "@/src/components/organisms/schedules/schedule-table";
 
@@ -152,68 +135,58 @@ export function useScheduleTableColumns({
             schedule.status,
           );
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={`${t("tableUi.actions")}: ${schedule.name}`}
-                >
-                  <EllipsisVertical size={16} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onSelect={() => router.push(`/schedule/${schedule.id}`)}
-                >
-                  <Eye size={16} />
-                  {t("scheduleUi.viewDetails")}
-                </DropdownMenuItem>
-                {canChange && (
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      router.push(`/schedule/${schedule.id}/edit`)
-                    }
-                  >
-                    <Pencil size={16} />
-                    {t("scheduleUi.edit")}
-                  </DropdownMenuItem>
-                )}
-                {schedule.status === "DRAFT" && (
-                  <DropdownMenuItem
-                    disabled={actionPending}
-                    onSelect={() => onActivate(schedule.id)}
-                  >
-                    <Play size={16} />
-                    {t("scheduleUi.activate")}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  disabled={actionPending}
-                  onSelect={() => onDuplicate(schedule.id)}
-                >
-                  <Copy size={16} />
-                  {t("scheduleUi.duplicate")}
-                </DropdownMenuItem>
-                {canChange && (
-                  <DropdownMenuItem
-                    disabled={actionPending}
-                    onSelect={() => onCancel(schedule.id)}
-                  >
-                    <X size={16} />
-                    {t("scheduleUi.cancelSchedule")}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-700"
-                  onSelect={() => onDelete(schedule)}
-                >
-                  <Trash2 size={16} />
-                  {t("scheduleUi.delete")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <RowActionsMenu
+              label={`${t("tableUi.actions")}: ${schedule.name}`}
+              items={[
+                {
+                  label: t("scheduleUi.viewDetails"),
+                  icon: <Eye size={16} />,
+                  onSelect: () => router.push(`/schedule/${schedule.id}`),
+                },
+                ...(canChange
+                  ? [
+                      {
+                        label: t("scheduleUi.edit"),
+                        icon: <Pencil size={16} />,
+                        onSelect: () =>
+                          router.push(`/schedule/${schedule.id}/edit`),
+                      },
+                    ]
+                  : []),
+                ...(schedule.status === "DRAFT"
+                  ? [
+                      {
+                        label: t("scheduleUi.activate"),
+                        icon: <Play size={16} />,
+                        onSelect: () => onActivate(schedule.id),
+                        disabled: actionPending,
+                      },
+                    ]
+                  : []),
+                {
+                  label: t("scheduleUi.duplicate"),
+                  icon: <Copy size={16} />,
+                  onSelect: () => onDuplicate(schedule.id),
+                  disabled: actionPending,
+                },
+                ...(canChange
+                  ? [
+                      {
+                        label: t("scheduleUi.cancelSchedule"),
+                        icon: <X size={16} />,
+                        onSelect: () => onCancel(schedule.id),
+                        disabled: actionPending,
+                      },
+                    ]
+                  : []),
+                {
+                  label: t("scheduleUi.delete"),
+                  icon: <Trash2 size={16} />,
+                  onSelect: () => onDelete(schedule),
+                  destructive: true,
+                },
+              ]}
+            />
           );
         },
       },

@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardBody,
   DataTable,
+  RowActionsMenu,
   useDataTableState,
   type ColumnDef,
 } from "@next-phish/ui";
@@ -94,14 +95,17 @@ export function ApiKeyListPresentation({
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label={`${t("apiKeys.revoke")}: ${row.original.name ?? row.original.start ?? row.original.id}`}
-            onClick={() => onRevoke(row.original)}
-          >
-            <Trash2 size={16} aria-hidden="true" />
-          </Button>
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.name ?? row.original.start ?? row.original.id}`}
+            items={[
+              {
+                label: t("apiKeys.revoke"),
+                icon: <Trash2 size={16} />,
+                onSelect: () => onRevoke(row.original),
+                destructive: true,
+              },
+            ]}
+          />
         ),
       },
     ],

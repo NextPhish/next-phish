@@ -5,6 +5,7 @@ import type { TargetGroupUserView, TargetGroupView } from "@next-phish/shared";
 import {
   Button,
   DataTable,
+  RowActionsMenu,
   Dialog,
   FormMessage,
   PageHeader,
@@ -68,14 +69,17 @@ export function TargetGroupDetailPresentation(props: Props) {
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label={`${t("targetGroups.removeUser")}: ${row.original.email}`}
-            onClick={() => onRemoveRequest(row.original)}
-          >
-            <Trash2 size={16} aria-hidden="true" />
-          </Button>
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.email}`}
+            items={[
+              {
+                label: t("targetGroups.removeUser"),
+                icon: <Trash2 size={16} />,
+                onSelect: () => onRemoveRequest(row.original),
+                destructive: true,
+              },
+            ]}
+          />
         ),
       },
     ],

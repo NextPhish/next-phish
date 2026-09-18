@@ -74,6 +74,7 @@ export function AppDataTable<T extends Record<string, any>>({
       onSort={setSorts}
       removableSort
       loading={loading}
+      scrollable
       showGridlines
       header={header}
       emptyMessage={t("common.noRecordsFound")}
@@ -93,9 +94,17 @@ export function AppDataTable<T extends Record<string, any>>({
       ))}
       {actions && actions.length > 0 && (
         <Column
-          header=""
-          body={(row: T) => <ActionColumn row={row} actions={actions} />}
+          header={t("tableUi.actions")}
+          body={(row: T) => (
+            <ActionColumn
+              row={row}
+              actions={actions}
+              label={t("tableUi.actions")}
+            />
+          )}
           style={{ width: "4rem" }}
+          frozen
+          alignFrozen="right"
         />
       )}
     </PrimeDataTable>
