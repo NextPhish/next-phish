@@ -111,28 +111,36 @@ it("expands each history immediately after its recipient row and removes it on c
   let firstToggle = firstRow.querySelector("button")!;
   const secondToggle = secondRow.querySelector("button")!;
   await user.click(secondToggle);
+  await user.click(
+    screen.getByRole("menuitem", { name: /Toggle event history for elena/i }),
+  );
   firstToggle = screen
     .getByText("Daniel Demo")
     .closest("tr")!
     .querySelector("button")!;
   await user.click(firstToggle);
-  firstToggle = screen
-    .getByText("Daniel Demo")
-    .closest("tr")!
-    .querySelector("button")!;
+  await user.click(
+    screen.getByRole("menuitem", { name: /Toggle event history for daniel/i }),
+  );
   const firstDetails = screen.getByText("Timeline 0").closest("tr")!;
   const secondDetails = screen.getByText("Timeline 1").closest("tr")!;
   expect(firstRow.nextElementSibling).toBe(firstDetails);
   expect(firstDetails.nextElementSibling).toBe(secondRow);
   expect(secondRow.nextElementSibling).toBe(secondDetails);
   expect(firstDetails.querySelector("td")).toHaveAttribute("colspan", "8");
-  expect(
-    document.getElementById(firstToggle.getAttribute("aria-controls")!),
-  ).toContainElement(screen.getByText("Timeline 0"));
+  firstToggle = screen
+    .getByText("Daniel Demo")
+    .closest("tr")!
+    .querySelector("button")!;
   await user.click(firstToggle);
+  const historyAction = screen.getByRole("menuitem", {
+    name: /Toggle event history for daniel/i,
+  });
+  expect(historyAction).toHaveAttribute("aria-expanded", "true");
   expect(
-    screen.getByText("Daniel Demo").closest("tr")!.querySelector("button"),
-  ).toHaveAttribute("aria-expanded", "false");
+    document.getElementById(historyAction.getAttribute("aria-controls")!),
+  ).toContainElement(screen.getByText("Timeline 0"));
+  await user.click(historyAction);
   expect(screen.queryByText("Timeline 0")).not.toBeInTheDocument();
   expect(firstRow.nextElementSibling).toBe(secondRow);
   expect(screen.getByText("Timeline 1")).toBeVisible();

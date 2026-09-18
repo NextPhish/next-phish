@@ -22,6 +22,9 @@ function HeaderCell<T>({
   return (
     <th
       scope="col"
+      className={
+        header.column.id === "actions" ? "np-table-actions" : undefined
+      }
       colSpan={header.colSpan}
       aria-sort={
         sort && header.column.getSortIndex() === 0
@@ -99,7 +102,12 @@ export function TableBody<T>({
           (_, row) => (
             <tr key={`loading-${row}`}>
               {table.getVisibleLeafColumns().map((column, index) => (
-                <td key={column.id}>
+                <td
+                  key={column.id}
+                  className={
+                    column.id === "actions" ? "np-table-actions" : undefined
+                  }
+                >
                   {row === 0 && index === 0 && (
                     <span className="np-sr-only" role="status">
                       {labels.loading}
@@ -165,7 +173,14 @@ export function TableBody<T>({
           <Fragment key={row.id}>
             <tr>
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td
+                  key={cell.id}
+                  className={
+                    cell.column.id === "actions"
+                      ? "np-table-actions"
+                      : undefined
+                  }
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

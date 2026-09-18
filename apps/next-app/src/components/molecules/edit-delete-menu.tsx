@@ -1,13 +1,7 @@
 "use client";
 
-import { EllipsisVertical, Pencil, Trash2 } from "lucide-react";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@next-phish/ui";
+import { Pencil, Trash2 } from "lucide-react";
+import { RowActionsMenu } from "@next-phish/ui";
 
 interface Props {
   label: string;
@@ -25,22 +19,21 @@ export function EditDeleteMenu({
   onDelete,
 }: Props) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" aria-label={label}>
-          <EllipsisVertical size={16} aria-hidden="true" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={onEdit}>
-          <Pencil size={16} aria-hidden="true" />
-          {editLabel}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onDelete}>
-          <Trash2 size={16} aria-hidden="true" />
-          {deleteLabel}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <RowActionsMenu
+      label={label}
+      items={[
+        {
+          label: editLabel,
+          icon: <Pencil size={16} aria-hidden="true" />,
+          onSelect: onEdit,
+        },
+        {
+          label: deleteLabel,
+          icon: <Trash2 size={16} aria-hidden="true" />,
+          onSelect: onDelete,
+          destructive: true,
+        },
+      ]}
+    />
   );
 }

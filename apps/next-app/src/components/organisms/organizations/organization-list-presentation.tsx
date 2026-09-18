@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   DataTable,
+  RowActionsMenu,
   Dialog,
   FormMessage,
   PageHeader,
@@ -97,28 +98,27 @@ export function OrganizationListPresentation(props: OrganizationListProps) {
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <div className={styles.actions}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onManage(row.original.id)}
-              aria-label={`${t("organizations.manage")}: ${row.original.name}`}
-            >
-              <Settings2 size={16} aria-hidden="true" />
-              {t("organizations.manage")}
-            </Button>
-            {row.original.$me.role === "owner" && ownedCount > 1 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={deletePending}
-                onClick={() => onDeleteRequest(row.original)}
-                aria-label={`${t("organizations.delete")}: ${row.original.name}`}
-              >
-                <Trash2 size={16} aria-hidden="true" />
-              </Button>
-            )}
-          </div>
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.name}`}
+            items={[
+              {
+                label: t("organizations.manage"),
+                icon: <Settings2 size={16} />,
+                onSelect: () => onManage(row.original.id),
+              },
+              ...(row.original.$me.role === "owner" && ownedCount > 1
+                ? [
+                    {
+                      label: t("organizations.delete"),
+                      icon: <Trash2 size={16} />,
+                      onSelect: () => onDeleteRequest(row.original),
+                      disabled: deletePending,
+                      destructive: true,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         ),
       },
     ],

@@ -10,12 +10,14 @@ import type { DataTableAction } from "./types";
 interface ActionColumnProps<T extends Record<string, any>> {
   row: T;
   actions: DataTableAction<T>[];
+  label: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ActionColumn<T extends Record<string, any>>({
   row,
   actions,
+  label,
 }: ActionColumnProps<T>) {
   const menuRef = useRef<Menu>(null);
 
@@ -59,6 +61,7 @@ export function ActionColumn<T extends Record<string, any>>({
       />
       <Button
         icon="pi pi-ellipsis-v"
+        aria-label={label}
         className="flex h-8 w-8 items-center justify-center rounded-lg border-0 bg-transparent text-zinc-400 hover:bg-white/10 hover:text-white"
         onClick={(e) => menuRef.current?.toggle(e)}
       />

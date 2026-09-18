@@ -74,7 +74,7 @@ it("retains the added role filter and sends role/page state to the API", async (
     </I18nProvider>,
   );
   expect(
-    screen.queryByRole("button", { name: /Delete:/ }),
+    screen.queryByRole("menuitem", { name: "Delete" }),
   ).not.toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Add filter" }));
   await user.click(screen.getByRole("menuitem", { name: "Role" }));
@@ -102,10 +102,15 @@ it("only exposes eligible owner deletion and keeps a failed deletion in its dial
       <OrganizationListContainer />
     </I18nProvider>,
   );
+  await user.click(
+    screen.getByRole("button", { name: "Actions: Shared team" }),
+  );
   expect(
-    screen.queryByRole("button", { name: "Delete: Shared team" }),
+    screen.queryByRole("menuitem", { name: "Delete" }),
   ).not.toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Delete: Owned team" }));
+  await user.keyboard("{Escape}");
+  await user.click(screen.getByRole("button", { name: "Actions: Owned team" }));
+  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
   await user.click(screen.getByRole("button", { name: "Delete" }));
   expect(mocks.remove).toHaveBeenCalledWith({ organizationId: "owner" });
   expect(screen.getByRole("dialog")).toBeInTheDocument();

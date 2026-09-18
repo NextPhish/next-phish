@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   DataTable,
+  RowActionsMenu,
   Dialog,
   FormMessage,
   PageHeader,
@@ -102,24 +103,22 @@ export function TargetGroupsListPresentation(props: TargetGroupsListProps) {
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <div className={styles.actions}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(row.original.id)}
-            >
-              <Pencil size={16} aria-hidden="true" />
-              {t("targetGroups.editGroup")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={`${t("targetGroups.delete")}: ${row.original.name}`}
-              onClick={() => onDeleteRequest(row.original)}
-            >
-              <Trash2 size={16} aria-hidden="true" />
-            </Button>
-          </div>
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.name}`}
+            items={[
+              {
+                label: t("targetGroups.editGroup"),
+                icon: <Pencil size={16} />,
+                onSelect: () => onEdit(row.original.id),
+              },
+              {
+                label: t("targetGroups.delete"),
+                icon: <Trash2 size={16} />,
+                onSelect: () => onDeleteRequest(row.original),
+                destructive: true,
+              },
+            ]}
+          />
         ),
       },
     ],

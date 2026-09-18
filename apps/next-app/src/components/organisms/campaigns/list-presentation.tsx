@@ -1,17 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { EllipsisVertical, Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
   DataTable,
+  RowActionsMenu,
   Dialog,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   FormMessage,
   PageHeader,
   type ColumnDef,
@@ -160,45 +156,37 @@ export function CampaignListPresentation(props: CampaignListProps) {
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={`${t("tableUi.actions")}: ${row.original.name}`}
-              >
-                <EllipsisVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => props.onOpen(row.original.id)}>
-                <Eye size={16} />
-                {t("campaignsUi.view")}
-              </DropdownMenuItem>
-              {["DRAFT", "PUBLISHED"].includes(row.original.status) && (
-                <DropdownMenuItem
-                  onSelect={() => props.onEdit(row.original.id)}
-                >
-                  <Pencil size={16} />
-                  {t("campaignsUi.edit")}
-                </DropdownMenuItem>
-              )}
-              {["DRAFT", "PUBLISHED", "COMPLETED", "FAILED"].includes(
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.name}`}
+            items={[
+              {
+                label: t("campaignsUi.view"),
+                icon: <Eye size={16} />,
+                onSelect: () => props.onOpen(row.original.id),
+              },
+              ...(["DRAFT", "PUBLISHED"].includes(row.original.status)
+                ? [
+                    {
+                      label: t("campaignsUi.edit"),
+                      icon: <Pencil size={16} />,
+                      onSelect: () => props.onEdit(row.original.id),
+                    },
+                  ]
+                : []),
+              ...(["DRAFT", "PUBLISHED", "COMPLETED", "FAILED"].includes(
                 row.original.status,
-              ) && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-red-700"
-                    onSelect={() => props.onDeleteRequest(row.original)}
-                  >
-                    <Trash2 size={16} />
-                    {t("campaignsUi.delete")}
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              )
+                ? [
+                    {
+                      label: t("campaignsUi.delete"),
+                      icon: <Trash2 size={16} />,
+                      onSelect: () => props.onDeleteRequest(row.original),
+                      destructive: true,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         ),
       },
     ],

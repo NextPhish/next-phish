@@ -5,11 +5,11 @@ import { ArrowRight, CalendarClock } from "lucide-react";
 import type { inferRouterOutputs } from "@trpc/server";
 import {
   Badge,
-  Button,
   Card,
   CardBody,
   CardHeader,
   DataTable,
+  RowActionsMenu,
   EmptyState,
   useDataTableState,
   type ColumnDef,
@@ -92,14 +92,16 @@ export function ScheduleDetailContent({
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label={`${t("scheduleUi.viewCampaign")}: ${row.original.name}`}
-            onClick={() => onNavigate(`/campaigns/${row.original.id}`)}
-          >
-            <ArrowRight size={16} aria-hidden="true" />
-          </Button>
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.name}`}
+            items={[
+              {
+                label: t("scheduleUi.viewCampaign"),
+                icon: <ArrowRight size={16} />,
+                onSelect: () => onNavigate(`/campaigns/${row.original.id}`),
+              },
+            ]}
+          />
         ),
       },
     ],

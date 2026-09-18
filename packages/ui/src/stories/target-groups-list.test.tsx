@@ -85,7 +85,10 @@ it("confirms exact group deletion in a controlled dialog", async () => {
       <TargetGroupsListContainer />
     </I18nProvider>,
   );
-  await user.click(screen.getByRole("button", { name: "Delete: Engineering" }));
+  await user.click(
+    screen.getByRole("button", { name: "Actions: Engineering" }),
+  );
+  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Delete" }));
   expect(mocks.remove).toHaveBeenCalledWith({ id: "g1" });

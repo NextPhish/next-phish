@@ -84,14 +84,16 @@ it("confirms deactivate and reactivate with the exact boolean and id", async () 
     </I18nProvider>,
   );
   await user.click(
-    screen.getByRole("button", { name: "Deactivate: Alex Morgan" }),
+    screen.getByRole("button", { name: "Actions: Alex Morgan" }),
   );
+  await user.click(screen.getByRole("menuitem", { name: "Deactivate" }));
   await user.click(screen.getByRole("button", { name: "Deactivate" }));
   expect(mocks.setDisabled).toHaveBeenCalledWith({
     userId: "admin",
     disabled: true,
   });
-  await user.click(screen.getByRole("button", { name: "Reactivate: Sam Lee" }));
+  await user.click(screen.getByRole("button", { name: "Actions: Sam Lee" }));
+  await user.click(screen.getByRole("menuitem", { name: "Reactivate" }));
   await user.click(screen.getByRole("button", { name: "Reactivate" }));
   expect(mocks.setDisabled).toHaveBeenCalledWith({
     userId: "inactive",

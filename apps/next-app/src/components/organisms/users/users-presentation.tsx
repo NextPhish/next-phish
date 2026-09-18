@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   DataTable,
+  RowActionsMenu,
   Dialog,
   FormMessage,
   PageHeader,
@@ -117,33 +118,30 @@ export function UsersPresentation(props: Props) {
         header: t("tableUi.actions"),
         enableSorting: false,
         cell: ({ row }) => (
-          <div className={styles.actions}>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={`${t(row.original.disabledAt ? "usersUi.reactivate" : "usersUi.deactivate")}: ${row.original.name}`}
-              onClick={() => onToggleRequest(row.original)}
-            >
-              {row.original.disabledAt ? (
-                <RotateCcw size={16} aria-hidden="true" />
-              ) : (
-                <Ban size={16} aria-hidden="true" />
-              )}
-              {t(
-                row.original.disabledAt
-                  ? "usersUi.reactivate"
-                  : "usersUi.deactivate",
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={`${t("usersUi.deletePermanently")}: ${row.original.name}`}
-              onClick={() => onDeleteRequest(row.original)}
-            >
-              <Trash2 size={16} aria-hidden="true" />
-            </Button>
-          </div>
+          <RowActionsMenu
+            label={`${t("tableUi.actions")}: ${row.original.name}`}
+            items={[
+              {
+                label: t(
+                  row.original.disabledAt
+                    ? "usersUi.reactivate"
+                    : "usersUi.deactivate",
+                ),
+                icon: row.original.disabledAt ? (
+                  <RotateCcw size={16} />
+                ) : (
+                  <Ban size={16} />
+                ),
+                onSelect: () => onToggleRequest(row.original),
+              },
+              {
+                label: t("usersUi.deletePermanently"),
+                icon: <Trash2 size={16} />,
+                onSelect: () => onDeleteRequest(row.original),
+                destructive: true,
+              },
+            ]}
+          />
         ),
       },
     ],

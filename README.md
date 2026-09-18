@@ -35,6 +35,7 @@ The checked-in Compose file targets development. The guide documents production 
 - [Deployment and operations](docs/deployment.md)
 - [Architecture](docs/architecture.md)
 - [Coding standards](docs/coding-standards.md)
+- [Contributing and branching strategy](contribution.md)
 - [UI component library and Storybook](packages/ui/README.md)
 - [System email templates (MJML)](packages/backend/src/email/templates/README.md)
 

@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { DataTable, useDataTableState, type DataTableProps } from "../index";
+import {
+  DataTable,
+  RowActionsMenu,
+  useDataTableState,
+  type ColumnDef,
+  type DataTableProps,
+} from "../index";
 import {
   campaigns,
   campaignColumns,
@@ -69,3 +75,47 @@ export const ServerControlled: Story = { args: { server: true } };
 export const Filtered: Story = { args: { filtered: true } };
 
 export const WithoutToolbar: Story = { args: { withoutToolbar: true } };
+
+type OverflowRow = { id: string; name: string };
+const overflowRows: OverflowRow[] = [
+  { id: "row-1", name: "First record" },
+  { id: "row-2", name: "Second record" },
+];
+const overflowColumns: ColumnDef<OverflowRow>[] = [
+  { accessorKey: "name", header: "Name" },
+  ...["Owner", "Department", "Status", "Created", "Updated", "Region"].map(
+    (header): ColumnDef<OverflowRow> => ({
+      id: header,
+      header,
+      cell: () => `${header} value that fills the column`,
+    }),
+  ),
+  {
+    id: "actions",
+    header: "Actions",
+    cell: () => (
+      <RowActionsMenu
+        label="Actions"
+        items={[{ label: "Open record", onSelect: () => undefined }]}
+      />
+    ),
+  },
+];
+function OverflowDemo() {
+  const state = useDataTableState();
+  return (
+    <div style={{ maxWidth: 700 }}>
+      <DataTable
+        {...state}
+        data={overflowRows}
+        columns={overflowColumns}
+        getRowId={(row) => row.id}
+        caption="Wide records"
+        searchable={false}
+      />
+    </div>
+  );
+}
+export const HorizontalOverflow: Story = {
+  render: () => <OverflowDemo />,
+};
