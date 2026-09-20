@@ -1,18 +1,11 @@
 "use client";
-import { useMemo } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+
+import { Suspense, useMemo } from "react";
 import { Skeleton } from "@next-phish/ui";
 import type { OrganizationAnalyticsMonth } from "@next-phish/backend";
 import { useTranslation } from "@/src/lib/i18n";
-import styles from "./chart.module.css";
+import styles from "../chart.module.css";
+import Visualization from "./parts/campaigns-chart-visualization";
 const monthKeys = [
   "charts.jan",
   "charts.feb",
@@ -32,6 +25,8 @@ interface Props {
   loading?: boolean;
   variant?: "legacy" | "v1";
 }
+const ChartSkeleton = () => <Skeleton style={{ width: "100%", height: 250 }} />;
+
 export function CampaignsChart({ months, loading, variant = "legacy" }: Props) {
   const t = useTranslation();
   const isV1 = variant === "v1";
@@ -67,37 +62,17 @@ export function CampaignsChart({ months, loading, variant = "legacy" }: Props) {
         aria-label={title}
       >
         {loading ? (
-          <Skeleton style={{ width: "100%", height: 250 }} />
+          <ChartSkeleton />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+          <Suspense fallback={<ChartSkeleton />}>
+            <Visualization
               data={data}
-              margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
-              accessibilityLayer
-            >
-              <CartesianGrid stroke={grid} vertical={false} />
-              <XAxis
-                dataKey="month"
-                tick={{ fill: axis, fontSize: 11 }}
-                axisLine={{ stroke: grid }}
-                tickLine={false}
-              />
-              <YAxis
-                allowDecimals={false}
-                tick={{ fill: axis, fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip cursor={{ fill: grid }} />
-              <Bar
-                dataKey="campaigns"
-                name={t("charts.campaigns")}
-                fill={isV1 ? "#5b4bdb" : "#29b8ff"}
-                radius={[6, 6, 0, 0]}
-                isAnimationActive={false}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+              axis={axis}
+              grid={grid}
+              seriesName={t("charts.campaigns")}
+              fill={isV1 ? "#5b4bdb" : "#29b8ff"}
+            />
+          </Suspense>
         )}
       </div>
     </div>

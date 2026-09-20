@@ -1,16 +1,7 @@
 "use client";
 
+import { lazy, Suspense } from "react";
 import Link from "next/link";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { CalendarClock } from "lucide-react";
 import {
   Badge as UiBadge,
@@ -32,103 +23,7 @@ interface TimelineViewProps {
   statusLabel: (status: string) => string;
   onRowNavigate: (row: TimelineRow) => void;
 }
-
-function TimelineChart({
-  rows,
-  range,
-  variant,
-  mediumDateFormatter,
-  shortDateFormatter,
-  statusLabel,
-  onRowNavigate,
-  labels,
-}: Pick<
-  TimelineViewProps,
-  | "rows"
-  | "range"
-  | "mediumDateFormatter"
-  | "shortDateFormatter"
-  | "statusLabel"
-  | "onRowNavigate"
-> & {
-  variant: "legacy" | "v1";
-  labels?: { schedules: string; campaigns: string };
-}) {
-  const data = rows.map((row) => ({
-    ...row,
-    range: [row.start.getTime(), row.end.getTime()] as [number, number],
-  }));
-  const axis = variant === "v1" ? "#626d80" : "#a1a1aa";
-  const grid =
-    variant === "v1" ? "rgba(25,34,53,.08)" : "rgba(255,255,255,.08)";
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 8, right: 16, bottom: 8, left: 8 }}
-        accessibilityLayer={variant !== "v1"}
-      >
-        <CartesianGrid stroke={grid} horizontal={false} />
-        <XAxis
-          type="number"
-          domain={[range.startsAt.getTime(), range.endsAt.getTime()]}
-          tickFormatter={(value) => shortDateFormatter.format(new Date(value))}
-          tick={{ fill: axis, fontSize: 11 }}
-          axisLine={{ stroke: grid }}
-          tickLine={false}
-        />
-        <YAxis
-          type="category"
-          dataKey="label"
-          width={130}
-          tick={{ fill: axis, fontSize: 12 }}
-          axisLine={false}
-          tickLine={false}
-        />
-        <Tooltip
-          formatter={(_value, _name, item) => {
-            const row = item.payload as TimelineRow;
-            const kind =
-              row.kind === "schedule"
-                ? (labels?.schedules ?? "Schedule")
-                : (labels?.campaigns ?? "Campaign");
-            return [
-              `${kind} · ${statusLabel(row.status)} · ${mediumDateFormatter.format(row.start)} – ${mediumDateFormatter.format(row.end)}`,
-              row.label,
-            ];
-          }}
-        />
-        <Bar
-          dataKey="range"
-          barSize={18}
-          radius={6}
-          isAnimationActive={false}
-          onClick={(_entry, index) => {
-            const row = rows[index];
-            if (row) onRowNavigate(row);
-          }}
-          className="cursor-pointer"
-        >
-          {rows.map((row) => (
-            <Cell
-              key={`${row.kind}-${row.id}`}
-              fill={
-                row.kind === "schedule"
-                  ? variant === "v1"
-                    ? "#6d60dc"
-                    : "#29b8ff"
-                  : variant === "v1"
-                    ? "#4ab3a5"
-                    : "#15e5d4"
-              }
-            />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
+const TimelineChart = lazy(() => import("./timeline-chart"));
 
 export function ScheduleTimelineV1View({
   rows,
@@ -175,16 +70,18 @@ export function ScheduleTimelineV1View({
               aria-hidden="true"
               style={{ height: `${Math.max(280, rows.length * 42 + 64)}px` }}
             >
-              <TimelineChart
-                rows={rows}
-                range={range}
-                variant="v1"
-                mediumDateFormatter={mediumDateFormatter}
-                shortDateFormatter={shortDateFormatter}
-                statusLabel={statusLabel}
-                onRowNavigate={onRowNavigate}
-                labels={labels}
-              />
+              <Suspense fallback={<Skeleton className="h-full rounded-lg" />}>
+                <TimelineChart
+                  rows={rows}
+                  range={range}
+                  variant="v1"
+                  mediumDateFormatter={mediumDateFormatter}
+                  shortDateFormatter={shortDateFormatter}
+                  statusLabel={statusLabel}
+                  onRowNavigate={onRowNavigate}
+                  labels={labels}
+                />
+              </Suspense>
             </div>
             <ul className="mt-5 grid gap-2 border-t border-ui-border pt-4 sm:grid-cols-2">
               {rows.map((row) => (
@@ -265,15 +162,17 @@ export function ScheduleTimelineLegacyView({
         <Skeleton className="h-72 rounded-xl" />
       ) : rows.length ? (
         <div style={{ height: `${Math.max(280, rows.length * 42 + 64)}px` }}>
-          <TimelineChart
-            rows={rows}
-            range={range}
-            variant="legacy"
-            mediumDateFormatter={mediumDateFormatter}
-            shortDateFormatter={shortDateFormatter}
-            statusLabel={statusLabel}
-            onRowNavigate={onRowNavigate}
-          />
+          <Suspense fallback={<Skeleton className="h-full rounded-xl" />}>
+            <TimelineChart
+              rows={rows}
+              range={range}
+              variant="legacy"
+              mediumDateFormatter={mediumDateFormatter}
+              shortDateFormatter={shortDateFormatter}
+              statusLabel={statusLabel}
+              onRowNavigate={onRowNavigate}
+            />
+          </Suspense>
         </div>
       ) : (
         <div className="flex min-h-52 items-center justify-center rounded-lg border border-dashed border-white/10 text-sm text-zinc-400">

@@ -4,6 +4,10 @@ import type { CampaignStatisticsModel } from "../../../../apps/next-app/src/comp
 import { ScheduleTimelineV1View } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-timeline/parts/schedule-timeline-views";
 import type { TimelineRow } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-timeline/parts/schedule-timeline-data";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
+import {
+  CampaignsChart,
+  EmailStatsChart,
+} from "../../../../apps/next-app/src/components/molecules/charts";
 
 const delivery = {
   campaign: {
@@ -107,3 +111,38 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const DeliveryDoughnut: Story = { args: { chart: "delivery" } };
 export const ScheduleRangeBars: Story = { args: { chart: "timeline" } };
+
+const months = [
+  {
+    month: "2026-08",
+    campaigns: 2,
+    sent: 100,
+    opened: 40,
+    clicked: 15,
+    submitted: 5,
+    reported: 20,
+    failed: 3,
+  },
+  {
+    month: "2026-09",
+    campaigns: 3,
+    sent: 150,
+    opened: 65,
+    clicked: 22,
+    submitted: 8,
+    reported: 30,
+    failed: 2,
+  },
+];
+
+export const OrganizationAnalytics: Story = {
+  args: { chart: "delivery" },
+  render: () => (
+    <I18nProvider initialLocale="en">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <CampaignsChart months={months} variant="v1" />
+        <EmailStatsChart months={months} variant="v1" />
+      </div>
+    </I18nProvider>
+  ),
+};

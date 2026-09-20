@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { lazy, Suspense } from "react";
 import { Skeleton } from "@next-phish/ui";
 import { useTranslation } from "@/src/lib/i18n/client";
 import type { CampaignStatisticsModel } from "../hooks/use-campaign-statistics";
@@ -22,6 +15,7 @@ const deliveryColors: Record<string, string> = {
   DELIVERY_UNKNOWN: "#F97316",
   CANCELLED: "#71717A",
 };
+const DeliveryStatusChart = lazy(() => import("./delivery-status-chart"));
 
 function MetricCard({
   label,
@@ -188,34 +182,9 @@ export function CampaignStatisticsView({
         </p>
         {deliveryEntries.length ? (
           <div className="mt-5 h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart accessibilityLayer>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius="62%"
-                  outerRadius="82%"
-                  paddingAngle={1}
-                  isAnimationActive={false}
-                >
-                  {chartData.map((entry) => (
-                    <Cell
-                      key={entry.name}
-                      fill={entry.color}
-                      stroke="#fff"
-                      strokeWidth={2}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend
-                  verticalAlign="bottom"
-                  iconType="circle"
-                  wrapperStyle={{ color: "#626d80", fontSize: 12 }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<Skeleton className="h-full rounded-xl" />}>
+              <DeliveryStatusChart data={chartData} />
+            </Suspense>
           </div>
         ) : (
           <p className="mt-5 rounded-xl border border-dashed border-[var(--np-border)] px-5 py-10 text-center text-sm text-[var(--np-muted)]">

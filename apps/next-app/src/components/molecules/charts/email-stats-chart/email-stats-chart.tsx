@@ -1,19 +1,12 @@
 "use client";
-import { useMemo } from "react";
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+
+import { Suspense, useMemo } from "react";
 import { Skeleton } from "@next-phish/ui";
 import type { OrganizationAnalyticsMonth } from "@next-phish/backend";
 import { useTranslation } from "@/src/lib/i18n";
-import styles from "./chart.module.css";
+import styles from "../chart.module.css";
+import type { EmailChartSeries } from "./types/email-stats-chart.types";
+import Visualization from "./parts/email-stats-chart-visualization";
 const monthKeys = [
   "charts.jan",
   "charts.feb",
@@ -41,6 +34,8 @@ interface Props {
   loading?: boolean;
   variant?: "legacy" | "v1";
 }
+const ChartSkeleton = () => <Skeleton style={{ width: "100%", height: 250 }} />;
+
 export function EmailStatsChart({
   months,
   loading,
@@ -55,6 +50,9 @@ export function EmailStatsChart({
         ...Object.fromEntries(series.map(([field]) => [field, item[field]])),
       })),
     [months, t],
+  );
+  const translatedSeries: EmailChartSeries[] = series.map(
+    ([field, label, color]) => ({ field, name: t(label), color }),
   );
   const axis = isV1 ? "#626d80" : "#a1a1aa";
   const grid = isV1 ? "rgba(98,109,128,.12)" : "rgba(255,255,255,.08)";
@@ -80,44 +78,16 @@ export function EmailStatsChart({
         aria-label={title}
       >
         {loading ? (
-          <Skeleton style={{ width: "100%", height: 250 }} />
+          <ChartSkeleton />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
+          <Suspense fallback={<ChartSkeleton />}>
+            <Visualization
               data={data}
-              margin={{ top: 8, right: 12, bottom: 0, left: -16 }}
-              accessibilityLayer
-            >
-              <CartesianGrid stroke={grid} vertical={false} />
-              <XAxis
-                dataKey="month"
-                tick={{ fill: axis, fontSize: 11 }}
-                axisLine={{ stroke: grid }}
-                tickLine={false}
-              />
-              <YAxis
-                allowDecimals={false}
-                tick={{ fill: axis, fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip />
-              <Legend wrapperStyle={{ color: axis, fontSize: 11 }} />
-              {series.map(([field, label, color]) => (
-                <Line
-                  key={field}
-                  type="monotone"
-                  dataKey={field}
-                  name={t(label)}
-                  stroke={color}
-                  strokeWidth={2}
-                  dot={{ r: 2 }}
-                  activeDot={{ r: 4 }}
-                  isAnimationActive={false}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
+              series={translatedSeries}
+              axis={axis}
+              grid={grid}
+            />
+          </Suspense>
         )}
       </div>
     </div>
