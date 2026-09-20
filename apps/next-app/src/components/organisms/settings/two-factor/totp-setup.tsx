@@ -10,9 +10,8 @@ import {
   Input,
 } from "@next-phish/ui";
 import { useTranslation } from "../../../../lib/i18n";
-import type { TwoFactorValues } from "./presentation";
+import type { TwoFactorValues } from "./parts/two-factor-settings-view";
 import { BackupCodes } from "./backup-codes";
-import styles from "../profile-settings.module.css";
 
 export function TotpSetup({
   totpUri,
@@ -30,13 +29,13 @@ export function TotpSetup({
   return (
     <Form
       noValidate
-      className={styles.dialogForm}
+      className="grid gap-5"
       aria-busy={isSubmitting || undefined}
     >
-      <div className={styles.setupGrid}>
-        <div className={styles.qrPanel}>
+      <div className="grid gap-[18px]">
+        <div className="grid justify-items-center gap-3 rounded-[10px] border border-[var(--np-border)] bg-[var(--np-tint)] p-4 text-center [&_p]:mt-1 [&_p]:text-xs [&_p]:leading-6 [&_p]:text-[var(--np-muted)]">
           <p>{t("settings.scanQr")}</p>
-          <span className={styles.qrCode}>
+          <span className="inline-flex rounded-lg bg-white p-3">
             <QRCode value={totpUri} size={176} />
           </span>
         </div>
@@ -66,7 +65,7 @@ export function TotpSetup({
         )}
       </FormField>
       {error && <FormMessage variant="error">{error}</FormMessage>}
-      <div className={styles.dialogActions}>
+      <div className="flex justify-end gap-2.5">
         <DialogClose asChild>
           <Button
             type="button"

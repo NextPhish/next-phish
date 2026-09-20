@@ -1,4 +1,4 @@
-import { CampaignDetailContainer } from "@/src/components/organisms/campaigns/detail-container";
+import { CampaignDetail } from "@/src/components/organisms/campaigns";
 
 export default async function CampaignDetailPage({
   params,
@@ -8,5 +8,5 @@ export default async function CampaignDetailPage({
   searchParams: Promise<{ saved?: string }>;
 }) {
   const [{ id }, { saved }] = await Promise.all([params, searchParams]);
-  return <CampaignDetailContainer id={id} saved={saved} />;
+  return <CampaignDetail id={id} saved={saved} />;
 }

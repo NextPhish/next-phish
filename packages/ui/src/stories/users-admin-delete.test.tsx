@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { DeleteUserDialog } from "../../../../apps/next-app/src/components/organisms/users/delete-user-dialog";
+import { DeleteUser } from "../../../../apps/next-app/src/components/organisms/users/delete-user";
 import { demoPreview, demoUsers } from "./users-admin.stories";
 
 const mocks = vi.hoisted(() => ({
@@ -36,7 +36,7 @@ beforeEach(() => {
 function setup(onClose = vi.fn()) {
   const view = render(
     <I18nProvider initialLocale="en">
-      <DeleteUserDialog user={demoUsers[0]!} onClose={onClose} />
+      <DeleteUser user={demoUsers[0]!} onClose={onClose} />
     </I18nProvider>,
   );
   return { user: userEvent.setup(), onClose, ...view };
@@ -60,7 +60,7 @@ it("blocks permanent deletion until a current successful preview exists", async 
   });
   rerender(
     <I18nProvider initialLocale="en">
-      <DeleteUserDialog user={demoUsers[0]!} onClose={() => {}} />
+      <DeleteUser user={demoUsers[0]!} onClose={() => {}} />
     </I18nProvider>,
   );
   expect(
@@ -102,7 +102,7 @@ it("resets orphan selection when opening another user", async () => {
   });
   rerender(
     <I18nProvider initialLocale="en">
-      <DeleteUserDialog user={demoUsers[1]!} onClose={() => {}} />
+      <DeleteUser user={demoUsers[1]!} onClose={() => {}} />
     </I18nProvider>,
   );
   expect(

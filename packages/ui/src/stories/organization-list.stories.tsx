@@ -1,12 +1,10 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import {
-  OrganizationListPresentation,
-  type OrganizationListProps,
-} from "../../../../apps/next-app/src/components/organisms/organizations/organization-list-presentation";
+import { OrganizationListView } from "../../../../apps/next-app/src/components/organisms/organizations/organization-list/parts/organization-list-view";
+import type { OrganizationListModel } from "../../../../apps/next-app/src/components/organisms/organizations/organization-list/types/organization-list.types";
 import { AppShell, useDataTableState } from "../index";
-type OrganizationView = OrganizationListProps["organizations"][number];
+type OrganizationView = OrganizationListModel["organizations"][number];
 
 export const demoOrganizations = [
   {
@@ -31,11 +29,19 @@ export const demoOrganizations = [
     $me: { role: "member" },
   },
 ] as OrganizationView[];
-function Preview({ loading = false }: { loading?: boolean }) {
+function Preview({
+  loading = false,
+  canCreate = true,
+  empty = false,
+}: {
+  loading?: boolean;
+  canCreate?: boolean;
+  empty?: boolean;
+}) {
   const table = useDataTableState();
   const [deleting, setDeleting] = useState<OrganizationView | null>(null);
   const role = table.state.filters.role;
-  const rows = demoOrganizations.filter(
+  const rows = (empty ? [] : demoOrganizations).filter(
     (org) =>
       (!role || org.$me.role === role) &&
       org.name.toLowerCase().includes(table.state.search.toLowerCase()),
@@ -59,11 +65,13 @@ function Preview({ loading = false }: { loading?: boolean }) {
         activeItem="organizations"
         breadcrumb="Organizations"
       >
-        <OrganizationListPresentation
+        <OrganizationListView
           {...table}
           organizations={rows}
           total={rows.length}
-          ownedCount={1}
+          canCreate={canCreate}
+          onCreate={() => undefined}
+          canDeleteOrganization={() => false}
           loading={loading}
           onRetry={() => {}}
           onManage={() => {}}
@@ -86,3 +94,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 export const Loading: Story = { args: { loading: true } };
+export const OwnerWithNoMatches: Story = {
+  args: { canCreate: true, empty: true },
+};
+export const CannotCreate: Story = { args: { canCreate: false } };

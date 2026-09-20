@@ -1,4 +1,4 @@
-import { ScheduleFormContainer } from "@/src/components/organisms/schedules/form-container";
+import { ScheduleForm } from "@/src/components/organisms/schedules";
 
 export const dynamic = "force-dynamic";
 
@@ -8,5 +8,5 @@ export default async function EditSchedulePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <ScheduleFormContainer scheduleId={id} />;
+  return <ScheduleForm scheduleId={id} />;
 }

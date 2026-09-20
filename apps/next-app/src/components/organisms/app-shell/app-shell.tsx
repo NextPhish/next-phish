@@ -7,9 +7,9 @@ import type { OrganizationView } from "@next-phish/backend";
 import { Languages, Settings } from "lucide-react";
 import { SUPPORTED_LANGUAGES } from "@/src/lib/constants";
 import { useLocale, useSetLocale, useTranslation } from "@/src/lib/i18n";
-import { OrgSwitcher } from "./org-switcher";
+import { OrganizationSwitcher } from "./organization-switcher";
 import { SidebarProfile } from "./sidebar-profile";
-import { useSidebarNavigation } from "./sidebar-menu";
+import { useSidebarNavigation } from "./hooks/use-sidebar-navigation";
 import styles from "./app-shell.module.css";
 
 const EMPTY_ORGANIZATIONS: OrganizationView[] = [];
@@ -116,7 +116,7 @@ export function AppShell({
           </>
         }
         organization={
-          <OrgSwitcher
+          <OrganizationSwitcher
             organizations={organizations}
             organizationTotal={organizationTotal}
           />

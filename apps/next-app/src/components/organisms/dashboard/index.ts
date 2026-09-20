@@ -1,1 +1,2 @@
-export { DashboardContainer } from "./container";
+export { Dashboard } from "./dashboard";
+export { DashboardSkeleton } from "./parts/dashboard-skeleton";

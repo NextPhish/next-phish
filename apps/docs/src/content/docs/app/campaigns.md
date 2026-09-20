@@ -21,6 +21,8 @@ _The campaign list distinguishes reusable templates from concrete runs. Open a n
 
 A template campaign is a source for future concrete runs, not a sendable campaign with its own recipients or delivery statistics.
 
+When a schedule becomes due, NextPhish creates a separate concrete run and snapshots its selected assets and audience. It then creates durable delivery work for each recipient according to the schedule's pacing policy. See [Scheduling and delivery](/concepts/scheduling-and-delivery/) for the full path from schedule polling through the database outbox, BullMQ and the mail provider.
+
 ## Publish and follow a run
 
 Open the campaign details and check the selected audience, sender, message, page, and planned time with a second person. Publish the draft when those are correct. A published concrete campaign exposes a **Schedule** action. Depending on its state, the detail view also offers pause, resume, complete, clone, and delete actions.
@@ -41,8 +43,8 @@ _The delivery chart summarizes the current send state. Open **Recipients** to in
 | **Statistics** | How many recipients reached each stage?   |
 | **Recipients** | What happened to one recipient, and when? |
 
-In **Recipients**, open a row to inspect its timeline. **Sent** means the sending provider accepted the message; **Opened** means the tracking image loaded; **Clicked** means a tracked link or landing page was followed; **Submitted** means the practice page's submit action was used. A separate delivery timeline can show provider statuses such as **Delivered**, **Bounced**, or **Rejected**. See [Events and data](/concepts/events-and-data/) for how these events are recorded and why opens or clicks sometimes come from scanners.
+In **Recipients**, open a row to inspect its timeline. **Sent** means the sending provider accepted the message; it does not guarantee delivery to the mailbox. **Opened** means the tracking image loaded; **Clicked** means a tracked link or landing page was followed; **Submitted** means the practice page's submit action was used. A separate delivery timeline can show provider statuses such as **Delivered**, **Bounced**, or **Rejected**. **Delivery unknown** means NextPhish cannot safely determine whether the provider accepted the message, so it avoids an automatic retry that could create a duplicate. See [Events and data](/concepts/events-and-data/) for how these events are recorded and why opens or clicks sometimes come from scanners.
 
 If the campaign stays pending, ask an administrator to check the worker, schedule timezone, delivery setting, and mail provider. If messages are sent but do not reach inboxes, see [Mail allowlisting](/guides/mail-allowlisting/). If clicks appear before anyone opens the test message, see [Ignored networks](/guides/ignored-networks/).
 
-Delivery requires a running worker, `DELIVERY_ENABLED=true`, a reachable sending provider and a public content origin accessible to recipients. For a local walkthrough, see [Local development](/guides/local-development/).
+Delivery requires a running worker, `DELIVERY_ENABLED=true`, reachable Redis and PostgreSQL services, a reachable sending provider and a public content origin accessible to recipients. Queue processing is durable and guarded against duplicate work, but it is not an exactly-once guarantee across the database, Redis and SMTP. For a local walkthrough, see [Local development](/guides/local-development/).

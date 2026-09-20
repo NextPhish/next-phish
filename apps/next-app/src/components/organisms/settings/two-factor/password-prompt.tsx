@@ -9,8 +9,7 @@ import {
   PasswordInput,
 } from "@next-phish/ui";
 import { useTranslation } from "../../../../lib/i18n";
-import type { TwoFactorValues } from "./presentation";
-import styles from "../profile-settings.module.css";
+import type { TwoFactorValues } from "./parts/two-factor-settings-view";
 
 export function PasswordPrompt({
   error,
@@ -24,7 +23,7 @@ export function PasswordPrompt({
   return (
     <Form
       noValidate
-      className={styles.dialogForm}
+      className="grid gap-5"
       aria-busy={isSubmitting || undefined}
     >
       <FormField
@@ -51,7 +50,7 @@ export function PasswordPrompt({
         )}
       </FormField>
       {error && <FormMessage variant="error">{error}</FormMessage>}
-      <div className={styles.dialogActions}>
+      <div className="flex justify-end gap-2.5">
         <DialogClose asChild>
           <Button
             type="button"

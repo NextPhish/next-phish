@@ -1,5 +1,5 @@
-import { PagesListContainer } from "@/src/components/organisms/pages/pages-list-container";
+import { PagesList } from "@/src/components/organisms/pages";
 
 export default function PagesPage() {
-  return <PagesListContainer />;
+  return <PagesList />;
 }

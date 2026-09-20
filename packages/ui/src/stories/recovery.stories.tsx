@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Formik } from "formik";
 import { AuthLayout } from "../index";
-import { ResetPasswordPresentation } from "../../../../apps/next-app/src/components/organisms/reset-password/presentation";
+import { ResetPasswordFlow } from "../../../../apps/next-app/src/components/organisms/reset-password/parts/reset-password-flow";
 import {
   I18nProvider,
   useTranslation,
@@ -21,7 +21,7 @@ function RecoveryPreview({ step = "reset" }: { step?: "reset" | "verify" }) {
         initialValues={{ otp: "", newPassword: "", confirmPassword: "" }}
         onSubmit={() => {}}
       >
-        <ResetPasswordPresentation step={step} error="" />
+        <ResetPasswordFlow step={step} error="" />
       </Formik>
     </AuthLayout>
   );

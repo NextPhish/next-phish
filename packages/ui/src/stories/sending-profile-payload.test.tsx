@@ -4,8 +4,8 @@ import {
   createSendingProfilePayload,
   sendingProfileValuesFromView,
   updateSendingProfilePayload,
-} from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-values";
-import { sendingProfileValidator } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-validation";
+} from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form/sending-profile-values";
+import { sendingProfileValidator } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form/sending-profile-validation";
 
 describe("sending profile payloads", () => {
   const values = {

@@ -14,12 +14,12 @@ import {
   CardBody,
   FormMessage,
 } from "../index";
-import { GeneralTabPresentation } from "../../../../apps/next-app/src/components/organisms/settings/general-tab-presentation";
-import { ChangePasswordPresentation } from "../../../../apps/next-app/src/components/organisms/settings/change-password-presentation";
-import { TwoFactorPresentation } from "../../../../apps/next-app/src/components/organisms/settings/two-factor/presentation";
-import { NotificationsTab } from "../../../../apps/next-app/src/components/organisms/settings/notifications-tab";
-import { ApiKeyListPresentation } from "../../../../apps/next-app/src/components/organisms/settings/api-key-list-presentation";
-import { ApiKeyForm } from "../../../../apps/next-app/src/components/organisms/settings/api-key-form";
+import { GeneralSettingsView } from "../../../../apps/next-app/src/components/organisms/settings/general-settings/parts/general-settings-view";
+import { ChangePasswordFields } from "../../../../apps/next-app/src/components/organisms/settings/change-password/parts/change-password-fields";
+import { TwoFactorSettingsView } from "../../../../apps/next-app/src/components/organisms/settings/two-factor/parts/two-factor-settings-view";
+import { NotificationsSettings } from "../../../../apps/next-app/src/components/organisms/settings/user-settings/parts/notifications-settings";
+import { ApiKeyListView } from "../../../../apps/next-app/src/components/organisms/settings/api-key-list/parts/api-key-list-view";
+import { ApiKeyFields } from "../../../../apps/next-app/src/components/organisms/settings/api-key-form/parts/api-key-fields";
 import {
   I18nProvider,
   useTranslation,
@@ -28,8 +28,7 @@ import { toFormikValidation } from "../../../../apps/next-app/src/lib/to-formik-
 import {
   profileValidator,
   passwordValidator,
-} from "../../../../apps/next-app/src/components/organisms/settings/profile-validation";
-import styles from "../../../../apps/next-app/src/components/organisms/settings/profile-settings.module.css";
+} from "../../../../apps/next-app/src/components/organisms/settings/validation";
 
 const keys = [
   {
@@ -75,11 +74,8 @@ function ProfileContent({ tab }: { tab: Tab }) {
       {preview && (
         <FormMessage variant="info">{t("settings.previewNotice")}</FormMessage>
       )}
-      <Tabs defaultValue={tab} className={styles.tabs}>
-        <TabsList
-          aria-label={t("settings.accountTitle")}
-          className={styles.tabList}
-        >
+      <Tabs defaultValue={tab} className="min-w-0">
+        <TabsList aria-label={t("settings.accountTitle")} className="mb-0 px-5">
           {(["general", "security", "api-keys", "notifications"] as const).map(
             (value) => (
               <TabsTrigger key={value} value={value}>
@@ -102,7 +98,7 @@ function ProfileContent({ tab }: { tab: Tab }) {
             validate={profileValidator(t)}
             onSubmit={() => setPreview(true)}
           >
-            <GeneralTabPresentation
+            <GeneralSettingsView
               email="alex@example.com"
               timezones={[
                 "UTC",
@@ -116,7 +112,7 @@ function ProfileContent({ tab }: { tab: Tab }) {
           </Formik>
         </TabsContent>
         <TabsContent value="security">
-          <div className={styles.cardStack}>
+          <div className="grid gap-5">
             <Card>
               <CardHeader
                 title={t("settings.changePassword")}
@@ -132,7 +128,7 @@ function ProfileContent({ tab }: { tab: Tab }) {
                   validate={passwordValidator(t)}
                   onSubmit={() => setPreview(true)}
                 >
-                  <ChangePasswordPresentation error="" success="" />
+                  <ChangePasswordFields error="" success="" />
                 </Formik>
               </CardBody>
             </Card>
@@ -140,7 +136,7 @@ function ProfileContent({ tab }: { tab: Tab }) {
               initialValues={{ password: "", verifyCode: "" }}
               onSubmit={() => setPreview(true)}
             >
-              <TwoFactorPresentation
+              <TwoFactorSettingsView
                 isEnabled={false}
                 step="idle"
                 error=""
@@ -155,7 +151,7 @@ function ProfileContent({ tab }: { tab: Tab }) {
           </div>
         </TabsContent>
         <TabsContent value="api-keys">
-          <ApiKeyListPresentation
+          <ApiKeyListView
             keys={keys}
             loading={false}
             onRetry={() => {}}
@@ -164,7 +160,7 @@ function ProfileContent({ tab }: { tab: Tab }) {
           />
         </TabsContent>
         <TabsContent value="notifications">
-          <NotificationsTab />
+          <NotificationsSettings />
         </TabsContent>
       </Tabs>
     </AppShell>
@@ -218,7 +214,7 @@ export const CreateApiKey: Story = {
         }
       >
         {({ status }) => (
-          <ApiKeyForm
+          <ApiKeyFields
             visible
             onHide={() => {}}
             error={status ?? ""}
@@ -236,7 +232,7 @@ export const AuthenticatorSetup: Story = {
         initialValues={{ password: "", verifyCode: "" }}
         onSubmit={() => {}}
       >
-        <TwoFactorPresentation
+        <TwoFactorSettingsView
           isEnabled={false}
           step="setup"
           error=""

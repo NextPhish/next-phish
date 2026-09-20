@@ -16,6 +16,12 @@ const quickLinks = [
   { kicker: 'EXPLORE', title: 'Use the app', description: 'Learn the pages and workflows that make up NextPhish.', href: '/app/dashboard/', icon: 'compass' },
   { kicker: 'AGENT READY', title: 'Connect an AI assistant', description: 'Use MCP to give an assistant controlled access to NextPhish tools.', href: '/guides/mcp/', icon: 'agent' },
 ];
+const deliverySteps = [
+  { number: '01', title: 'Choose when to run', description: 'A schedule is a reusable plan. When it becomes due, a background worker creates a campaign run and prepares its recipients.' },
+  { number: '02', title: 'Record the work safely', description: 'The database saves each state change and its next background action together. This pending-work list is called the transactional outbox.' },
+  { number: '03', title: 'Queue and send', description: 'A publisher transfers pending actions to the queue. Delivery workers send through your SMTP profile, respecting planned times and sending limits.' },
+  { number: '04', title: 'Follow the outcome', description: 'Temporary failures can be retried. If the server may have accepted an email but confirmation was lost, the outcome is marked unknown for review.' },
+];
 ---
 <!doctype html>
 <html lang="en">
@@ -47,6 +53,14 @@ const quickLinks = [
         </section>
         <section class="intro-strip" aria-label="What you can do with NextPhish"><div><strong>One connected workflow</strong><span>From the first landing page to the final campaign result.</span></div><div class="strip-steps"><span>Build</span><b>→</b><span>Launch</span><b>→</b><span>Measure</span></div></section>
         <section class="section workflow" aria-labelledby="workflow-title"><div class="section-heading"><div><p class="eyebrow">THE WORKFLOW</p><h2 id="workflow-title">Understand the whole picture.</h2><p>NextPhish connects the building blocks of an awareness campaign in one place.</p></div><a class="section-link" href={docsHref('/getting-started/')}>Explore the platform <span aria-hidden="true">→</span></a></div><div class="workflow-grid">{steps.map((step) => <article class="workflow-card"><span class="card-number">{step.number}</span><div class={`card-icon icon-${step.icon}`} aria-hidden="true">{step.icon === 'layers' ? '▣' : step.icon === 'calendar' ? '▦' : step.icon === 'pulse' ? '⌁' : '▥'}</div><h3>{step.title}</h3><p>{step.description}</p></article>)}</div></section>
+        <section class="section delivery" aria-labelledby="delivery-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">FROM SCHEDULE TO SEND</p><h2 id="delivery-title">Saved now. Sent in the background.</h2><p>You can close the browser after saving. The worker service carries out the plan.</p></div>
+            <a class="section-link" href={docsHref('/concepts/scheduling-and-delivery/')}>How scheduling and delivery work <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="workflow-grid">{deliverySteps.map((step) => <article class="workflow-card"><span class="card-number">{step.number}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}</div>
+          <p class="delivery-note">Think of the outbox as a saved to-do list for the worker: if publishing to the queue fails, the pending action stays in the database for another attempt. Scheduled times are not exact inbox-arrival guarantees, and SMTP acceptance does not prove inbox delivery.</p>
+        </section>
         <section class="section start" aria-labelledby="start-title"><div class="section-heading"><div><p class="eyebrow">FIND YOUR WAY</p><h2 id="start-title">Where would you like to start?</h2><p>Go from first run to daily use with focused, practical guides.</p></div></div><div class="link-grid">{quickLinks.map((link) => <a class="link-card" href={docsHref(link.href)}><span class="link-icon" aria-hidden="true">{link.icon === 'terminal' ? '⌘' : link.icon === 'server' ? '▤' : link.icon === 'agent' ? '✦' : '◈'}</span><span class="link-content"><small>{link.kicker}</small><strong>{link.title}</strong><span>{link.description}</span></span><span class="link-arrow" aria-hidden="true">↗</span></a>)}</div></section>
         <section class="bottom-cta"><div><p class="eyebrow">READY TO BEGIN?</p><h2>Make every simulation count.</h2><p>Start with the fundamentals, then build a workflow that fits your team.</p></div><a class="button button-light" href={docsHref('/getting-started/')}>Start reading <span aria-hidden="true">→</span></a></section>
       </main>

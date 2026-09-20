@@ -1,4 +1,4 @@
-import { ScheduleDetailContainer } from "@/src/components/organisms/schedules/detail-container";
+import { ScheduleDetail } from "@/src/components/organisms/schedules";
 
 export default async function ScheduleDetailPage({
   params,
@@ -8,5 +8,5 @@ export default async function ScheduleDetailPage({
   searchParams: Promise<{ saved?: string }>;
 }) {
   const [{ id }, { saved }] = await Promise.all([params, searchParams]);
-  return <ScheduleDetailContainer id={id} saved={saved} />;
+  return <ScheduleDetail id={id} saved={saved} />;
 }

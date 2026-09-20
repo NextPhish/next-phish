@@ -6,9 +6,9 @@ import type {
   UserView,
 } from "../../../backend/src/user/types";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { UsersPresentation } from "../../../../apps/next-app/src/components/organisms/users/users-presentation";
-import { CreateUserPresentation } from "../../../../apps/next-app/src/components/organisms/users/create-user-presentation";
-import { DeleteUserPresentation } from "../../../../apps/next-app/src/components/organisms/users/delete-user-presentation";
+import { UserListView } from "../../../../apps/next-app/src/components/organisms/users/user-list/parts/user-list-view";
+import { CreateUserFields } from "../../../../apps/next-app/src/components/organisms/users/create-user/parts/create-user-fields";
+import { DeleteUserView } from "../../../../apps/next-app/src/components/organisms/users/delete-user/parts/delete-user-view";
 import { AppShell, useDataTableState } from "../index";
 export const demoUsers = [
   {
@@ -57,7 +57,7 @@ function List({ loading = false }: { loading?: boolean }) {
   return (
     <I18nProvider initialLocale="en">
       <AppShell activeItem="users" navigation={[]} breadcrumb="Users">
-        <UsersPresentation
+        <UserListView
           {...table}
           users={demoUsers}
           total={demoUsers.length}
@@ -100,7 +100,7 @@ export function UserCreateFixture() {
         }}
         onSubmit={() => {}}
       >
-        <CreateUserPresentation
+        <CreateUserFields
           visible
           organizations={[
             { id: "acme", name: "Acme" },
@@ -128,7 +128,7 @@ export function UserDeletionFixture({
   const [action, setAction] = useState<"keep" | "delete">("keep");
   return (
     <I18nProvider initialLocale="en">
-      <DeleteUserPresentation
+      <DeleteUserView
         user={demoUsers[0]!}
         preview={state === "ready" ? demoPreview : undefined}
         previewLoading={state === "loading"}

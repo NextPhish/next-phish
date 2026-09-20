@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { RecipientTimelinePresentation } from "../../../../apps/next-app/src/components/organisms/campaigns/recipient-timeline-presentation";
+import { RecipientTimelineView } from "../../../../apps/next-app/src/components/organisms/campaigns/recipient-timeline/parts/recipient-timeline-view";
 
 describe("campaign recipient timeline", () => {
   it("shows a localized retry for failed event queries", async () => {
@@ -10,7 +10,7 @@ describe("campaign recipient timeline", () => {
     const user = userEvent.setup();
     render(
       <I18nProvider initialLocale="bg">
-        <RecipientTimelinePresentation
+        <RecipientTimelineView
           events={[]}
           loading={false}
           error
@@ -29,7 +29,7 @@ describe("campaign recipient timeline", () => {
   it("preserves event source, metadata, and campaign timezone", () => {
     render(
       <I18nProvider initialLocale="en">
-        <RecipientTimelinePresentation
+        <RecipientTimelineView
           events={[
             {
               id: "event-1",
@@ -56,9 +56,9 @@ describe("campaign recipient timeline", () => {
 
 import { useState } from "react";
 import {
-  CampaignRecipientsPresentation,
+  CampaignRecipientsView,
   type Recipient,
-} from "../../../../apps/next-app/src/components/organisms/campaigns/recipients-presentation";
+} from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-recipients/parts/campaign-recipients-view";
 import { useDataTableState } from "../hooks/use-data-table-state";
 
 function RecipientsPreview() {
@@ -82,7 +82,7 @@ function RecipientsPreview() {
   })) as Recipient[];
   return (
     <I18nProvider initialLocale="en">
-      <CampaignRecipientsPresentation
+      <CampaignRecipientsView
         rows={rows}
         total={rows.length}
         state={state}
@@ -108,39 +108,17 @@ it("expands each history immediately after its recipient row and removes it on c
   render(<RecipientsPreview />);
   const firstRow = screen.getByText("Daniel Demo").closest("tr")!;
   const secondRow = screen.getByText("Elena Demo").closest("tr")!;
-  let firstToggle = firstRow.querySelector("button")!;
-  const secondToggle = secondRow.querySelector("button")!;
-  await user.click(secondToggle);
-  await user.click(
-    screen.getByRole("menuitem", { name: /Toggle event history for elena/i }),
-  );
-  firstToggle = screen
-    .getByText("Daniel Demo")
-    .closest("tr")!
-    .querySelector("button")!;
-  await user.click(firstToggle);
-  await user.click(
-    screen.getByRole("menuitem", { name: /Toggle event history for daniel/i }),
-  );
+  await user.click(secondRow);
+  await user.click(firstRow);
   const firstDetails = screen.getByText("Timeline 0").closest("tr")!;
   const secondDetails = screen.getByText("Timeline 1").closest("tr")!;
   expect(firstRow.nextElementSibling).toBe(firstDetails);
   expect(firstDetails.nextElementSibling).toBe(secondRow);
   expect(secondRow.nextElementSibling).toBe(secondDetails);
-  expect(firstDetails.querySelector("td")).toHaveAttribute("colspan", "8");
-  firstToggle = screen
-    .getByText("Daniel Demo")
-    .closest("tr")!
-    .querySelector("button")!;
-  await user.click(firstToggle);
-  const historyAction = screen.getByRole("menuitem", {
-    name: /Toggle event history for daniel/i,
-  });
-  expect(historyAction).toHaveAttribute("aria-expanded", "true");
-  expect(
-    document.getElementById(historyAction.getAttribute("aria-controls")!),
-  ).toContainElement(screen.getByText("Timeline 0"));
-  await user.click(historyAction);
+  expect(firstDetails.querySelector("td")).toHaveAttribute("colspan", "7");
+  expect(firstRow).toHaveAttribute("aria-expanded", "true");
+  firstRow.focus();
+  await user.keyboard("{Enter}");
   expect(screen.queryByText("Timeline 0")).not.toBeInTheDocument();
   expect(firstRow.nextElementSibling).toBe(secondRow);
   expect(screen.getByText("Timeline 1")).toBeVisible();

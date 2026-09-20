@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CampaignDetailPresentation } from "../../../../apps/next-app/src/components/organisms/campaigns/detail-presentation";
+import { CampaignDetailView } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-detail/parts/campaign-detail-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 
 function setup(type: "TEMPLATE" | "CONCRETE") {
@@ -9,7 +9,7 @@ function setup(type: "TEMPLATE" | "CONCRETE") {
   const Recipients = vi.fn(() => <p>Recipients content</p>);
   render(
     <I18nProvider initialLocale="en">
-      <CampaignDetailPresentation
+      <CampaignDetailView
         name="Awareness campaign"
         type={type}
         status="PUBLISHED"

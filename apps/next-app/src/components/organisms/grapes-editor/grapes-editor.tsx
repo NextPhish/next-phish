@@ -10,6 +10,7 @@ import pluginForms from "grapesjs-plugin-forms";
 import styleGradient from "grapesjs-style-gradient";
 import grapesjsFonts from "@silexlabs/grapesjs-fonts";
 import styles from "./grapes-editor.module.css";
+import { buildEditorHtml, initialEditorHtml } from "./starter-content";
 
 export type EditorMode = "email" | "page";
 
@@ -25,41 +26,8 @@ interface GrapesEditorProps {
 function buildHtml(editor: Editor) {
   const css = editor.getCss();
   const body = editor.getHtml();
-  return `<!DOCTYPE html><html><head><meta charset="utf-8" /><style>${css}</style></head><body>${body}</body></html>`;
+  return buildEditorHtml(body, css ?? "");
 }
-
-const emailDefaultContent = `
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fb;padding:32px 0;font-family:Arial,Helvetica,sans-serif;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;">
-          <tr>
-            <td style="padding:40px;background:linear-gradient(135deg,#15e5d4 0%,#29b8ff 35%,#3b8fff 60%,#5c73ff 80%,#7b5cff 100%);color:#ffffff;">
-              <h1 style="margin:0;font-size:28px;line-height:1.2;">Security Update</h1>
-              <p style="margin:16px 0 0;font-size:16px;line-height:1.6;">Hello {{.FirstName}}, this is your starting point for a new phishing simulation email.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:32px 40px;color:#0f172a;">
-              <p style="margin:0 0 16px;font-size:15px;line-height:1.7;">We noticed activity that requires your attention. Review the link below and confirm your details.</p>
-              <p style="margin:0 0 24px;font-size:15px;line-height:1.7;">Email: {{.Email}}</p>
-              <a href="{{.URL}}" style="display:inline-block;background:#29b8ff;color:#ffffff;text-decoration:none;padding:14px 24px;border-radius:999px;font-weight:700;">Review activity</a>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-`;
-
-const pageDefaultContent = `
-  <div style="padding:48px;font-family:system-ui,-apple-system,sans-serif;max-width:960px;margin:0 auto;">
-    <div style="background:linear-gradient(135deg,#15e5d4 0%,#29b8ff 35%,#3b8fff 60%,#5c73ff 80%,#7b5cff 100%);border-radius:16px;padding:64px 48px;color:#ffffff;text-align:center;">
-      <h1 style="margin:0 0 16px;font-size:36px;line-height:1.2;font-weight:700;">Welcome to NextPhish</h1>
-      <p style="margin:0;font-size:18px;line-height:1.6;opacity:0.9;">Start building your page here.</p>
-    </div>
-  </div>
-`;
 
 function getPluginsConfig(mode: EditorMode, fontsApiKey?: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,8 +72,6 @@ export function GrapesEditor({
 }: GrapesEditorProps) {
   const initializedRef = useRef(false);
 
-  const defaultContent =
-    mode === "email" ? emailDefaultContent : pageDefaultContent;
   const { plugins, pluginsOpts } = getPluginsConfig(mode, fontsApiKey);
 
   function handleEditor(editor: Editor) {
@@ -114,10 +80,8 @@ export function GrapesEditor({
         editor.loadProjectData(
           initialDesign as Parameters<Editor["loadProjectData"]>[0],
         );
-      } else if (initialHtml) {
-        editor.setComponents(initialHtml);
       } else {
-        editor.setComponents(defaultContent);
+        editor.setComponents(initialEditorHtml(mode, initialHtml));
       }
 
       initializedRef.current = true;

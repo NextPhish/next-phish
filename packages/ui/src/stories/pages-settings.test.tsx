@@ -2,7 +2,7 @@ import { Formik } from "formik";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import { PageSettingsPresentation } from "../../../../apps/next-app/src/components/organisms/pages/page-settings-presentation";
+import { PageSettingsView } from "../../../../apps/next-app/src/components/organisms/pages/page-form/page-settings/parts/page-settings-view";
 import {
   I18nProvider,
   useTranslation,
@@ -25,7 +25,7 @@ function Settings({ select = vi.fn() }: { select?: (id: string) => void }) {
       onSubmit={() => {}}
     >
       {({ values, setFieldValue }) => (
-        <PageSettingsPresentation
+        <PageSettingsView
           t={t}
           values={values}
           setFieldValue={async (field, value) => {

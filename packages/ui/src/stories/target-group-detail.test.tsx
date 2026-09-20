@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { TargetGroupDetailContainer } from "../../../../apps/next-app/src/components/organisms/target-groups/detail-container";
+import { TargetGroupDetail } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-detail";
 const mocks = vi.hoisted(() => ({
   users: vi.fn(),
   remove: vi.fn(),
@@ -14,12 +14,12 @@ vi.mock(
   () => ({ TargetGroupForm: () => <div>Group form</div> }),
 );
 vi.mock(
-  "../../../../apps/next-app/src/components/organisms/target-groups/add-user-dialog",
-  () => ({ AddUserDialog: () => null }),
+  "../../../../apps/next-app/src/components/organisms/target-groups/target-group-add-user",
+  () => ({ TargetGroupAddUser: () => null }),
 );
 vi.mock(
-  "../../../../apps/next-app/src/components/organisms/target-groups/import-users-dialog",
-  () => ({ ImportUsersDialog: () => null }),
+  "../../../../apps/next-app/src/components/organisms/target-groups/target-group-import",
+  () => ({ TargetGroupImport: () => null }),
 );
 vi.mock("@/src/lib/trpc", () => ({
   trpc: {
@@ -72,7 +72,7 @@ it("queries member pages and removes only the confirmed group member", async () 
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <TargetGroupDetailContainer groupId="group-1" />
+      <TargetGroupDetail groupId="group-1" />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Next page" }));

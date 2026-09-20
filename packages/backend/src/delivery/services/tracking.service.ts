@@ -7,6 +7,7 @@ import {
   CampaignStatus,
   RecipientDeliveryStatus,
 } from "../execution.enums";
+import { renderTemplateVariables } from "./template-variables";
 
 type TrackableCampaignEvent = Extract<
   CampaignEventTypeValue,
@@ -66,7 +67,22 @@ export class TrackingService {
     )
       return null;
     const action = `/s?ref=${encodeURIComponent(trackingRef)}`;
-    const formHtml = page.html.replace(
+    const landingUrl = `/${page.path ?? "c"}?ref=${encodeURIComponent(trackingRef)}`;
+    const personalizedHtml = renderTemplateVariables(page.html, {
+      firstName: recipient.firstName,
+      FirstName: recipient.firstName,
+      lastName: recipient.lastName,
+      LastName: recipient.lastName,
+      email: recipient.email,
+      Email: recipient.email,
+      position: recipient.position ?? "",
+      Position: recipient.position ?? "",
+      trackingRef,
+      TrackingRef: trackingRef,
+      url: landingUrl,
+      URL: landingUrl,
+    });
+    const formHtml = personalizedHtml.replace(
       /<form\b([^>]*)>/gi,
       (_match, attributes: string) => {
         const withoutAction = attributes.replace(

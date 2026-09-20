@@ -18,9 +18,54 @@ export const taskRelationSchema = z
   .nullable()
   .optional();
 
+const taskBlockIdSchema = z.string().trim().min(1).max(100).optional();
+const taskParagraphBlockSchema = z
+  .object({
+    id: taskBlockIdSchema,
+    type: z.literal("paragraph"),
+    data: z.object({ text: z.string().max(20_000) }).strict(),
+  })
+  .strict();
+const taskHeaderBlockSchema = z
+  .object({
+    id: taskBlockIdSchema,
+    type: z.literal("header"),
+    data: z
+      .object({
+        text: z.string().max(2_000),
+        level: z.number().int().min(1).max(6),
+      })
+      .strict(),
+  })
+  .strict();
+const taskListBlockSchema = z
+  .object({
+    id: taskBlockIdSchema,
+    type: z.literal("list"),
+    data: z
+      .object({
+        style: z.enum(["ordered", "unordered"]),
+        items: z.array(z.string().max(10_000)).max(200),
+      })
+      .strict(),
+  })
+  .strict();
+export const taskDescriptionBlockSchema = z.discriminatedUnion("type", [
+  taskParagraphBlockSchema,
+  taskHeaderBlockSchema,
+  taskListBlockSchema,
+]);
+
+export const taskDescriptionSchema = z
+  .object({
+    version: z.literal(1),
+    blocks: z.array(taskDescriptionBlockSchema).max(500),
+  })
+  .strict();
+
 export const taskFormSchema = z.object({
   title: z.string().trim().min(1, "Task title is required").max(200),
-  description: z.string().trim().max(4000).optional().default(""),
+  description: taskDescriptionSchema.nullable().optional().default(null),
   statusId: z.string().min(1, "Status is required"),
   priority: taskPrioritySchema.default("MEDIUM"),
   assigneeId: z.string().nullable().optional(),
@@ -41,5 +86,7 @@ export const taskStatusFormSchema = z.object({
 });
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
+export type TaskDescription = z.infer<typeof taskDescriptionSchema>;
+export type TaskDescriptionBlock = z.infer<typeof taskDescriptionBlockSchema>;
 export type TaskStatusFormValues = z.infer<typeof taskStatusFormSchema>;
 export type TaskResourceType = z.infer<typeof taskResourceTypeSchema>;

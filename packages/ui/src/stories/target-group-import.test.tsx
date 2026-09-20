@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { ImportUsersDialog } from "../../../../apps/next-app/src/components/organisms/target-groups/import-users-dialog";
+import { TargetGroupImport } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-import";
 const mocks = vi.hoisted(() => ({
   upload: vi.fn(),
   start: vi.fn(),
@@ -45,7 +45,7 @@ it("validates the file before uploading", async () => {
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <ImportUsersDialog visible targetGroupId="group-1" onHide={mocks.close} />
+      <TargetGroupImport visible targetGroupId="group-1" onHide={mocks.close} />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Start import" }));
@@ -58,7 +58,7 @@ it("uploads the selected CSV and starts upsert with the returned file id", async
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <ImportUsersDialog visible targetGroupId="group-1" onHide={mocks.close} />
+      <TargetGroupImport visible targetGroupId="group-1" onHide={mocks.close} />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("radio", { name: /Insert \+ Update/ }));
@@ -95,7 +95,7 @@ it("keeps a failed upload in configure mode and shows a localized error", async 
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <ImportUsersDialog visible targetGroupId="group-1" onHide={mocks.close} />
+      <TargetGroupImport visible targetGroupId="group-1" onHide={mocks.close} />
     </I18nProvider>,
   );
   const file = new File(["email"], "users.csv", { type: "text/csv" });
@@ -114,7 +114,7 @@ it("shows a retry when import progress cannot be loaded", async () => {
   const user = userEvent.setup();
   const dialog = (
     <I18nProvider initialLocale="en">
-      <ImportUsersDialog visible targetGroupId="group-1" onHide={mocks.close} />
+      <TargetGroupImport visible targetGroupId="group-1" onHide={mocks.close} />
     </I18nProvider>
   );
   const { rerender } = render(dialog);
@@ -128,7 +128,7 @@ it("shows a retry when import progress cannot be loaded", async () => {
   mocks.jobError = true;
   rerender(
     <I18nProvider initialLocale="en">
-      <ImportUsersDialog visible targetGroupId="group-1" onHide={mocks.close} />
+      <TargetGroupImport visible targetGroupId="group-1" onHide={mocks.close} />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Try again" }));

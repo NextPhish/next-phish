@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Formik } from "formik";
 import type { CampaignFormValues } from "@next-phish/shared";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CampaignFormPresentation } from "../../../../apps/next-app/src/components/organisms/campaigns/form-presentation";
+import { CampaignFormView } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-form/parts/campaign-form-view";
 
 const values: CampaignFormValues = {
   name: "Quarterly security awareness",
@@ -29,7 +29,7 @@ function Preview() {
   return (
     <I18nProvider initialLocale="en">
       <Formik initialValues={values} onSubmit={() => undefined}>
-        <CampaignFormPresentation
+        <CampaignFormView
           isEdit={false}
           emailTemplates={[
             {

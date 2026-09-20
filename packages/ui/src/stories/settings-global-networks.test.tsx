@@ -2,7 +2,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { GlobalIgnoredNetworksContainer } from "../../../../apps/next-app/src/components/organisms/settings/global-ignored-networks-container";
+import { GlobalIgnoredNetworks } from "../../../../apps/next-app/src/components/organisms/settings/global-ignored-networks/global-ignored-networks";
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
@@ -54,7 +54,7 @@ beforeEach(() => {
 function setup() {
   return render(
     <I18nProvider initialLocale="en">
-      <GlobalIgnoredNetworksContainer />
+      <GlobalIgnoredNetworks />
     </I18nProvider>,
   );
 }
@@ -113,7 +113,7 @@ it("uses the localized shared schema errors for an empty network", async () => {
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="bg">
-      <GlobalIgnoredNetworksContainer />
+      <GlobalIgnoredNetworks />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Добави мрежа" }));

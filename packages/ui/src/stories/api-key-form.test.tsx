@@ -6,7 +6,7 @@ import {
   createApiKeyFormSchema,
   type CreateApiKeyFormValues,
 } from "@next-phish/shared";
-import { ApiKeyForm } from "../../../../apps/next-app/src/components/organisms/settings/api-key-form";
+import { ApiKeyFields } from "../../../../apps/next-app/src/components/organisms/settings/api-key-form/parts/api-key-fields";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { toFormikValidation } from "../../../../apps/next-app/src/lib/to-formik-validation";
 const initialValues: CreateApiKeyFormValues = {
@@ -27,7 +27,7 @@ function form(submit: (values: CreateApiKeyFormValues) => Promise<void>) {
         validate={toFormikValidation(createApiKeyFormSchema)}
         onSubmit={submit}
       >
-        <ApiKeyForm
+        <ApiKeyFields
           visible
           onHide={() => {}}
           error=""

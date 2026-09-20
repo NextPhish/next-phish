@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { UsersContainer } from "../../../../apps/next-app/src/components/organisms/users/users-container";
+import { UserList } from "../../../../apps/next-app/src/components/organisms/users/user-list";
 import { demoUsers } from "./users-admin.stories";
 const mocks = vi.hoisted(() => ({
   query: vi.fn(),
@@ -11,12 +11,12 @@ const mocks = vi.hoisted(() => ({
   invalidate: vi.fn(),
 }));
 vi.mock(
-  "../../../../apps/next-app/src/components/organisms/users/create-user-container",
-  () => ({ CreateUserContainer: () => null }),
+  "../../../../apps/next-app/src/components/organisms/users/create-user",
+  () => ({ CreateUser: () => null }),
 );
 vi.mock(
-  "../../../../apps/next-app/src/components/organisms/users/delete-user-dialog",
-  () => ({ DeleteUserDialog: () => null }),
+  "../../../../apps/next-app/src/components/organisms/users/delete-user",
+  () => ({ DeleteUser: () => null }),
 );
 vi.mock("@/src/lib/trpc", () => ({
   trpc: {
@@ -52,7 +52,7 @@ it("maps admin role/status filters, sort and pagination to the server query", as
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <UsersContainer />
+      <UserList />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Add filter" }));
@@ -80,7 +80,7 @@ it("confirms deactivate and reactivate with the exact boolean and id", async () 
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <UsersContainer />
+      <UserList />
     </I18nProvider>,
   );
   await user.click(

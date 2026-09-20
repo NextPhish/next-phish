@@ -1,5 +1,5 @@
-import { OrganizationListContainer } from "@/src/components/organisms/organizations/organization-list-container";
+import { OrganizationList } from "@/src/components/organisms/organizations";
 
 export default function OrganizationsPage() {
-  return <OrganizationListContainer />;
+  return <OrganizationList />;
 }

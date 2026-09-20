@@ -2,7 +2,7 @@ import { expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { ScheduleDetailContent } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-detail-content";
+import { ScheduleDetailContent } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-detail/parts/schedule-detail-content";
 import { populatedSchedule } from "./schedule-detail.stories";
 
 it("renders generated campaigns and delegates campaign navigation", async () => {

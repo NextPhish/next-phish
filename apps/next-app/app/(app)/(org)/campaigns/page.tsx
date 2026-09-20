@@ -1,7 +1,7 @@
-import { CampaignListContainer } from "@/src/components/organisms/campaigns/list-container";
+import { CampaignList } from "@/src/components/organisms/campaigns";
 
 export const dynamic = "force-dynamic";
 
 export default function CampaignsPage() {
-  return <CampaignListContainer />;
+  return <CampaignList />;
 }

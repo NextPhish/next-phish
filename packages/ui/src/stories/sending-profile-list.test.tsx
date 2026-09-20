@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { SendingProfilesListContainer } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profiles-list-container";
+import { SendingProfileList } from "../../../../apps/next-app/src/components/organisms/sending-profiles";
 
 const mocks = vi.hoisted(() => ({
   inputs: [] as unknown[],
@@ -81,7 +81,7 @@ vi.mock("@/src/lib/trpc", () => ({
 describe("sending profiles list", () => {
   it("maps search, provider filter, sorting and pagination to the query", async () => {
     const user = userEvent.setup();
-    render(<SendingProfilesListContainer />);
+    render(<SendingProfileList />);
     await user.type(screen.getByRole("searchbox"), "smtp");
     await waitFor(() =>
       expect(mocks.inputs.at(-1)).toMatchObject({
@@ -112,7 +112,7 @@ describe("sending profiles list", () => {
   });
   it("deletes only the confirmed profile", async () => {
     const user = userEvent.setup();
-    render(<SendingProfilesListContainer />);
+    render(<SendingProfileList />);
     await user.click(screen.getByRole("button", { name: /tableUi.actions/ }));
     await user.click(screen.getByText("sendingProfiles.delete"));
     await user.click(screen.getAllByText("sendingProfiles.delete").at(-1)!);

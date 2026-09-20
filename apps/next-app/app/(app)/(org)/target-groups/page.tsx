@@ -1,4 +1,4 @@
-import { TargetGroupsListContainer } from "@/src/components/organisms/target-groups/list-container";
+import { TargetGroupList } from "@/src/components/organisms/target-groups/target-group-list";
 export default function TargetGroupsPage() {
-  return <TargetGroupsListContainer />;
+  return <TargetGroupList />;
 }

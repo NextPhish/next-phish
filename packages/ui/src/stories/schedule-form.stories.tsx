@@ -5,8 +5,8 @@ import {
   I18nProvider,
   useTranslation,
 } from "../../../../apps/next-app/src/lib/i18n/client";
-import { ScheduleFormPresentation } from "../../../../apps/next-app/src/components/organisms/schedules/form-presentation";
-import { scheduleFormValidator } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-form-validation";
+import { ScheduleFormView } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-form/parts/schedule-form-view";
+import { scheduleFormValidator } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-form/parts/schedule-form-validation";
 
 const defaults: ScheduleFormValues = {
   name: "",
@@ -75,7 +75,7 @@ function LocalizedFixture({ values }: { values: ScheduleFormValues }) {
         validate={scheduleFormValidator(t, campaigns)}
         onSubmit={() => undefined}
       >
-        <ScheduleFormPresentation
+        <ScheduleFormView
           error=""
           campaigns={campaigns}
           targetGroups={groups}

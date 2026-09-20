@@ -5,8 +5,8 @@ import { Formik } from "formik";
 import type { ScheduleFormValues } from "@next-phish/shared";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { createTranslator } from "../../../../apps/next-app/src/lib/i18n";
-import { ScheduleFormPresentation } from "../../../../apps/next-app/src/components/organisms/schedules/form-presentation";
-import { scheduleFormValidator } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-form-validation";
+import { ScheduleFormView } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-form/parts/schedule-form-view";
+import { scheduleFormValidator } from "../../../../apps/next-app/src/components/organisms/schedules/schedule-form/parts/schedule-form-validation";
 
 const values: ScheduleFormValues = {
   name: "",
@@ -42,7 +42,7 @@ it("shows Bulgarian validation and focuses controls from the error summary", asy
         validate={scheduleFormValidator(createTranslator("bg"), campaigns)}
         onSubmit={() => undefined}
       >
-        <ScheduleFormPresentation
+        <ScheduleFormView
           error=""
           campaigns={campaigns}
           targetGroups={[]}

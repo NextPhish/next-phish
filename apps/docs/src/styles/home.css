@@ -326,6 +326,22 @@ button {
 .start {
   padding-top: 12px;
 }
+.delivery {
+  padding-top: 0;
+}
+.delivery .workflow-card h3 {
+  margin-top: 32px;
+}
+.delivery .section-link {
+  white-space: normal;
+}
+.delivery-note {
+  max-width: 85ch;
+  margin: 24px 0 0;
+  color: #626d80;
+  font-size: 14px;
+  line-height: 1.7;
+}
 .link-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

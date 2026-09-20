@@ -169,6 +169,29 @@ export class UserRepository {
     };
   }
 
+  async createWelcomeJob(input: {
+    userId: string;
+    name: string;
+    email: string;
+  }): Promise<WelcomeUserJob> {
+    const token = randomBytes(32).toString("base64url");
+    const appUrl = (process.env.APP_URL ?? "http://localhost:3000").replace(
+      /\/$/,
+      "",
+    );
+    const callbackURL = "/initial-password";
+    const magicLink = `${appUrl}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
+    await this.db.verification.create({
+      data: {
+        id: randomUUID(),
+        identifier: token,
+        value: JSON.stringify({ email: input.email, name: input.name }),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+    return { ...input, magicLink };
+  }
+
   async setDisabled(userId: string, disabled: boolean): Promise<void> {
     await this.db.$transaction([
       this.db.user.update({

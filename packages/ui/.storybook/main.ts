@@ -10,6 +10,7 @@ const config: StorybookConfig = {
       ...config.resolve,
       alias: {
         ...config.resolve?.alias,
+        "next/link": new URL("./next-link.tsx", import.meta.url).pathname,
         "@": new URL("../../../apps/next-app", import.meta.url).pathname,
       },
     };

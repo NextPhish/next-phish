@@ -8,10 +8,10 @@ import {
   I18nProvider,
   useTranslation,
 } from "../../../../apps/next-app/src/lib/i18n/client";
-import { SendingProfilesListPresentation } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profiles-list-presentation";
-import { SendingProfileFormPresentation } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form-presentation";
-import { TestEmailPresentation } from "../../../../apps/next-app/src/components/organisms/sending-profiles/test-email-presentation";
-import { sendingProfileValidator } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-validation";
+import { SendingProfileListView } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-list/parts/sending-profile-list-view";
+import { SendingProfileFormView } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form/parts/sending-profile-form-view";
+import { TestEmailDialogView } from "../../../../apps/next-app/src/components/organisms/sending-profiles/test-email-dialog/parts/test-email-dialog-view";
+import { sendingProfileValidator } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form/sending-profile-validation";
 
 const providers = [
   "SMTP",
@@ -60,7 +60,7 @@ function ListPreview() {
   );
   return (
     <Shell>
-      <SendingProfilesListPresentation
+      <SendingProfileListView
         t={t}
         locale="en"
         rows={filtered}
@@ -130,7 +130,7 @@ function FormPreview({ providerType = "SMTP" }: { providerType?: string }) {
         validate={sendingProfileValidator(t)}
         onSubmit={() => undefined}
       >
-        <SendingProfileFormPresentation
+        <SendingProfileFormView
           error=""
           isEdit
           onCancel={() => {}}
@@ -147,7 +147,7 @@ function TestDialogPreview() {
         initialValues={{ toEmail: "recipient@example.com" }}
         onSubmit={() => undefined}
       >
-        <TestEmailPresentation
+        <TestEmailDialogView
           visible
           pending={false}
           status={{ type: "idle", message: "" }}

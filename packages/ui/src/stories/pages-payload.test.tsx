@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { usePageEditor } from "../../../../apps/next-app/src/hooks/use-page-editor";
+import { usePageEditor } from "../../../../apps/next-app/src/components/organisms/pages/page-form/hooks/use-page-editor";
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),

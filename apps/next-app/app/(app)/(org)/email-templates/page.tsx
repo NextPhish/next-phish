@@ -1,5 +1,5 @@
-import { EmailTemplatesOverview } from "@/src/components/organisms/email-templates/email-templates-overview";
+import { EmailTemplateList } from "@/src/components/organisms/email-templates";
 
 export default function EmailTemplatesPage() {
-  return <EmailTemplatesOverview />;
+  return <EmailTemplateList />;
 }

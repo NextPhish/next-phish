@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { Form, useFormikContext } from "formik";
 import type { ScheduleFormValues } from "@next-phish/shared";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { ScheduleFormContainer } from "../../../../apps/next-app/src/components/organisms/schedules/form-container";
+import { ScheduleForm } from "../../../../apps/next-app/src/components/organisms/schedules";
 
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
@@ -36,9 +36,9 @@ vi.mock("@/src/lib/trpc", () => ({
   },
 }));
 vi.mock(
-  "../../../../apps/next-app/src/components/organisms/schedules/form-presentation",
+  "../../../../apps/next-app/src/components/organisms/schedules/schedule-form/parts/schedule-form-view",
   () => ({
-    ScheduleFormPresentation: () => {
+    ScheduleFormView: () => {
       const form = useFormikContext<ScheduleFormValues>();
       return (
         <Form>
@@ -69,7 +69,7 @@ it("creates a one-time schedule with local inputs converted to dates", async () 
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <ScheduleFormContainer />
+      <ScheduleForm />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Fill" }));
@@ -113,7 +113,7 @@ it("updates a recurring schedule without discarding recurrence fields", async ()
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <ScheduleFormContainer scheduleId="schedule-2" />
+      <ScheduleForm scheduleId="schedule-2" />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Save" }));

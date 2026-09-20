@@ -2,7 +2,7 @@ import { Formik } from "formik";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { SendingProfileFormPresentation } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form-presentation";
+import { SendingProfileFormView } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form/parts/sending-profile-form-view";
 
 const cases = [
   ["SMTP", "Host"],
@@ -31,7 +31,7 @@ describe("sending profile provider forms", () => {
             }}
             onSubmit={() => undefined}
           >
-            <SendingProfileFormPresentation
+            <SendingProfileFormView
               isEdit
               error=""
               onCancel={() => {}}

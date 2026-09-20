@@ -1,2 +1,2 @@
-export { SettingsContainer } from "./settings-container";
-export { UserSettingsContainer } from "./user-settings-container";
+export { UserSettings } from "./user-settings";
+export { GlobalSettings } from "./global-settings";

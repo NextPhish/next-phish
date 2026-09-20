@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Formik } from "formik";
 import { createOrganizationSchema } from "@next-phish/shared";
-import { OnboardingScreen } from "../../../../apps/next-app/src/components/organisms/onboarding/screen";
-import { OnboardingPresentation } from "../../../../apps/next-app/src/components/organisms/onboarding/presentation";
+import { OnboardingScreen } from "../../../../apps/next-app/src/components/organisms/onboarding/parts/screen";
+import { OnboardingView } from "../../../../apps/next-app/src/components/organisms/onboarding/parts/onboarding-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { toFormikValidation } from "../../../../apps/next-app/src/lib/to-formik-validation";
 function OnboardingDemo({
@@ -21,7 +21,7 @@ function OnboardingDemo({
           onSubmit={(_, helpers) => helpers.setStatus(true)}
         >
           {({ status }) => (
-            <OnboardingPresentation
+            <OnboardingView
               slugStatus={slugStatus}
               error={
                 status

@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Formik } from "formik";
 import { setupSchema } from "@next-phish/shared";
 import { AuthLayoutSkeleton } from "../index";
-import { SetupScreen } from "../../../../apps/next-app/src/components/organisms/setup/screen";
-import { SetupPresentation } from "../../../../apps/next-app/src/components/organisms/setup/presentation";
+import { SetupScreen } from "../../../../apps/next-app/src/components/organisms/setup/parts/screen";
+import { SetupView } from "../../../../apps/next-app/src/components/organisms/setup/parts/setup-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { toFormikValidation } from "../../../../apps/next-app/src/lib/to-formik-validation";
 function SetupDemo({
@@ -32,7 +32,7 @@ function SetupDemo({
           onSubmit={(_, helpers) => helpers.setStatus(true)}
         >
           {({ status }) => (
-            <SetupPresentation
+            <SetupView
               error={
                 serverError || status
                   ? locale === "bg"

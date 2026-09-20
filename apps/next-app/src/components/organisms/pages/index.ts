@@ -1,2 +1,2 @@
-export { PageFormContainer as default } from "./page-form-container";
-export { PageForm } from "./page-form";
+export { PageForm as default, PageForm, PageFormSkeleton } from "./page-form";
+export { PagesList } from "./pages-list";

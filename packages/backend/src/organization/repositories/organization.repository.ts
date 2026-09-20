@@ -300,7 +300,17 @@ export class OrganizationRepository {
     const [rows, total] = await Promise.all([
       this.db.member.findMany({
         where,
-        include: { user: { select: { name: true, email: true, image: true } } },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              image: true,
+              passwordSetupRequired: true,
+              disabledAt: true,
+            },
+          },
+        },
         orderBy,
         take: input.limit,
         skip: input.offset,

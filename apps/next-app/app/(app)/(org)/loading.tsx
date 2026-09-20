@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardSkeleton } from "@/src/components/organisms/dashboard/skeleton";
+import { DashboardSkeleton } from "@/src/components/organisms/dashboard";
 import { useTranslation } from "@/src/lib/i18n";
 
 export default function DashboardLoading() {

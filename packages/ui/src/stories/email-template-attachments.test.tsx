@@ -6,10 +6,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { FileAttachmentPanel } from "../../../../apps/next-app/src/components/organisms/email-templates/file-attachment-panel";
+import { EmailTemplateAttachments } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-attachments";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { describe, expect, it, vi } from "vitest";
-import { useAttachmentManager } from "../../../../apps/next-app/src/hooks/use-attachment-manager";
+import { useAttachmentManager } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form/hooks/use-attachment-manager";
 
 describe("email template attachments", () => {
   it("keeps the uploaded file id for the template payload and only removes after deletion succeeds", async () => {
@@ -127,7 +127,11 @@ it("retries only failed attachments after a partially successful batch", async (
     .mockResolvedValueOnce(undefined);
   render(
     <I18nProvider initialLocale="en">
-      <FileAttachmentPanel files={[]} onUpload={upload} onRemove={vi.fn()} />
+      <EmailTemplateAttachments
+        files={[]}
+        onUpload={upload}
+        onRemove={vi.fn()}
+      />
     </I18nProvider>,
   );
   const first = new File(["a"], "a.pdf", { type: "application/pdf" });

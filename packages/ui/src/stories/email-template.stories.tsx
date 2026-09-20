@@ -1,9 +1,9 @@
 import { Formik } from "formik";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { EmailTemplateForm } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form";
+import { EmailTemplateFormView } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form/parts/email-template-form-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { createTranslator } from "../../../../apps/next-app/src/lib/i18n/shared";
-import { emailTemplateFormValidator } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form-validation";
+import { emailTemplateFormValidator } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form/email-template-form-validation";
 
 function Preview({ locale = "en" }: { locale?: "en" | "bg" }) {
   const t = createTranslator(locale);
@@ -19,7 +19,7 @@ function Preview({ locale = "en" }: { locale?: "en" | "bg" }) {
         validate={emailTemplateFormValidator(t)}
         onSubmit={() => {}}
       >
-        <EmailTemplateForm
+        <EmailTemplateFormView
           t={t}
           attachedFiles={[
             {

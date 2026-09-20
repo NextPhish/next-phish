@@ -1,4 +1,9 @@
-import { Fragment, type ReactNode } from "react";
+import {
+  Fragment,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { flexRender, type Table, type Header } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Button } from "../atoms/button";
@@ -81,6 +86,39 @@ interface TableBodyProps<T> {
   onClearSearch: () => void;
   emptyAction?: ReactNode;
   renderRowDetails?: (row: T) => ReactNode;
+  onRowActivate?: (row: T) => void;
+  getRowActivationLabel?: (row: T) => string;
+  isRowExpanded?: (row: T) => boolean;
+}
+
+const interactiveSelector =
+  "a,button,input,select,textarea,summary,[role='button'],[role='link'],[role='menuitem'],[contenteditable='true']";
+
+function startedInInteractiveElement(target: EventTarget | null) {
+  return (
+    target instanceof Element && Boolean(target.closest(interactiveSelector))
+  );
+}
+
+function activateFromClick<T>(
+  event: MouseEvent<HTMLTableRowElement>,
+  row: T,
+  onActivate: (row: T) => void,
+) {
+  if (startedInInteractiveElement(event.target)) return;
+  if (window.getSelection()?.toString().trim()) return;
+  onActivate(row);
+}
+
+function activateFromKeyboard<T>(
+  event: KeyboardEvent<HTMLTableRowElement>,
+  row: T,
+  onActivate: (row: T) => void,
+) {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  if (startedInInteractiveElement(event.target)) return;
+  event.preventDefault();
+  onActivate(row);
 }
 export function TableBody<T>({
   table,
@@ -92,6 +130,9 @@ export function TableBody<T>({
   onClearSearch,
   emptyAction,
   renderRowDetails,
+  onRowActivate,
+  getRowActivationLabel,
+  isRowExpanded,
 }: TableBodyProps<T>) {
   const colSpan = Math.max(1, table.getVisibleLeafColumns().length);
   if (loading)
@@ -171,7 +212,32 @@ export function TableBody<T>({
         const details = renderRowDetails?.(row.original);
         return (
           <Fragment key={row.id}>
-            <tr>
+            <tr
+              tabIndex={onRowActivate ? 0 : undefined}
+              aria-label={getRowActivationLabel?.(row.original)}
+              aria-expanded={
+                onRowActivate && isRowExpanded
+                  ? isRowExpanded(row.original)
+                  : undefined
+              }
+              onClick={
+                onRowActivate
+                  ? (event) =>
+                      activateFromClick(event, row.original, onRowActivate)
+                  : undefined
+              }
+              onKeyDown={
+                onRowActivate
+                  ? (event) =>
+                      activateFromKeyboard(event, row.original, onRowActivate)
+                  : undefined
+              }
+              className={
+                onRowActivate
+                  ? "cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--np-primary)]"
+                  : undefined
+              }
+            >
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}

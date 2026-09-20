@@ -1,5 +1,5 @@
 import { AuthLayout } from "@next-phish/ui";
-import { ForgotPasswordContainer } from "@/src/components/organisms/forgot-password";
+import { ForgotPassword } from "@/src/components/organisms/forgot-password";
 import { getTranslator } from "@/src/lib/i18n/server";
 
 export default async function ForgotPasswordPage() {
@@ -13,7 +13,7 @@ export default async function ForgotPasswordPage() {
       brandDescription={t("login.brandDescription")}
       brandFooter={t("login.brandFooter")}
     >
-      <ForgotPasswordContainer />
+      <ForgotPassword />
     </AuthLayout>
   );
 }

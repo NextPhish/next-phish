@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Building2 } from "lucide-react";
 import { AppShell, Card, CardBody, useDataTableState } from "../index";
-import { OrganizationDetailPresentation } from "../../../../apps/next-app/src/components/organisms/organizations/organization-detail-presentation";
+import { OrganizationDetailView } from "../../../../apps/next-app/src/components/organisms/organizations/organization-detail/parts/organization-detail-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 
 const months = [
@@ -88,21 +88,39 @@ function OrganizationDetailPreview() {
       userId: "alex",
       role: "owner",
       createdAt: new Date("2025-02-10"),
-      user: { name: "Alex Morgan", email: "alex@acme.example", image: null },
+      user: {
+        name: "Alex Morgan",
+        email: "alex@acme.example",
+        image: null,
+        passwordSetupRequired: false,
+        disabledAt: null,
+      },
     },
     {
       id: "member-2",
       userId: "mira",
       role: "admin",
       createdAt: new Date("2025-05-18"),
-      user: { name: "Mira Patel", email: "mira@acme.example", image: null },
+      user: {
+        name: "Mira Patel",
+        email: "mira@acme.example",
+        image: null,
+        passwordSetupRequired: false,
+        disabledAt: null,
+      },
     },
     {
       id: "member-3",
       userId: "sam",
       role: "member",
       createdAt: new Date("2026-01-07"),
-      user: { name: "Sam Lee", email: "sam@acme.example", image: null },
+      user: {
+        name: "Sam Lee",
+        email: "sam@acme.example",
+        image: null,
+        passwordSetupRequired: true,
+        disabledAt: null,
+      },
     },
   ];
   return (
@@ -125,9 +143,11 @@ function OrganizationDetailPreview() {
       breadcrumb="Organizations"
       profile={<span>Alex Morgan</span>}
     >
-      <OrganizationDetailPresentation
+      <OrganizationDetailView
+        onAddMember={() => undefined}
         model={{
           organization,
+          canManage: true,
           analytics: months,
           analyticsLoading: false,
           analyticsError: null,
@@ -140,6 +160,9 @@ function OrganizationDetailPreview() {
             loading: false,
             error: null,
             onRetry: () => {},
+            canManage: true,
+            resendError: null,
+            onResendWelcome: async () => undefined,
           },
         }}
         settings={

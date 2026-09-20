@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import { TasksPresentation } from "../../../../apps/next-app/src/components/organisms/tasks/presentation";
-import type { useTaskBoard } from "../../../../apps/next-app/src/hooks/use-task-board";
+import { TasksView } from "../../../../apps/next-app/src/components/organisms/tasks/parts/tasks-view";
+import type { useTaskBoard } from "../../../../apps/next-app/src/components/organisms/tasks/hooks/use-task-board";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { AppShell, FormMessage } from "../index";
 type Board = ReturnType<typeof useTaskBoard>;
@@ -19,7 +19,17 @@ const initialTasks = [
   {
     id: "task1",
     title: "Review the onboarding simulation",
-    description: "Confirm the landing page and email copy before launch.",
+    description: {
+      version: 1 as const,
+      blocks: [
+        {
+          type: "paragraph" as const,
+          data: {
+            text: "Confirm the landing page and email copy before launch.",
+          },
+        },
+      ],
+    },
     statusId: "todo",
     priority: "HIGH",
     dueAt: "2026-09-18T10:00:00Z",
@@ -34,7 +44,15 @@ const initialTasks = [
   {
     id: "task2",
     title: "Prepare the next awareness report",
-    description: "Summarize the latest results and follow-up actions.",
+    description: {
+      version: 1 as const,
+      blocks: [
+        {
+          type: "paragraph" as const,
+          data: { text: "Summarize the latest results and follow-up actions." },
+        },
+      ],
+    },
     statusId: "progress",
     priority: "MEDIUM",
     dueAt: null,
@@ -44,7 +62,7 @@ const initialTasks = [
   {
     id: "task3",
     title: "Check sender configuration",
-    description: "",
+    description: null,
     statusId: "done",
     priority: "LOW",
     dueAt: null,
@@ -96,7 +114,7 @@ function TasksPreview({ loading = false }: { loading?: boolean }) {
           Preview only. No task changes are saved.
         </FormMessage>
       )}
-      <TasksPresentation
+      <TasksView
         board={board}
         onCreate={() => setNotice(true)}
         onEdit={() => setNotice(true)}

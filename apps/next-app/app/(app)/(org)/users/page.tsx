@@ -1,4 +1,4 @@
-import { UsersContainer } from "@/src/components/organisms/users/users-container";
+import { UserList } from "@/src/components/organisms/users/user-list";
 export default function UsersPage() {
-  return <UsersContainer />;
+  return <UserList />;
 }

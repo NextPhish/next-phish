@@ -1,6 +1,6 @@
 {
   "name": "@next-phish/database",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "private": true,
   "main": "./src/client.ts",
   "types": "./src/client.ts",

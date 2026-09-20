@@ -1,5 +1,5 @@
 import { AuthLayout } from "@next-phish/ui";
-import { TwoFactorContainer } from "@/src/components/organisms/two-factor";
+import { TwoFactor } from "@/src/components/organisms/two-factor";
 import { getTranslator } from "@/src/lib/i18n/server";
 
 export default async function TwoFactorPage() {
@@ -14,7 +14,7 @@ export default async function TwoFactorPage() {
       brandDescription={t("login.brandDescription")}
       brandFooter={t("login.brandFooter")}
     >
-      <TwoFactorContainer />
+      <TwoFactor />
     </AuthLayout>
   );
 }

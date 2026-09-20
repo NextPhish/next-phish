@@ -1,6 +1,6 @@
 import { Formik } from "formik";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { ImportWebsitePresentation } from "../../../../apps/next-app/src/components/organisms/pages/import-website-presentation";
+import { ImportWebsiteView } from "../../../../apps/next-app/src/components/organisms/pages/import-website/parts/import-website-view";
 import {
   I18nProvider,
   useTranslation,
@@ -42,7 +42,7 @@ function PreviewContent({ progress }: { progress: boolean }) {
       initialValues={{ url: "https://example.com/login" }}
       onSubmit={() => {}}
     >
-      <ImportWebsitePresentation
+      <ImportWebsiteView
         visible
         t={t}
         state={state}

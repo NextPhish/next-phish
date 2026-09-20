@@ -130,15 +130,6 @@
   background: transparent;
   text-align: left;
 }
-.taskContent > p {
-  display: -webkit-box;
-  margin-top: 8px;
-  overflow: hidden;
-  color: var(--np-muted);
-  font-size: 13px;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
 .taskTitleRow {
   display: flex;
   align-items: flex-start;

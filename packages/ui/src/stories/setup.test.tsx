@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik } from "formik";
 import { setupSchema } from "@next-phish/shared";
-import { SetupPresentation } from "../../../../apps/next-app/src/components/organisms/setup/presentation";
+import { SetupView } from "../../../../apps/next-app/src/components/organisms/setup/parts/setup-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { toFormikValidation } from "../../../../apps/next-app/src/lib/to-formik-validation";
 
@@ -39,7 +39,7 @@ it.each([
           validate={toFormikValidation(setupSchema)}
           onSubmit={submit}
         >
-          <SetupPresentation error="" />
+          <SetupView error="" />
         </Formik>
       </I18nProvider>,
     );

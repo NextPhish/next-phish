@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CampaignListPresentation } from "../../../../apps/next-app/src/components/organisms/campaigns/list-presentation";
+import { CampaignListView } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-list/parts/campaign-list-view";
 
 const rows = [
   {
@@ -30,7 +30,7 @@ const rows = [
 ];
 function Preview() {
   return (
-    <CampaignListPresentation
+    <CampaignListView
       rows={rows}
       total={2}
       loading={false}

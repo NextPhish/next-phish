@@ -4,7 +4,7 @@ import { CalendarDays } from "lucide-react";
 import {
   ScheduleDetailContent,
   type ScheduleDetail,
-} from "../../../../apps/next-app/src/components/organisms/schedules/schedule-detail-content";
+} from "../../../../apps/next-app/src/components/organisms/schedules/schedule-detail/parts/schedule-detail-content";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { AppShell, Badge, FormMessage, PageHeader } from "../index";
 

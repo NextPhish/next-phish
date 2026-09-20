@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Provider, TRPCProvider } from "@/src/components/ui";
+import { TRPCProvider } from "@/src/components/providers/trpc-provider";
 import { I18nProvider } from "@/src/lib/i18n";
 import { getLocale, getTranslator } from "@/src/lib/i18n/server";
 
@@ -40,9 +40,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <I18nProvider initialLocale={locale}>
-          <TRPCProvider>
-            <Provider>{children}</Provider>
-          </TRPCProvider>
+          <TRPCProvider>{children}</TRPCProvider>
         </I18nProvider>
       </body>
     </html>

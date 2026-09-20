@@ -1,4 +1,4 @@
-import { CampaignFormContainer } from "@/src/components/organisms/campaigns/form-container";
+import { CampaignForm } from "@/src/components/organisms/campaigns";
 
 export const dynamic = "force-dynamic";
 
@@ -8,5 +8,5 @@ export default async function EditCampaignPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <CampaignFormContainer campaignId={id} />;
+  return <CampaignForm campaignId={id} />;
 }

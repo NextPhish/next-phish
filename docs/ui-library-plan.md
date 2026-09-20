@@ -8,7 +8,7 @@ Selected direction: V1 from the static prototypes in `next-phish-redesign/v1`. I
 | ------------------------------------------------------------------ | --------------------------------------------- | -------------------------------------------------------------------- |
 | V1 CSS tokens and repeated HTML card/field/button functions        | `.np-theme`, semantic tokens, atoms/molecules | Page composition and branding overrides                              |
 | Direct PrimeReact Button/InputText/Dropdown/MultiSelect usage      | Button/Input/Select/Autocomplete/MultiSelect  | Formik field bindings, Zod, translations                             |
-| `molecules/form-field.tsx`, `atoms/form-message.tsx`               | FormField, FormMessage, FormErrorSummary      | touched/errors/submit status in the container                        |
+| `molecules/form-field.tsx`, `atoms/form-message.tsx`               | FormField, FormMessage, FormErrorSummary      | touched/errors/submit status in application orchestration            |
 | `molecules/data-table/data-table.tsx` + FilterBar/useTableState    | DataTable, FilterBar, useDataTableState       | tRPC queries, debounce, organization/permissions, API mapping        |
 | `molecules/file-uploader.tsx`                                      | FileUploader                                  | Actual uploads, auth, server validation, storage                     |
 | `organisms/app-shell/*`                                            | AppShell + NavigationGroup descriptors        | Next Link/pathname, organization and profile, access control         |

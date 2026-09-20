@@ -5,8 +5,8 @@ import type {
   UpdateOrganizationInput,
 } from "@next-phish/shared";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { GeneralFormPresentation } from "../../../../apps/next-app/src/components/organisms/organization-settings/general-form-presentation";
-import { IgnoredNetworksPresentation } from "../../../../apps/next-app/src/components/organisms/organization-settings/ignored-networks-presentation";
+import { GeneralSettingsFields } from "../../../../apps/next-app/src/components/organisms/organization-settings/general-settings/parts/general-settings-fields";
+import { IgnoredNetworksView } from "../../../../apps/next-app/src/components/organisms/organization-settings/ignored-networks/parts/ignored-networks-view";
 
 const networks = [
   {
@@ -44,14 +44,14 @@ function Preview({
             initialValues={{ name: "Acme Security", slug: "acme-security" }}
             onSubmit={() => undefined}
           >
-            <GeneralFormPresentation status={{ type: "idle", message: "" }} />
+            <GeneralSettingsFields status={{ type: "idle", message: "" }} />
           </Formik>
         ) : (
           <Formik<IgnoredNetworkInput>
             initialValues={{ network: "", description: "" }}
             onSubmit={() => undefined}
           >
-            <IgnoredNetworksPresentation
+            <IgnoredNetworksView
               networks={empty ? [] : networks}
               isLoading={loading}
               status={{ type: "idle", message: "" }}

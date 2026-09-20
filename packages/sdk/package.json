@@ -1,6 +1,6 @@
 {
   "name": "@next-phish/sdk",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "description": "Typed Node.js client for Next Phish personal access token APIs",
   "type": "module",
   "main": "./dist/index.js",
