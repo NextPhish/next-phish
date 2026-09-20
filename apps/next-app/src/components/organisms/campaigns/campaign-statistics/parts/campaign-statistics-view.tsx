@@ -1,9 +1,10 @@
 "use client";
 
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { Skeleton } from "@next-phish/ui";
 import { useTranslation } from "@/src/lib/i18n/client";
 import type { CampaignStatisticsModel } from "../hooks/use-campaign-statistics";
+import DeliveryStatusChart from "./delivery-status-chart";
 
 const deliveryColors: Record<string, string> = {
   PLANNED: "#64748B",
@@ -15,8 +16,6 @@ const deliveryColors: Record<string, string> = {
   DELIVERY_UNKNOWN: "#F97316",
   CANCELLED: "#71717A",
 };
-const DeliveryStatusChart = lazy(() => import("./delivery-status-chart"));
-
 function MetricCard({
   label,
   value,

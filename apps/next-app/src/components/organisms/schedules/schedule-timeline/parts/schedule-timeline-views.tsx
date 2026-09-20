@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { CalendarClock } from "lucide-react";
 import {
@@ -12,6 +12,7 @@ import {
   Skeleton,
 } from "@next-phish/ui";
 import type { TimelineRange, TimelineRow } from "./schedule-timeline-data";
+import TimelineChart from "./timeline-chart";
 import type { ScheduleTimelineProps } from "../types/schedule-timeline.types";
 
 interface TimelineViewProps {
@@ -23,8 +24,6 @@ interface TimelineViewProps {
   statusLabel: (status: string) => string;
   onRowNavigate: (row: TimelineRow) => void;
 }
-const TimelineChart = lazy(() => import("./timeline-chart"));
-
 export function ScheduleTimelineV1View({
   rows,
   range,
