@@ -1,5 +1,7 @@
-import { TargetGroupForm } from "@/src/components/organisms/target-groups/target-group-form";
-import { TargetGroupCreateHeading } from "@/src/components/organisms/target-groups/create-heading";
+import {
+  TargetGroupForm,
+  TargetGroupCreateHeading,
+} from "@/src/components/organisms/target-groups/target-group-form";
 export default function NewTargetGroupPage() {
   return (
     <div className="grid min-w-0 gap-6">

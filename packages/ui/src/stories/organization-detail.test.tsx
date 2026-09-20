@@ -1,12 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { OrganizationDetailPresentation } from "../../../../apps/next-app/src/components/organisms/organizations/organization-detail-presentation";
-import { OrganizationDetailContainer } from "../../../../apps/next-app/src/components/organisms/organizations/organization-detail-container";
+import { OrganizationDetail } from "../../../../apps/next-app/src/components/organisms/organizations";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { useDataTableState } from "../index";
 
-const mocks = vi.hoisted(() => ({ memberInputs: [] as unknown[] }));
+const mocks = vi.hoisted(() => ({
+  memberInputs: [] as unknown[],
+  role: "owner",
+}));
 vi.mock("@/src/components/organisms/organization-settings", () => ({
   OrganizationSettings: () => <div>Settings form</div>,
 }));
@@ -28,7 +29,7 @@ vi.mock("@/src/lib/trpc", () => ({
             $me: {
               id: "m-1",
               userId: "u-1",
-              role: "owner",
+              role: mocks.role,
               createdAt: new Date(),
             },
           },
@@ -75,60 +76,32 @@ vi.mock("@/src/lib/trpc", () => ({
   },
 }));
 
-function PermissionFixture({ role }: { role: string }) {
-  const table = useDataTableState();
-  return (
-    <I18nProvider initialLocale="en">
-      <OrganizationDetailPresentation
-        model={{
-          organization: {
-            id: "org",
-            name: "Acme",
-            slug: "acme",
-            logo: null,
-            createdAt: new Date(),
-            $me: {
-              id: "membership",
-              userId: "user",
-              role,
-              createdAt: new Date(),
-            },
-          },
-          analytics: [],
-          analyticsLoading: false,
-          analyticsError: null,
-          onRetryAnalytics: () => {},
-          members: {
-            rows: [],
-            total: 0,
-            state: table.state,
-            onStateChange: table.onStateChange,
-            loading: false,
-            error: null,
-            onRetry: () => {},
-          },
-        }}
-        settings={<div>Protected settings</div>}
-      />
-    </I18nProvider>
-  );
-}
-
 describe("organization detail", () => {
   beforeEach(() => {
     mocks.memberInputs.length = 0;
+    mocks.role = "owner";
   });
   it("hides settings from members and shows them to managers", () => {
-    const view = render(<PermissionFixture role="member" />);
-    expect(screen.queryByText("Protected settings")).not.toBeInTheDocument();
-    view.rerender(<PermissionFixture role="admin" />);
-    expect(screen.getByText("Protected settings")).toBeInTheDocument();
+    mocks.role = "member";
+    const view = render(
+      <I18nProvider initialLocale="en">
+        <OrganizationDetail organizationId="org-1" />
+      </I18nProvider>,
+    );
+    expect(screen.queryByText("Settings form")).not.toBeInTheDocument();
+    mocks.role = "admin";
+    view.rerender(
+      <I18nProvider initialLocale="en">
+        <OrganizationDetail organizationId="org-1" />
+      </I18nProvider>,
+    );
+    expect(screen.getByText("Settings form")).toBeInTheDocument();
   });
   it("maps member sorting, filtering, and pagination to the server query", async () => {
     const user = userEvent.setup();
     render(
       <I18nProvider initialLocale="en">
-        <OrganizationDetailContainer organizationId="org-1" />
+        <OrganizationDetail organizationId="org-1" />
       </I18nProvider>,
     );
     expect(mocks.memberInputs.at(-1)).toMatchObject({

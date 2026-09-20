@@ -2,11 +2,11 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import {
-  PagesListPresentation,
-  type PagesListPresentationProps,
-} from "../../../../apps/next-app/src/components/organisms/pages/pages-list-presentation";
+  PagesListView,
+  type PagesListViewProps,
+} from "../../../../apps/next-app/src/components/organisms/pages/pages-list/parts/pages-list-view";
 import { AppShell, useDataTableState } from "../index";
-type Page = PagesListPresentationProps["pages"][number];
+type Page = PagesListViewProps["pages"][number];
 
 export const demoPages = [
   {
@@ -38,7 +38,7 @@ function Preview({ loading = false }: { loading?: boolean }) {
   return (
     <I18nProvider initialLocale="en">
       <AppShell navigation={[]} activeItem="pages" breadcrumb="Pages">
-        <PagesListPresentation
+        <PagesListView
           {...table}
           pages={demoPages}
           total={demoPages.length}

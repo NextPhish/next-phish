@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { useState } from "react";
-import { OrganizationListContainer } from "../../../../apps/next-app/src/components/organisms/organizations/organization-list-container";
+import { OrganizationList } from "../../../../apps/next-app/src/components/organisms/organizations";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 const mocks = vi.hoisted(() => ({
   query: vi.fn(),
@@ -70,7 +70,7 @@ it("retains the added role filter and sends role/page state to the API", async (
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <OrganizationListContainer />
+      <OrganizationList />
     </I18nProvider>,
   );
   expect(
@@ -99,7 +99,7 @@ it("only exposes eligible owner deletion and keeps a failed deletion in its dial
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <OrganizationListContainer />
+      <OrganizationList />
     </I18nProvider>,
   );
   await user.click(

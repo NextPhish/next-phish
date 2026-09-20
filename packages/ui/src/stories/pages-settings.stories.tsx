@@ -1,6 +1,6 @@
 import { Formik } from "formik";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { PageSettingsPresentation } from "../../../../apps/next-app/src/components/organisms/pages/page-settings-presentation";
+import { PageSettingsView } from "../../../../apps/next-app/src/components/organisms/pages/page-form/page-settings/parts/page-settings-view";
 import {
   I18nProvider,
   useTranslation,
@@ -31,7 +31,7 @@ function PreviewContent({ redirect }: { redirect: boolean }) {
     >
       {({ values, setFieldValue }) => (
         <div className="np-theme" style={{ maxWidth: 360, padding: 20 }}>
-          <PageSettingsPresentation
+          <PageSettingsView
             t={t}
             values={values}
             setFieldValue={setFieldValue}

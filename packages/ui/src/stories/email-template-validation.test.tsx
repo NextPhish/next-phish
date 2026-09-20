@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emailTemplateFormValidator } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form-validation";
+import { emailTemplateFormValidator } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form/email-template-form-validation";
 
 describe("email template form validation", () => {
   it("uses the shared create schema and translates its exact errors", () => {

@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CreateUserContainer } from "../../../../apps/next-app/src/components/organisms/users/create-user-container";
+import { CreateUser } from "../../../../apps/next-app/src/components/organisms/users/create-user";
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
@@ -30,7 +30,7 @@ beforeEach(() => {
 function setup(onCreated = vi.fn()) {
   render(
     <I18nProvider initialLocale="en">
-      <CreateUserContainer visible onCreated={onCreated} onCancel={() => {}} />
+      <CreateUser visible onCreated={onCreated} onCancel={() => {}} />
     </I18nProvider>,
   );
   return { user: userEvent.setup(), onCreated };

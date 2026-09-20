@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { PagesListContainer } from "../../../../apps/next-app/src/components/organisms/pages/pages-list-container";
+import { PagesList } from "../../../../apps/next-app/src/components/organisms/pages/pages-list/pages-list";
 const mocks = vi.hoisted(() => ({
   query: vi.fn(),
   push: vi.fn(),
@@ -59,7 +59,7 @@ it("maps type filtering, sorting and pagination to the page list API", async () 
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <PagesListContainer />
+      <PagesList />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Add filter" }));
@@ -87,7 +87,7 @@ it("confirms deletion with the exact row id and closes after success", async () 
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <PagesListContainer />
+      <PagesList />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Actions: Sign in" }));

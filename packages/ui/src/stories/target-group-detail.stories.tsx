@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { TargetGroupDetailPresentation } from "../../../../apps/next-app/src/components/organisms/target-groups/detail-presentation";
+import { TargetGroupDetailView } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-detail/parts/target-group-detail-view";
 import { AppShell, useDataTableState } from "../index";
 function Preview({ loading = false }: { loading?: boolean }) {
   const table = useDataTableState();
@@ -11,14 +11,14 @@ function Preview({ loading = false }: { loading?: boolean }) {
         navigation={[]}
         breadcrumb="Engineering"
       >
-        <TargetGroupDetailPresentation
+        <TargetGroupDetailView
           {...table}
           group={
             {
               id: "engineering",
               name: "Engineering",
               status: "ACTIVE",
-            } as Parameters<typeof TargetGroupDetailPresentation>[0]["group"]
+            } as Parameters<typeof TargetGroupDetailView>[0]["group"]
           }
           groupId="engineering"
           groupLoading={false}
@@ -38,7 +38,7 @@ function Preview({ loading = false }: { loading?: boolean }) {
                 lastName: "Ivanova",
                 position: "Manager",
               },
-            ] as Parameters<typeof TargetGroupDetailPresentation>[0]["users"]
+            ] as Parameters<typeof TargetGroupDetailView>[0]["users"]
           }
           total={2}
           usersLoading={loading}

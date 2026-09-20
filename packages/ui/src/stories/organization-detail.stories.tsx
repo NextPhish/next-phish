@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Building2 } from "lucide-react";
 import { AppShell, Card, CardBody, useDataTableState } from "../index";
-import { OrganizationDetailPresentation } from "../../../../apps/next-app/src/components/organisms/organizations/organization-detail-presentation";
+import { OrganizationDetailView } from "../../../../apps/next-app/src/components/organisms/organizations/organization-detail/parts/organization-detail-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 
 const months = [
@@ -125,9 +125,10 @@ function OrganizationDetailPreview() {
       breadcrumb="Organizations"
       profile={<span>Alex Morgan</span>}
     >
-      <OrganizationDetailPresentation
+      <OrganizationDetailView
         model={{
           organization,
+          canManage: true,
           analytics: months,
           analyticsLoading: false,
           analyticsError: null,

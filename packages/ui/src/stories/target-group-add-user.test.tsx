@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { AddUserDialog } from "../../../../apps/next-app/src/components/organisms/target-groups/add-user-dialog";
+import { TargetGroupAddUser } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-add-user";
 const mocks = vi.hoisted(() => ({
   add: vi.fn(),
   invalidate: vi.fn(),
@@ -24,7 +24,7 @@ it("validates and awaits an exact add-user payload before closing", async () => 
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <AddUserDialog visible targetGroupId="g1" onHide={mocks.close} />
+      <TargetGroupAddUser visible targetGroupId="g1" onHide={mocks.close} />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Create" }));

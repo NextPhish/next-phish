@@ -38,7 +38,7 @@ Use `useReducer` with a custom hook when a component has:
 - A `reset()` function that clears multiple state values
 - State transitions that depend on current state
 
-Extract the reducer and hook into `src/hooks/` (e.g., `use-two-factor-state.ts`).
+Extract the reducer and hook into the owning component’s `hooks/` folder. Use feature-level `hooks/` for sibling consumers and `src/hooks/` only for cross-feature reuse.
 
 Expose semantic actions instead of raw dispatch:
 
@@ -137,91 +137,77 @@ import { toFormikValidation } from "@/src/lib/to-formik-validation";
 </Formik>;
 ```
 
-### Presentation components are single functions
+## Frontend Component Structure
 
-Each `presentation.tsx` file must export one component. For multi-step forms or distinct views, split into separate files (e.g., `verify-otp-view.tsx`, `reset-password-view.tsx`) and import them into the presentation.
+### Ownership and naming
 
+Keep the existing Atomic Design layers (`atoms`, `molecules`, `organisms`, `templates`). Inside a feature, give each substantial component its own kebab-case folder and a descriptive main file. Use PascalCase component names without `Container` or `Presentation` suffixes. This convention replaces the former mandatory container/presentation file pair.
+
+```text
+src/components/organisms/organizations/
+  organization-list/
+    index.ts
+    organization-list.tsx
+    hooks/
+      use-organization-list.ts
+    types/
+      organization-list.types.ts
+    parts/
+      organization-list-view.tsx
+      organization-list-toolbar.tsx
 ```
-organisms/reset-password/
-├── container.tsx
-├── presentation.tsx        # single exported component, delegates to views
-├── verify-otp-view.tsx     # OTP verification form
-├── reset-password-view.tsx # new password form
-└── index.ts
-```
 
-### Container / Presentation split
+- **Main component**: owns or composes business orchestration, permissions, navigation, query/mutation hooks, and providers. Keep its JSX short: providers and a small number of named parts. Move complex rendering into `parts/`.
+- **`hooks/`**: component-owned state and orchestration hooks. Extract substantial logic or related state transitions here; do not create a hook just to relocate a trivial expression. Expose meaningful data and semantic callbacks.
+- **`parts/`**: private rendering components, fields, sections, and table column definitions. Accept typed data/callbacks and consume Formik context as needed. Do not fetch data, navigate imperatively, or make authorization decisions here. Presentation state, formatting, translations, and declarative links are allowed.
+- **`types/`**: types used by several files of the component. Keep single-file props beside their component. Infer domain/form types from existing DTOs, router outputs, or Zod schemas instead of copying them. Use `import type` for type-only dependencies.
+- **`index.ts`**: export the intended public component and intentionally shared types. Runtime consumers outside the component use its public entry. Internal files import each other directly, not through their own barrel, to avoid cycles. Tests and Storybook may import parts deliberately to exercise rendering without backend providers.
 
-Complex interactive components (dialogs, multi-step forms, data-driven UIs) must be split into two files:
+Create folders only when they contain useful code. Simple controls may remain a single component file; a one-line fragment does not need its own part. A substantial dialog or form with an independent lifecycle should own its own component folder rather than become an unrelated sibling file in another component's `parts/`.
 
-- **`container.tsx`** — owns the business logic. Wraps the presentation with `<Formik>`, calls tRPC mutations, handles navigation, manages error/success state via `useFormStatus`. It passes simple props down (e.g. `error`, `isLoading`).
-- **`presentation.tsx`** — pure rendering. Uses `useFormikContext()` to read form state and render fields. Receives display-only props from the container (error strings, loading flags). No API calls, no navigation logic.
+Keep code at the nearest common owner. A hook used only by one component lives in its `hooks/`; a hook shared by sibling components can live in their feature's `hooks/`. Truly cross-feature hooks stay in `src/hooks/`. Apply the same ownership rule to shared types and utilities. Reusable application-independent UI belongs in `@next-phish/ui`.
 
-The container wraps the presentation inside `<Formik>`, so the presentation can call `useFormikContext()` directly:
+### Logic and rendering
+
+A main component can delegate substantial orchestration to a local hook:
 
 ```tsx
-// container.tsx
+// organization-list/organization-list.tsx
 "use client";
 
-import { Formik } from "formik";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import { useFormStatus } from "@/src/hooks/use-form-status";
-import { MyPresentation } from "./presentation";
+import { useOrganizationList } from "./hooks/use-organization-list";
+import { OrganizationListView } from "./parts/organization-list-view";
 
-export function MyContainer() {
-  const { status, setError } = useFormStatus();
-
-  async function handleSubmit(values: MyValues) {
-    const { error } = await doSomething(values);
-    if (error) setError(error);
-  }
-
-  return (
-    <Formik
-      initialValues={{ field: "" }}
-      validate={toFormikValidation(mySchema)}
-      onSubmit={handleSubmit}
-    >
-      <MyPresentation error={status.type === "error" ? status.message : ""} />
-    </Formik>
-  );
+export function OrganizationList() {
+  const model = useOrganizationList();
+  return <OrganizationListView {...model} />;
 }
 ```
 
-```tsx
-// presentation.tsx
-"use client";
+Use explicit typed props or a cohesive view model. Do not pass raw mutation objects or entire provider contexts when a few data fields and callbacks are sufficient. Split large views into meaningful sections, such as a toolbar, table, and confirmation dialog; each file should have a clear rendering responsibility.
 
-import { Form, Field, ErrorMessage, useFormikContext } from "formik";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { FormMessage } from "@/src/components/atoms/form-message";
+Keep pages server-first and `"use client"` at interactive entry points. The directory structure does not define the server/client boundary. Never import server implementation code into a client hook; type-only domain imports are allowed.
 
-interface MyPresentationProps {
-  error: string;
-}
+### Forms
 
-export function MyPresentation({ error }: MyPresentationProps) {
-  const { isSubmitting } = useFormikContext();
+- The main form component owns `<Formik>` with shared Zod validation and its submission callback, either defined locally or supplied by its local hook.
+- Form parts read field state with `useFormikContext()` and render `<Form>`, fields, and errors. They do not create a second Formik provider or duplicate field state in `useState`.
+- Keep error/success handling in `useFormStatus` and complex workflows in reducer-based semantic hooks.
+- Keep permission decisions and mutation payload construction in orchestration. Pass allowed actions or capability flags to rendering parts and retain backend authorization checks.
 
-  return (
-    <Form>
-      <Field as={InputText} name="field" />
-      <ErrorMessage name="field" component="p" />
-      {error && <FormMessage variant="error">{error}</FormMessage>}
-      <Button type="submit" loading={isSubmitting} />
-    </Form>
-  );
-}
-```
+### Styling
 
-Rules:
+Use Tailwind for ordinary layout, spacing, typography, responsive behavior, and common states. V1 screens use the tokens defined in `packages/ui/src/styles.css` under `.np-theme`; follow [brand guidelines](brand.md).
 
-- The container **owns** the `<Formik>` wrapper — the presentation never creates one.
-- The presentation **reads** form state via `useFormikContext()` — it never holds its own form state.
-- Keep props between container and presentation minimal: `error`, `isLoading`, visibility flags, callbacks for close/submit.
-- If the component is simple (a single input, a toggle), skip the split — only use this pattern when the logic is non-trivial.
-- Large presentations can be split into smaller sub-components (e.g. `permissions-field.tsx`, `expiration-field.tsx`). The main `presentation.tsx` composes them. Each sub-component can still use `useFormikContext()` since it's rendered inside the `<Formik>` tree.
+Do not create CSS modules merely to alias utilities such as `flex`, `gap-4`, or `text-sm`. Colocate exceptional `<component-name>.module.css` files with their owner for custom selectors, third-party DOM integration (such as GrapesJS), or complex animations where utilities are insufficient. A part can own its own module if those styles are exclusive to it. Shared theme tokens and reusable UI behavior stay in the UI package.
+
+When converting existing CSS, preserve exact sizing, weights, breakpoints, hover/focus behavior, and scoped child selectors. Extract repeated semantic UI into shared components instead of collecting opaque class-string constants. Do not change the visual design as a side effect of reorganizing files.
+
+### Migration and validation
+
+Apply this convention to new components and complete migration slices. Existing unmigrated `container`/`presentation` files can remain until their feature is migrated; do not add new uses of that naming. Move routes, barrel exports, Storybook stories, tests, and any mocks together, and remove obsolete paths rather than leaving permanent compatibility wrappers.
+
+Run affected package type checks, regression tests, lint, and React Doctor. For CSS conversions, verify representative views in the browser, including narrow layouts and keyboard interactions. Preserve server query mapping, form validation, mutation payloads, permissions, loading/error states, and table actions. Migration progress is tracked in [issue #28](https://github.com/NextPhish/next-phish/issues/28).
 
 ## Client-Side Data Fetching
 
@@ -237,7 +223,7 @@ All client-side data fetching must go through tRPC with React Query. This provid
 
 ### Custom hooks wrap tRPC queries
 
-Create domain-specific hooks in `src/hooks/` that wrap tRPC queries and expose a clean API:
+Wrap tRPC queries in domain-specific hooks that expose a clean API. Place component-owned hooks in the component’s `hooks/` folder; use feature-level or `src/hooks/` folders only when consumers share that ownership. For example, a cross-feature organization hook can remain in `src/hooks/`:
 
 ```tsx
 // src/hooks/use-my-organizations.ts

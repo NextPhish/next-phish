@@ -1,4 +1,4 @@
-import { OrganizationDetailContainer } from "@/src/components/organisms/organizations";
+import { OrganizationDetail } from "@/src/components/organisms/organizations";
 
 export const dynamic = "force-dynamic";
 
@@ -8,5 +8,5 @@ export default async function OrganizationManagerPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <OrganizationDetailContainer organizationId={id} />;
+  return <OrganizationDetail organizationId={id} />;
 }

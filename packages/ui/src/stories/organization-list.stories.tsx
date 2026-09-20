@@ -1,12 +1,10 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import {
-  OrganizationListPresentation,
-  type OrganizationListProps,
-} from "../../../../apps/next-app/src/components/organisms/organizations/organization-list-presentation";
+import { OrganizationListView } from "../../../../apps/next-app/src/components/organisms/organizations/organization-list/parts/organization-list-view";
+import type { OrganizationListModel } from "../../../../apps/next-app/src/components/organisms/organizations/organization-list/types/organization-list.types";
 import { AppShell, useDataTableState } from "../index";
-type OrganizationView = OrganizationListProps["organizations"][number];
+type OrganizationView = OrganizationListModel["organizations"][number];
 
 export const demoOrganizations = [
   {
@@ -59,11 +57,11 @@ function Preview({ loading = false }: { loading?: boolean }) {
         activeItem="organizations"
         breadcrumb="Organizations"
       >
-        <OrganizationListPresentation
+        <OrganizationListView
           {...table}
           organizations={rows}
           total={rows.length}
-          ownedCount={1}
+          canDeleteOrganization={() => false}
           loading={loading}
           onRetry={() => {}}
           onManage={() => {}}

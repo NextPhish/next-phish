@@ -1,7 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
-import { TargetGroupDetailContainer } from "@/src/components/organisms/target-groups/detail-container";
+import { TargetGroupDetail } from "@/src/components/organisms/target-groups/target-group-detail";
 export default function TargetGroupDetailPage() {
   const params = useParams();
-  return <TargetGroupDetailContainer groupId={params.id as string} />;
+  return <TargetGroupDetail groupId={params.id as string} />;
 }

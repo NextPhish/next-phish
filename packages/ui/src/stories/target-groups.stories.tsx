@@ -3,13 +3,13 @@ import { Formik } from "formik";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import {
-  TargetGroupsListPresentation,
-  type TargetGroupsListProps,
-} from "../../../../apps/next-app/src/components/organisms/target-groups/list-presentation";
-import { TargetGroupFormPresentation } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-form-presentation";
-import { ImportUsersPresentation } from "../../../../apps/next-app/src/components/organisms/target-groups/import-users-presentation";
+  TargetGroupListView,
+  type TargetGroupListViewProps,
+} from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-list/parts/target-group-list-view";
+import { TargetGroupFormFields } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-form/parts/target-group-form-fields";
+import { TargetGroupImportView } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-import/parts/target-group-import-view";
 import { AppShell, useDataTableState } from "../index";
-type Group = TargetGroupsListProps["groups"][number];
+type Group = TargetGroupListViewProps["groups"][number];
 export const demoGroups = [
   {
     id: "engineering",
@@ -42,7 +42,7 @@ function List({ loading = false }: { loading?: boolean }) {
         navigation={[]}
         breadcrumb="Target Groups"
       >
-        <TargetGroupsListPresentation
+        <TargetGroupListView
           {...table}
           groups={demoGroups}
           total={demoGroups.length}
@@ -93,7 +93,7 @@ export function TargetGroupFormFixture() {
           }}
           onSubmit={() => {}}
         >
-          <TargetGroupFormPresentation
+          <TargetGroupFormFields
             error=""
             success=""
             isEdit={false}
@@ -115,7 +115,7 @@ export function TargetGroupImportFixture({
         initialValues={{ mode: "insert" as const, file: null as File | null }}
         onSubmit={() => {}}
       >
-        <ImportUsersPresentation
+        <TargetGroupImportView
           visible
           onHide={() => {}}
           step={status}

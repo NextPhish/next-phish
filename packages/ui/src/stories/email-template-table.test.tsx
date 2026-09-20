@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EmailTemplatesOverview } from "../../../../apps/next-app/src/components/organisms/email-templates/email-templates-overview";
+import { EmailTemplateList } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-list";
 
 const mocks = vi.hoisted(() => ({
   inputs: [] as unknown[],
@@ -77,7 +77,7 @@ vi.mock("@/src/lib/trpc", () => ({
   },
 }));
 
-describe("EmailTemplatesOverview", () => {
+describe("EmailTemplateList", () => {
   beforeEach(() => {
     mocks.inputs.length = 0;
     mocks.deletePayloads.length = 0;
@@ -85,7 +85,7 @@ describe("EmailTemplatesOverview", () => {
   });
   it("maps search, status and pagination to the server query", async () => {
     const user = userEvent.setup();
-    render(<EmailTemplatesOverview />);
+    render(<EmailTemplateList />);
     await user.type(screen.getByRole("searchbox"), "invoice");
     await waitFor(() =>
       expect(mocks.inputs.at(-1)).toMatchObject({
@@ -118,7 +118,7 @@ describe("EmailTemplatesOverview", () => {
   });
   it("sends the selected id to the delete mutation", async () => {
     const user = userEvent.setup();
-    render(<EmailTemplatesOverview />);
+    render(<EmailTemplateList />);
     await user.click(screen.getByRole("button", { name: /tableUi.actions/ }));
     await user.click(screen.getByText("emailTemplates.delete"));
     await user.click(screen.getAllByText("emailTemplates.delete").at(-1)!);

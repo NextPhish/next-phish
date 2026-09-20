@@ -1,7 +1,7 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SendingProfileFormContainer } from "../../../../apps/next-app/src/components/organisms/sending-profiles/sending-profile-form-container";
+import { SendingProfileForm } from "../../../../apps/next-app/src/components/organisms/sending-profiles";
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn().mockResolvedValue({ id: "profile-1" }),
@@ -81,7 +81,7 @@ describe("sending profile form mutation", () => {
     mocks.create.mockReturnValueOnce(creating);
     mocks.invalidate.mockReturnValueOnce(invalidating);
     const user = userEvent.setup();
-    render(<SendingProfileFormContainer />);
+    render(<SendingProfileForm />);
     await fill(user);
     await user.click(screen.getByRole("button", { name: "common.create" }));
     await waitFor(() =>
@@ -114,7 +114,7 @@ describe("sending profile form mutation", () => {
   it("shows a failed save and stays on the form", async () => {
     mocks.create.mockRejectedValueOnce(new Error("unavailable"));
     const user = userEvent.setup();
-    render(<SendingProfileFormContainer />);
+    render(<SendingProfileForm />);
     await fill(user);
     await user.click(screen.getByRole("button", { name: "common.create" }));
     await waitFor(() =>

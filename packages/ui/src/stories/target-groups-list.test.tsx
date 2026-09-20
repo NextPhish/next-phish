@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { TargetGroupsListContainer } from "../../../../apps/next-app/src/components/organisms/target-groups/list-container";
+import { TargetGroupList } from "../../../../apps/next-app/src/components/organisms/target-groups/target-group-list";
 const mocks = vi.hoisted(() => ({
   query: vi.fn(),
   remove: vi.fn(),
@@ -57,7 +57,7 @@ it("maps status filter, server sorting and page changes to the list query", asyn
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <TargetGroupsListContainer />
+      <TargetGroupList />
     </I18nProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Add filter" }));
@@ -82,7 +82,7 @@ it("confirms exact group deletion in a controlled dialog", async () => {
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <TargetGroupsListContainer />
+      <TargetGroupList />
     </I18nProvider>,
   );
   await user.click(

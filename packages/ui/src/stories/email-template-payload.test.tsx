@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildEmailTemplatePayload } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-payload";
+import { buildEmailTemplatePayload } from "../../../../apps/next-app/src/components/organisms/email-templates/email-template-form/email-template-payload";
 
 describe("email template mutation payload", () => {
   it("preserves editor design, publish status, tracking and attachment ids while normalizing text", () => {

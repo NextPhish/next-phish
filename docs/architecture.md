@@ -192,11 +192,15 @@ All common operations run from the project root via `turbo`. Examples:
 - Health check endpoint at `/health`.
 - Keeps public/phishing landing pages off the Next.js server, prevents session/CSRF leaks.
 
-### Frontend: PrimeReact + Atomic Design
+### Frontend: shared UI + component ownership
 
-- PrimeReact components are wrapped in `apps/next-app/src/components/ui/` for theme consistency.
-- Atomic hierarchy: `atoms → molecules → organisms → templates → pages`.
-- Pages compose templates (or organisms directly for simple layouts).
+- `@next-phish/ui` is the application-independent design system (React, Radix, Tailwind, and TanStack Table). Retain specialized PrimeReact editors/charts through existing adapters; use shared V1 UI for migrated screens.
+- Keep the Atomic Design hierarchy: `atoms → molecules → organisms → templates → pages`. Pages compose public feature components or templates.
+- Give each substantial component a folder containing its named main component, `index.ts`, private rendering `parts/`, component-owned `hooks/`, and shared local `types/` as needed. Do not use `Container`/`Presentation` filenames or component suffixes for new or migrated code.
+- Main components and their hooks own orchestration, Formik, tRPC, permissions, and navigation. Rendering parts receive data/callbacks and may use Formik context. Main JSX stays small.
+- Runtime consumers import public entries; internal files use direct imports. Shared code lives at its nearest common owner, and `src/hooks/` is reserved for cross-feature hooks. Tests and stories may deliberately render private parts.
+- Prefer Tailwind for ordinary component styles. Keep exceptional CSS modules colocated with their component, particularly for third-party selectors or complex animations. Preserve `.np-theme` tokens and existing appearance during migration.
+- See [frontend component conventions](coding-standards.md#frontend-component-structure) for the exact structure, form rules, and migration checks. [Issue #28](https://github.com/NextPhish/next-phish/issues/28) tracks incremental adoption; legacy names outside migrated areas remain temporarily.
 
 ### Worker
 
@@ -212,19 +216,19 @@ Login (including magic links), password recovery, two-factor verification, initi
 
 Task forms use V1 controls and dialogs. The rich-text description editor remains an isolated PrimeReact Editor with V1 styling until a shared rich-text component is available. Task board previews and loading states live in Storybook. Tasks can be moved between visible status columns with a drag handle using a pointer, touch or keyboard (Space/Enter, arrow keys, Escape). The board uses `@dnd-kit/core` and the existing task move mutation; unsuccessful saves retain the original task status, and the status select remains available as an alternative.
 
-Schedule overview, create/edit forms and details use the light V1 workspace. The schedule table adapts the shared DataTable to server filtering, sorting and pagination; containers retain tRPC mutations and Formik submission. Delivery health uses compact metrics with the shared Radix-based HelpPopover. The timeline retains its existing PrimeReact Chart wrapper around Chart.js with V1 colors. Schedule forms, populated details and help popovers have independent Storybook previews; regression tests mock network mutations.
+Schedule overview, create/edit forms and details use the light V1 workspace. The schedule table adapts the shared DataTable to server filtering, sorting and pagination; main components and their hooks retain tRPC mutations and Formik submission. Delivery health uses compact metrics with the shared Radix-based HelpPopover. The timeline retains its existing PrimeReact Chart wrapper around Chart.js with V1 colors. Schedule forms, populated details and help popovers have independent Storybook previews; regression tests mock network mutations.
 
 Organization list, details, member tables and organization settings also use V1 components. Role filters and sorting remain server-side, and deletion eligibility uses the total owned-organization count rather than the current page. Settings preserve role restrictions and use shared dialogs and localized schema validation. Organization analytics opt into the V1 chart presentation while keeping all original series and chart interactions; the default chart variant remains available to legacy screens. Global ignored-network settings reuse the V1 organization network presentation through an admin-only adapter; their queries and mutations remain globally scoped under settings.
 
-Pages use the V1 server table, forms, redirect catalog and import dialog. Containers retain Formik, tRPC and navigation; the import URL schema is shared with the backend. GrapesJS remains the specialized editor. Catalog thumbnails and sandboxed HTML previews work in the application and standalone Storybook. Mocked regression tests cover list controls, redirects, imports and create/update payloads.
+Pages use the V1 server table, forms, redirect catalog and import dialog. Main components and their hooks retain Formik, tRPC and navigation; the import URL schema is shared with the backend. GrapesJS remains the specialized editor. Catalog thumbnails and sandboxed HTML previews work in the application and standalone Storybook. Mocked regression tests cover list controls, redirects, imports and create/update payloads.
 
-Email templates use the V1 server table and form presentation with the specialized GrapesJS editor supplied by the container. Shared TagInput and FileUploader controls preserve tags and attachments; upload/removal failures remain visible and pending attachment changes block saving. Standalone stories render the actual form presentation, and mocked tests cover query mapping, validation and attachment payloads.
+Email templates use component-owned list, form, attachment, and variable-panel folders. Their local hooks coordinate state and requests, while private parts render V1 controls; the form main supplies the specialized GrapesJS editor. Shared TagInput and FileUploader controls preserve tags and attachments; upload/removal failures remain visible and pending attachment changes block saving. Standalone stories render the actual form parts, and mocked tests cover query mapping, validation and attachment payloads.
 
-Sending profiles use V1 provider forms, dialogs and server tables. Provider filters reach the repository query; masked secrets are preserved when editing existing profiles. The form serializes only known boolean and numeric provider fields, preserving credentials as strings.
+Sending profiles own separate list, form, and test-email-dialog folders with local orchestration hooks and private rendering parts. Provider filters reach the repository query; masked secrets are preserved when editing existing profiles. The form serializes only known boolean and numeric provider fields, preserving credentials as strings.
 
-Target groups use V1 lists, recipient forms and import dialogs. Formik owns import mode and the selected file, while the import hook tracks upload/job progress. Admin user management uses the same table and dialog primitives with the existing admin guard, shared server validation and a current deletion preview before destructive actions.
+Target groups use V1 lists, recipient forms and import dialogs. Formik owns import mode and the selected file, while the import hook tracks upload/job progress. Admin user management owns user-list, create-user, and delete-user component folders and uses the same table and dialog primitives. Its server admin guard, shared validation, and current deletion preview checks remain in place; deletion state resets when the selected user changes.
 
-Campaigns use V1 authoring tabs, asset catalogs, lifecycle actions and recipient tables. Error summaries reveal invalid fields across tabs. Recipient timeline queries remain in containers; the server-paginated recipient table hides unsupported search. Charts retain the specialized Chart.js wrapper. All migrated menu sections have a light workspace boundary and English/Bulgarian translation coverage tests.
+Campaigns use V1 authoring tabs, asset catalogs, lifecycle actions and recipient tables. Error summaries reveal invalid fields across tabs. Recipient timeline queries remain in application orchestration; the server-paginated recipient table hides unsupported search. Charts retain the specialized Chart.js wrapper. All migrated menu sections have a light workspace boundary and English/Bulgarian translation coverage tests.
 
 ### Two-factor enrollment
 

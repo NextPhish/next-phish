@@ -1,31 +1,34 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import { ImportWebsiteDialog } from "../../../../apps/next-app/src/components/organisms/pages/import-website-dialog";
-import { PreviousImportsList } from "../../../../apps/next-app/src/components/organisms/pages/previous-imports-list";
+import { ImportWebsite } from "../../../../apps/next-app/src/components/organisms/pages/import-website/import-website";
+import { PreviousImportsList } from "../../../../apps/next-app/src/components/organisms/pages/import-website/parts/previous-imports-list";
 const mocks = vi.hoisted(() => ({
   dispatch: vi.fn(),
   import: vi.fn(),
   hide: vi.fn(),
 }));
-vi.mock("@/src/hooks/use-import-dialog", () => ({
-  useImportDialog: () => ({
-    state: {
-      url: "",
-      includeAssets: true,
-      importing: false,
-      error: "",
-      jobId: null,
-      progress: null,
-    },
-    dispatch: mocks.dispatch,
-    previousImports: [],
-    handleImport: mocks.import,
-    handleSelectPrevious: vi.fn(),
-    handleSearch: vi.fn(),
-    handleHide: mocks.hide,
+vi.mock(
+  "@/src/components/organisms/pages/import-website/hooks/use-import-dialog",
+  () => ({
+    useImportDialog: () => ({
+      state: {
+        url: "",
+        includeAssets: true,
+        importing: false,
+        error: "",
+        jobId: null,
+        progress: null,
+      },
+      dispatch: mocks.dispatch,
+      previousImports: [],
+      handleImport: mocks.import,
+      handleSelectPrevious: vi.fn(),
+      handleSearch: vi.fn(),
+      handleHide: mocks.hide,
+    }),
   }),
-}));
+);
 const t = (key: string) =>
   ({
     "common.cancel": "Cancel",
@@ -42,12 +45,7 @@ const t = (key: string) =>
 it("submits the validated URL with the assets choice and delegates cancellation", async () => {
   const user = userEvent.setup();
   render(
-    <ImportWebsiteDialog
-      visible
-      t={t}
-      onImportComplete={vi.fn()}
-      onHide={vi.fn()}
-    />,
+    <ImportWebsite visible t={t} onImportComplete={vi.fn()} onHide={vi.fn()} />,
   );
   await user.type(screen.getByLabelText("URL"), "https://example.com/login");
   await user.click(screen.getByRole("button", { name: "Import" }));

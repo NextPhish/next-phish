@@ -68,8 +68,13 @@ packages/plugin-campaign-summary/
     worker.ts                # optional export for jobs/events
     ui/
       index.ts               # client entry, no server imports
-      summary-container.tsx
-      summary-presentation.tsx
+      summary/
+        index.ts
+        summary.tsx
+        hooks/
+          use-summary.ts
+        parts/
+          summary-view.tsx
       summary-widget.tsx
       summary.stories.tsx
 ```
@@ -136,7 +141,7 @@ Generate three separate registries: public/client, server and worker. The client
 
 The host provides one predefined protected route structure, `/extensions/[pluginId]/[[...path]]`, which selects a component from the registry. Organization settings do not generate arbitrary app routes. The page, loader and API check activation and permissions on every request. The database-backed page uses `force-dynamic` and `loading.tsx` according to project conventions. A disabled plugin has an unavailable page and rejects API access; hiding navigation alone is not access control.
 
-For the first version, UI contributions are Client Components receiving a shared `organizationId`, settings DTO and host services; the host route remains a Server Component. Forms follow Formik + Zod and container/presentation conventions; queries use tRPC/React Query. The plugin frontend client is a separate host adapter using contract types, so the package does not import the application's `AppRouter` and create a circular dependency.
+For the first version, UI contributions are Client Components receiving a shared `organizationId`, settings DTO and host services; the host route remains a Server Component. Forms follow Formik + Zod and the [component ownership conventions](coding-standards.md#frontend-component-structure); queries use tRPC/React Query. The plugin frontend client is a separate host adapter using contract types, so the package does not import the application's `AppRouter` and create a circular dependency.
 
 The server generator creates statically typed tRPC routers under `plugins.campaignSummary`. Router aliases are generated deterministically; collisions fail the build. A generic `execute(pluginId, method, unknown)` is not proposed as the primary public API because it would lose direct end-to-end type inference. Shared management operations remain in a separate host-owned `plugin` router.
 
