@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CampaignListPresentation } from "../../../../apps/next-app/src/components/organisms/campaigns/list-presentation";
+import { CampaignListView } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-list/parts/campaign-list-view";
 
 const base = {
   total: 1,
@@ -44,7 +44,7 @@ describe("campaign list permissions", () => {
   it("hides editing for active campaigns", async () => {
     render(
       <I18nProvider initialLocale="en">
-        <CampaignListPresentation {...base} rows={[row("ACTIVE")]} />
+        <CampaignListView {...base} rows={[row("ACTIVE")]} />
       </I18nProvider>,
     );
     await userEvent.click(screen.getByRole("button", { name: /actions/i }));

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CampaignListContainer } from "../../../../apps/next-app/src/components/organisms/campaigns/list-container";
+import { CampaignList } from "../../../../apps/next-app/src/components/organisms/campaigns";
 const mocks = vi.hoisted(() => ({
   query: vi.fn(),
   remove: vi.fn(),
@@ -33,7 +33,7 @@ it("wires V1 sorting to campaign.list server query", async () => {
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="en">
-      <CampaignListContainer />
+      <CampaignList />
     </I18nProvider>,
   );
   expect(mocks.query).toHaveBeenCalledWith(

@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ResetPasswordContainer } from "../../../../apps/next-app/src/components/organisms/reset-password/container";
+import { ResetPassword } from "../../../../apps/next-app/src/components/organisms/reset-password";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 const auth = vi.hoisted(() => ({
   checkVerificationOtp: vi.fn(),
@@ -19,7 +19,7 @@ it("requires OTP verification, initializes the password form, and blocks mismatc
   const user = userEvent.setup();
   render(
     <I18nProvider initialLocale="bg">
-      <ResetPasswordContainer email="preview@example.test" />
+      <ResetPassword email="preview@example.test" />
     </I18nProvider>,
   );
   await user.type(screen.getByLabelText(/Код за потвърждение/), "123456");

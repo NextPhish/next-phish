@@ -4,9 +4,12 @@ import type { MemberView } from "@next-phish/backend";
 import {
   Badge,
   DataTable,
+  FormMessage,
+  RowActionsMenu,
   type ColumnDef,
   type TableFilter,
 } from "@next-phish/ui";
+import { Mail } from "lucide-react";
 import { useLocale, useTranslation } from "@/src/lib/i18n/client";
 import { uiTableLabels } from "@/src/lib/ui-table-labels";
 import type { OrganizationMembersModel } from "../types/organization-detail.types";
@@ -55,8 +58,33 @@ export function OrganizationMembersTable({
         cell: ({ row }) =>
           dateFormatter.format(new Date(row.original.createdAt)),
       },
+      ...(model.canManage
+        ? [
+            {
+              id: "actions",
+              header: t("tableUi.actions"),
+              enableSorting: false,
+              cell: ({ row }) =>
+                row.original.user.passwordSetupRequired &&
+                !row.original.user.disabledAt ? (
+                  <RowActionsMenu
+                    label={t("tableUi.actions")}
+                    items={[
+                      {
+                        label: t("organizations.retryWelcome"),
+                        icon: <Mail size={16} aria-hidden="true" />,
+                        disabled: model.resendingUserId === row.original.userId,
+                        onSelect: () =>
+                          void model.onResendWelcome(row.original.userId),
+                      },
+                    ]}
+                  />
+                ) : null,
+            } satisfies ColumnDef<MemberView>,
+          ]
+        : []),
     ],
-    [dateFormatter, t],
+    [dateFormatter, model, t],
   );
   const filters = useMemo<TableFilter[]>(
     () => [
@@ -73,20 +101,28 @@ export function OrganizationMembersTable({
     [t],
   );
   return (
-    <DataTable
-      data={model.rows}
-      total={model.total}
-      mode="server"
-      columns={columns}
-      getRowId={(row) => row.id}
-      caption={t("organizationUi.membersCaption")}
-      state={model.state}
-      onStateChange={model.onStateChange}
-      loading={model.loading}
-      error={model.error}
-      onRetry={model.onRetry}
-      filters={filters}
-      labels={{ ...uiTableLabels(t), search: t("organizations.searchMembers") }}
-    />
+    <div className="grid gap-3">
+      {model.resendError ? (
+        <FormMessage variant="error">{model.resendError}</FormMessage>
+      ) : null}
+      <DataTable
+        data={model.rows}
+        total={model.total}
+        mode="server"
+        columns={columns}
+        getRowId={(row) => row.id}
+        caption={t("organizationUi.membersCaption")}
+        state={model.state}
+        onStateChange={model.onStateChange}
+        loading={model.loading}
+        error={model.error}
+        onRetry={model.onRetry}
+        filters={filters}
+        labels={{
+          ...uiTableLabels(t),
+          search: t("organizations.searchMembers"),
+        }}
+      />
+    </div>
   );
 }

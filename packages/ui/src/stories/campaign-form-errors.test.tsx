@@ -4,8 +4,8 @@ import { Formik } from "formik";
 import { describe, expect, it } from "vitest";
 import type { CampaignFormValues } from "@next-phish/shared";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CampaignFormPresentation } from "../../../../apps/next-app/src/components/organisms/campaigns/form-presentation";
-import { campaignFormValidator } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-form-validation";
+import { CampaignFormView } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-form/parts/campaign-form-view";
+import { campaignFormValidator } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-form/parts/campaign-form-validation";
 import { useTranslation } from "../../../../apps/next-app/src/lib/i18n/client";
 
 const values: CampaignFormValues = {
@@ -38,7 +38,7 @@ function InvalidForm() {
       validate={campaignFormValidator(t)}
       onSubmit={() => undefined}
     >
-      <CampaignFormPresentation
+      <CampaignFormView
         isEdit={false}
         emailTemplates={[]}
         emailTemplatesTotal={0}

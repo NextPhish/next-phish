@@ -56,9 +56,9 @@ Defined as a CSS custom property on `:root`:
 
 Avoid light text on `brand-cyan` or `brand-aqua` — use `text-brand-navy` instead.
 
-## PrimeReact Palette Overrides
+## Legacy utility palette aliases
 
-The following Tailwind default palette slots are overridden with brand colors so that PrimeReact components pick up the brand automatically via the built-in Tailwind preset:
+The following Tailwind palette aliases remain for existing utility classes:
 
 | Override    | Brand color | Hex       |
 | ----------- | ----------- | --------- |
@@ -67,8 +67,8 @@ The following Tailwind default palette slots are overridden with brand colors so
 | `green-400` | brand-cyan  | `#15E5D4` |
 | `green-500` | brand-cyan  | `#15E5D4` |
 
-These overrides affect both PrimeReact and any custom code using those classes. See `apps/next-app/app/globals.css` for the `@theme` block.
+These overrides affect custom code using those utility classes. See `apps/next-app/app/globals.css` for the `@theme` block.
 
 ## Selected V1 redesign
 
-The existing palette above applies to the current PrimeReact app. New components in `packages/ui` use the approved V1 light workspace/dark sidebar/indigo direction. The source of truth is `packages/ui/src/styles.css`, scoped to `.np-theme`; do not change existing global palette overrides until the app migration. The new muted text token is `#626d80`, adjusted from the prototype for contrast on `#f5f6fa`.
+The existing palette above remains available for legacy brand utilities. Components in `packages/ui` use the approved V1 light workspace/dark sidebar/indigo direction. The source of truth is `packages/ui/src/styles.css`, scoped to `.np-theme`. The new muted text token is `#626d80`, adjusted from the prototype for contrast on `#f5f6fa`.

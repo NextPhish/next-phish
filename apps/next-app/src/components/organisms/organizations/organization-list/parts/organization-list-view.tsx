@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Building2, Settings2, Trash2 } from "lucide-react";
+import { Building2, Plus, Settings2, Trash2 } from "lucide-react";
 import type { OrganizationView } from "@next-phish/backend";
 import {
   Badge,
@@ -118,6 +118,14 @@ export function OrganizationListView(props: OrganizationListModel) {
       <PageHeader
         title={t("organizations.title")}
         description={t("organizations.subtitle")}
+        actions={
+          props.canCreate ? (
+            <Button onClick={props.onCreate}>
+              <Plus size={16} aria-hidden="true" />
+              {t("organizations.createTitle")}
+            </Button>
+          ) : undefined
+        }
       />
       <DataTable
         mode="server"
@@ -130,6 +138,10 @@ export function OrganizationListView(props: OrganizationListModel) {
         loading={props.loading}
         error={props.error}
         onRetry={props.onRetry}
+        onRowActivate={(organization) => onManage(organization.id)}
+        getRowActivationLabel={(organization) =>
+          `${t("organizations.manage")}: ${organization.name}`
+        }
         caption={t("organizations.title")}
         labels={{
           ...uiTableLabels(t),

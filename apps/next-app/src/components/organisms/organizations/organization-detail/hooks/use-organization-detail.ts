@@ -12,6 +12,9 @@ export function useOrganizationDetail(
   const t = useTranslation();
   const { state, onStateChange } = useDataTableState();
   const [debouncedSearch, setDebouncedSearch] = useState(state.search);
+  const [resendingUserId, setResendingUserId] = useState<string>();
+  const [resendError, setResendError] = useState<string | null>(null);
+  const resendWelcome = trpc.organization.resendMemberWelcome.useMutation();
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearch(state.search), 300);
     return () => clearTimeout(timeout);
@@ -48,12 +51,13 @@ export function useOrganizationDetail(
       onRetry: () => void organization.refetch(),
     };
   if (!organization.data) return { status: "not-found" };
+  const canManage = organization.data.$me.role !== "member";
 
   return {
     status: "ready",
     model: {
       organization: organization.data,
-      canManage: organization.data.$me.role !== "member",
+      canManage,
       analytics: analytics.data?.months ?? [],
       analyticsLoading: analytics.isLoading,
       analyticsError: analytics.error
@@ -68,6 +72,20 @@ export function useOrganizationDetail(
         loading: members.isLoading,
         error: members.error ? t("organizationUi.membersError") : null,
         onRetry: () => void members.refetch(),
+        canManage,
+        resendingUserId,
+        resendError,
+        onResendWelcome: async (userId) => {
+          setResendError(null);
+          setResendingUserId(userId);
+          try {
+            await resendWelcome.mutateAsync({ organizationId, userId });
+          } catch {
+            setResendError(t("organizations.resendWelcomeError"));
+          } finally {
+            setResendingUserId(undefined);
+          }
+        },
       },
     },
   };

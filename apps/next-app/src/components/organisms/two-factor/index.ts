@@ -1,1 +1,1 @@
-export { TwoFactorContainer } from "./container";
+export { TwoFactor } from "./two-factor";

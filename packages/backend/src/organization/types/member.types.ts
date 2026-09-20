@@ -7,5 +7,7 @@ export interface MemberView {
     name: string;
     email: string;
     image: string | null;
+    passwordSetupRequired: boolean;
+    disabledAt: Date | null;
   };
 }

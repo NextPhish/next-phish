@@ -4,7 +4,7 @@ import { Form, useFormikContext } from "formik";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CampaignFormValues } from "@next-phish/shared";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CampaignFormContainer } from "../../../../apps/next-app/src/components/organisms/campaigns/form-container";
+import { CampaignForm } from "../../../../apps/next-app/src/components/organisms/campaigns";
 
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
@@ -15,24 +15,27 @@ const mocks = vi.hoisted(() => ({
   campaign: undefined as undefined | Record<string, unknown>,
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
-vi.mock("@/src/hooks/use-campaign-authoring", () => ({
-  useCampaignAuthoring: () => ({
-    campaign: { data: mocks.campaign },
-    isLoading: false,
-    create: { mutateAsync: mocks.create },
-    update: { mutateAsync: mocks.update },
-    createSchedule: { mutateAsync: mocks.createSchedule },
-    updateSchedule: { mutateAsync: mocks.updateSchedule },
-    emailTemplates: [],
-    pages: [],
-    sendingProfiles: [],
-    targetGroups: [],
-  }),
-}));
 vi.mock(
-  "../../../../apps/next-app/src/components/organisms/campaigns/form-presentation",
+  "@/src/components/organisms/campaigns/campaign-form/hooks/use-campaign-authoring",
   () => ({
-    CampaignFormPresentation: () => {
+    useCampaignAuthoring: () => ({
+      campaign: { data: mocks.campaign },
+      isLoading: false,
+      create: { mutateAsync: mocks.create },
+      update: { mutateAsync: mocks.update },
+      createSchedule: { mutateAsync: mocks.createSchedule },
+      updateSchedule: { mutateAsync: mocks.updateSchedule },
+      emailTemplates: [],
+      pages: [],
+      sendingProfiles: [],
+      targetGroups: [],
+    }),
+  }),
+);
+vi.mock(
+  "../../../../apps/next-app/src/components/organisms/campaigns/campaign-form/parts/campaign-form-view",
+  () => ({
+    CampaignFormView: () => {
       const form = useFormikContext<CampaignFormValues>();
       return (
         <Form>
@@ -87,7 +90,7 @@ describe("campaign authoring mutations", () => {
     const user = userEvent.setup();
     render(
       <I18nProvider initialLocale="en">
-        <CampaignFormContainer />
+        <CampaignForm />
       </I18nProvider>,
     );
     await user.click(screen.getByRole("button", { name: "Fill" }));

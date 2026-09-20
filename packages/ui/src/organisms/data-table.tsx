@@ -53,6 +53,9 @@ interface BaseProps<T> {
   filters?: TableFilter[];
   emptyAction?: ReactNode;
   renderRowDetails?: (row: T) => ReactNode;
+  onRowActivate?: (row: T) => void;
+  getRowActivationLabel?: (row: T) => string;
+  isRowExpanded?: (row: T) => boolean;
   pageSizeOptions?: number[];
   labels?: Partial<DataTableLabels>;
 }
@@ -74,6 +77,9 @@ export function DataTable<T>({
   filters,
   emptyAction,
   renderRowDetails,
+  onRowActivate,
+  getRowActivationLabel,
+  isRowExpanded,
   mode = "client",
   total,
   pageSizeOptions = [10, 25, 50, 100],
@@ -212,6 +218,9 @@ export function DataTable<T>({
               }))
             }
             renderRowDetails={renderRowDetails}
+            onRowActivate={onRowActivate}
+            getRowActivationLabel={getRowActivationLabel}
+            isRowExpanded={isRowExpanded}
             emptyAction={emptyAction}
           />
         </table>

@@ -1,4 +1,4 @@
-import { ScheduleFormContainer } from "@/src/components/organisms/schedules/form-container";
+import { ScheduleForm } from "@/src/components/organisms/schedules";
 
 export const dynamic = "force-dynamic";
 
@@ -8,5 +8,5 @@ export default async function NewSchedulePage({
   searchParams: Promise<{ campaignId?: string }>;
 }) {
   const { campaignId } = await searchParams;
-  return <ScheduleFormContainer campaignId={campaignId} />;
+  return <ScheduleForm campaignId={campaignId} />;
 }

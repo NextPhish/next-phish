@@ -38,8 +38,11 @@ export default defineConfig({
           ],
         },
         {
-          label: "Understand results",
-          items: [{ slug: "concepts/events-and-data" }],
+          label: "How it works",
+          items: [
+            { slug: "concepts/scheduling-and-delivery" },
+            { slug: "concepts/events-and-data" },
+          ],
         },
         {
           label: "Using NextPhish",

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
-import { TasksPresentation } from "../../../../apps/next-app/src/components/organisms/tasks/presentation";
+import { TasksView } from "../../../../apps/next-app/src/components/organisms/tasks/parts/tasks-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 
 beforeEach(() => {
@@ -50,10 +50,10 @@ function setup(pending = false, failed = false) {
     moveError: failed ? new Error("Failed") : null,
     setStatusIds: vi.fn(),
     setSearch: vi.fn(),
-  } as unknown as ComponentProps<typeof TasksPresentation>["board"];
+  } as unknown as ComponentProps<typeof TasksView>["board"];
   render(
     <I18nProvider initialLocale="en">
-      <TasksPresentation
+      <TasksView
         board={board}
         onCreate={vi.fn()}
         onEdit={onEdit}

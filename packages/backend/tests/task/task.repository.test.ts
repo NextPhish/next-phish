@@ -88,4 +88,65 @@ describe("TaskRepository", () => {
       repo.deleteStatus(todo.id, organizationId, userId, done.id),
     ).resolves.toBe(true);
   });
+
+  it("persists structured descriptions and clears only on explicit null", async () => {
+    const [todo] = await repo.listStatuses(organizationId);
+    const description = {
+      version: 1 as const,
+      blocks: [
+        {
+          type: "paragraph" as const,
+          data: { text: '<script>alert("stored as text")</script>' },
+        },
+        {
+          type: "list" as const,
+          data: { style: "unordered" as const, items: ["100%_literal"] },
+        },
+      ],
+    };
+    const created = await repo.create(organizationId, userId, {
+      title: "Structured task",
+      statusId: todo.id,
+      priority: "MEDIUM",
+      description,
+    });
+    expect(created.description).toEqual(description);
+    expect(
+      (
+        await repo.list(organizationId, {
+          search: "stored as text",
+          limit: 10,
+          offset: 0,
+        })
+      ).tasks.map(({ id }) => id),
+    ).toContain(created.id);
+    expect(
+      (
+        await repo.list(organizationId, {
+          search: "%_literal",
+          limit: 10,
+          offset: 0,
+        })
+      ).tasks.map(({ id }) => id),
+    ).toContain(created.id);
+    expect(
+      (
+        await repo.list(organizationId, {
+          search: "paragraph",
+          limit: 10,
+          offset: 0,
+        })
+      ).tasks,
+    ).toEqual([]);
+
+    const renamed = await repo.update(created.id, organizationId, {
+      title: "Renamed task",
+    });
+    expect(renamed.description).toEqual(description);
+
+    const cleared = await repo.update(created.id, organizationId, {
+      description: null,
+    });
+    expect(cleared.description).toBeNull();
+  });
 });

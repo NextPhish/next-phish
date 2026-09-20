@@ -1,5 +1,5 @@
-import { SchedulesOverview } from "@/src/components/organisms/schedules/schedules-overview";
+import { ScheduleOverview } from "@/src/components/organisms/schedules";
 
 export default function SchedulePage() {
-  return <SchedulesOverview />;
+  return <ScheduleOverview />;
 }

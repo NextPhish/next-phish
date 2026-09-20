@@ -1,8 +1,8 @@
 import { useState, type ComponentProps } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { CampaignDetailPresentation } from "../../../../apps/next-app/src/components/organisms/campaigns/detail-presentation";
-import { CampaignDetailContent } from "../../../../apps/next-app/src/components/organisms/campaigns/detail-overview";
+import { CampaignDetailView } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-detail/parts/campaign-detail-view";
+import { CampaignDetailContent } from "../../../../apps/next-app/src/components/organisms/campaigns/campaign-detail/parts/detail-overview";
 
 type CampaignDetail = ComponentProps<typeof CampaignDetailContent>["data"];
 type CampaignSchedule = ComponentProps<
@@ -109,7 +109,7 @@ function Preview({ template = false }: { template?: boolean }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   return (
     <I18nProvider initialLocale="en">
-      <CampaignDetailPresentation
+      <CampaignDetailView
         name={campaign.name}
         type={template ? "TEMPLATE" : campaign.type}
         status={campaign.status}

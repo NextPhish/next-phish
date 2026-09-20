@@ -12,6 +12,10 @@ export interface OrganizationMembersModel {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
+  canManage: boolean;
+  resendingUserId?: string;
+  resendError: string | null;
+  onResendWelcome: (userId: string) => Promise<void>;
 }
 export interface OrganizationDetailModel {
   organization: OrganizationView;

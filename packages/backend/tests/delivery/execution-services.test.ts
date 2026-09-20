@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   attachSubmissionTracking,
+  TrackingService,
   calculateScheduledAt,
   canTransitionDelivery,
   generateLogicalMessageId,
@@ -163,6 +164,97 @@ describe("tracked content", () => {
     expect(html).toContain("method:'POST'");
     expect(html).not.toContain("FormData");
     expect(html).not.toContain(".value");
+  });
+
+  it("renders HTML-safe recipient variables into validated landing pages", async () => {
+    const findFirst = vi.fn().mockResolvedValue({
+      html: [
+        "{{.FirstName}}|{{firstName}}|{{.LastName}}|{{lastName}}",
+        "{{.Email}}|{{email}}|{{.Position}}|{{position}}",
+        '{{.TrackingRef}}|{{trackingRef}}|<a href="{{.URL}}">{{url}}</a>',
+      ].join("|"),
+      contentType: null,
+      path: "account/login",
+    });
+    const findByTrackingRef = vi.fn().mockResolvedValue({
+      firstName: '<Alex & "Sam">',
+      lastName: "O'Reilly",
+      email: "alex&sam@example.test",
+      position: "Research <Lead>",
+      organizationId: "org-1",
+      deliveryStatus: "SENT",
+      campaign: { pageId: "page-1" },
+    });
+    const tracking = new TrackingService(
+      { page: { findFirst } } as never,
+      { findByTrackingRef } as never,
+    );
+
+    const result = await tracking.resolveLandingPage(
+      'Ab&<"123',
+      "account/login",
+    );
+
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        id: "page-1",
+        organizationId: "org-1",
+        visibility: "SHADOW",
+      },
+      select: { html: true, contentType: true, path: true },
+    });
+    expect(result?.contentType).toBe("text/html; charset=utf-8");
+    expect(result?.html).toContain(
+      "&lt;Alex &amp; &quot;Sam&quot;&gt;|&lt;Alex &amp; &quot;Sam&quot;&gt;",
+    );
+    expect(result?.html).toContain("O&#39;Reilly|O&#39;Reilly");
+    expect(result?.html).toContain(
+      "alex&amp;sam@example.test|alex&amp;sam@example.test",
+    );
+    expect(result?.html).toContain(
+      "Research &lt;Lead&gt;|Research &lt;Lead&gt;",
+    );
+    expect(result?.html).toContain("Ab&amp;&lt;&quot;123|Ab&amp;&lt;&quot;123");
+    expect(result?.html).toContain(
+      '<a href="/account/login?ref=Ab%26%3C%22123">/account/login?ref=Ab%26%3C%22123</a>',
+    );
+    expect(result?.html).not.toContain('<Alex & "Sam">');
+  });
+
+  it("keeps cancelled and mismatched-path landing pages inaccessible", async () => {
+    const findFirst = vi.fn().mockResolvedValue({
+      html: "<p>Hidden</p>",
+      contentType: "text/html",
+      path: "account/login",
+    });
+    const findByTrackingRef = vi
+      .fn()
+      .mockResolvedValueOnce({
+        organizationId: "org-1",
+        deliveryStatus: "CANCELLED",
+        campaign: { pageId: "page-1" },
+      })
+      .mockResolvedValueOnce({
+        firstName: "Alex",
+        lastName: "User",
+        email: "alex@example.test",
+        position: null,
+        organizationId: "org-1",
+        deliveryStatus: "SENT",
+        campaign: { pageId: "page-1" },
+      });
+    const tracking = new TrackingService(
+      { page: { findFirst } } as never,
+      { findByTrackingRef } as never,
+    );
+
+    await expect(
+      tracking.resolveLandingPage("cancelled", "account/login"),
+    ).resolves.toBeNull();
+    expect(findFirst).not.toHaveBeenCalled();
+    await expect(
+      tracking.resolveLandingPage("mismatch", "other/path"),
+    ).resolves.toBeNull();
   });
 
   it("renders the configured page path and an invisible tracking pixel", () => {

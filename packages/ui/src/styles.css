@@ -1,5 +1,6 @@
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
+@import "@daypicker/react/style.css" layer(components);
 @import "tailwindcss/utilities.css" layer(utilities);
 @source "./**/*.{ts,tsx}";
 
@@ -757,7 +758,6 @@
     align-items: center;
   }
   .np-content {
-    max-width: 1640px;
     margin: auto;
     padding: 34px 36px 45px;
   }
@@ -1368,5 +1368,54 @@
     font-size: 13px;
     line-height: 1.6;
     box-shadow: 0 8px 28px rgb(25 34 53 / 14%);
+  }
+}
+
+@layer components {
+  .np-date-picker-popover {
+    z-index: 150;
+    max-width: calc(100vw - 24px);
+    padding: 12px;
+    background: var(--np-surface);
+    border: 1px solid var(--np-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgb(21 27 44 / 15%);
+  }
+  .np-calendar {
+    --rdp-accent-color: var(--np-primary);
+    --rdp-accent-background-color: var(--np-surface-subtle);
+    --rdp-day-height: 36px;
+    --rdp-day-width: 36px;
+    --rdp-day_button-height: 34px;
+    --rdp-day_button-width: 34px;
+    --rdp-selected-border: 2px solid var(--np-primary);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--np-ink);
+  }
+  .np-calendar button:focus-visible {
+    outline: 2px solid var(--np-primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .np-calendar .rdp-dropdowns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 5.5rem;
+    width: 100%;
+    gap: 6px;
+  }
+  .np-calendar .rdp-month_caption {
+    height: auto;
+    padding-bottom: 4px;
+  }
+  .np-calendar .rdp-nav {
+    position: static;
+    justify-content: flex-end;
+    height: 30px;
+  }
+  .np-select-content {
+    z-index: 160;
   }
 }

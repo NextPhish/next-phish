@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AuthLayout } from "@next-phish/ui";
 import { GetUserCountQuery, MessageBus } from "@next-phish/backend";
-import { LoginContainer } from "@/src/components/organisms/login";
+import { Login } from "@/src/components/organisms/login";
 import { Container } from "@/src/server/container";
 import {
   getAuthErrorMessage,
@@ -9,7 +9,6 @@ import {
 } from "@/src/lib/auth-errors";
 import { createTranslator } from "@/src/lib/i18n";
 import { getLocale } from "@/src/lib/i18n/server";
-import styles from "./login.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -45,9 +44,9 @@ export default async function LoginPage({
       brandDescription={t("login.brandDescription")}
       brandFooter={t("login.brandFooter")}
     >
-      <LoginContainer authError={authError} authSuccess={authSuccess} />
+      <Login authError={authError} authSuccess={authSuccess} />
       {count === 0 && (
-        <p className={styles.setupPrompt}>
+        <p className="mt-6 text-center text-[13px] text-[var(--np-muted)] [&_a:hover]:text-[var(--np-primary-hover)] [&_a]:font-semibold [&_a]:text-[var(--np-primary)]">
           {t("login.firstAdminPrompt")}{" "}
           <Link href="/setup">{t("login.startSetup")}</Link>
         </p>

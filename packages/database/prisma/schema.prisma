@@ -1064,7 +1064,7 @@ model Task {
   createdById          String
   assigneeId           String?
   title                String
-  description          String?
+  description          Json?        @db.JsonB
   priority             TaskPriority @default(MEDIUM)
   dueAt                DateTime?
   completedAt          DateTime?

@@ -1,4 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma as PrismaRuntime } from "@prisma/client";
+import { taskDescriptionSchema } from "@next-phish/shared";
 import type {
   TaskRelationInput,
   TaskStatusView,
@@ -86,6 +88,37 @@ export class TaskRepository {
     },
   ) {
     await this.ensureDefaultStatuses(organizationId);
+    const descriptionMatches = input.search
+      ? await this.db.$queryRaw<Array<{ id: string }>>(PrismaRuntime.sql`
+          SELECT "id"
+          FROM "task"
+          WHERE "organizationId" = ${organizationId}
+            AND EXISTS (
+              SELECT 1
+              FROM jsonb_array_elements(
+                COALESCE("description"->'blocks', '[]'::jsonb)
+              ) AS block
+              WHERE (
+                block->>'type' IN ('paragraph', 'header')
+                AND POSITION(
+                  LOWER(${input.search})
+                  IN LOWER(COALESCE(block->'data'->>'text', ''))
+                ) > 0
+              ) OR (
+                block->>'type' = 'list'
+                AND EXISTS (
+                  SELECT 1
+                  FROM jsonb_array_elements_text(
+                    COALESCE(block->'data'->'items', '[]'::jsonb)
+                  ) AS item(value)
+                  WHERE POSITION(
+                    LOWER(${input.search}) IN LOWER(item.value)
+                  ) > 0
+                )
+              )
+            )
+        `)
+      : [];
     const where: Prisma.TaskWhereInput = {
       organizationId,
       statusId: input.statusIds?.length ? { in: input.statusIds } : undefined,
@@ -93,7 +126,7 @@ export class TaskRepository {
       OR: input.search
         ? [
             { title: { contains: input.search, mode: "insensitive" } },
-            { description: { contains: input.search, mode: "insensitive" } },
+            { id: { in: descriptionMatches.map(({ id }) => id) } },
           ]
         : undefined,
     };
@@ -137,7 +170,10 @@ export class TaskRepository {
         organizationId,
         createdById,
         title: data.title.trim(),
-        description: data.description?.trim() || null,
+        description:
+          data.description === null || data.description === undefined
+            ? PrismaRuntime.DbNull
+            : (data.description as Prisma.InputJsonValue),
         statusId: data.statusId,
         priority: data.priority,
         assigneeId: data.assigneeId || null,
@@ -176,7 +212,9 @@ export class TaskRepository {
         description:
           data.description === undefined
             ? undefined
-            : data.description.trim() || null,
+            : data.description === null
+              ? PrismaRuntime.DbNull
+              : (data.description as Prisma.InputJsonValue),
         statusId: data.statusId,
         priority: data.priority,
         assigneeId:
@@ -502,7 +540,10 @@ export class TaskRepository {
       id: row.id,
       organizationId: row.organizationId,
       title: row.title,
-      description: row.description,
+      description:
+        row.description === null
+          ? null
+          : taskDescriptionSchema.parse(row.description),
       priority: row.priority,
       dueAt: row.dueAt,
       completedAt: row.completedAt,

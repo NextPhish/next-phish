@@ -108,6 +108,8 @@ export {
   taskStatusColorSchema,
   taskResourceTypeSchema,
   taskRelationSchema,
+  taskDescriptionBlockSchema,
+  taskDescriptionSchema,
   taskFormSchema,
   taskStatusFormSchema,
 } from "./task.schema";
@@ -115,8 +117,15 @@ export type {
   TaskFormValues,
   TaskStatusFormValues,
   TaskResourceType,
+  TaskDescription,
+  TaskDescriptionBlock,
 } from "./task.schema";
 export type { SendingProfileFormValues } from "./sending-profile.schema";
+
+export {
+  organizationCreateMemberSchema,
+  type OrganizationCreateMemberInput,
+} from "./user.schema";
 
 export { adminCreateUserSchema, welcomeUserPayloadSchema } from "./user.schema";
 export type { AdminCreateUserInput, WelcomeUserPayload } from "./user.schema";

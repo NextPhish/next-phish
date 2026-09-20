@@ -1,48 +1,19 @@
 "use client";
-
-import styles from "./chart.module.css";
-
-import { Chart } from "primereact/chart";
-import { Skeleton } from "primereact/skeleton";
-import { Skeleton as V1Skeleton } from "@next-phish/ui";
+import { useMemo } from "react";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Skeleton } from "@next-phish/ui";
 import type { OrganizationAnalyticsMonth } from "@next-phish/backend";
 import { useTranslation } from "@/src/lib/i18n";
-
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  interaction: { mode: "index" as const, intersect: false },
-  plugins: {
-    legend: {
-      position: "bottom" as const,
-      labels: {
-        color: "rgba(255,255,255,0.6)",
-        usePointStyle: true,
-        pointStyle: "circle",
-        padding: 16,
-        font: { size: 11 },
-      },
-    },
-  },
-  scales: {
-    x: {
-      ticks: { color: "rgba(255,255,255,0.5)", font: { size: 11 } },
-      grid: { color: "rgba(255,255,255,0.06)" },
-      border: { color: "rgba(255,255,255,0.1)" },
-    },
-    y: {
-      beginAtZero: true,
-      ticks: {
-        color: "rgba(255,255,255,0.5)",
-        font: { size: 11 },
-        precision: 0,
-      },
-      grid: { color: "rgba(255,255,255,0.06)" },
-      border: { display: false },
-    },
-  },
-};
-
+import styles from "./chart.module.css";
 const monthKeys = [
   "charts.jan",
   "charts.feb",
@@ -57,91 +28,37 @@ const monthKeys = [
   "charts.nov",
   "charts.dec",
 ] as const;
-
 const series = [
-  ["sent", "charts.sent", "#29b8ff", "rgba(41, 184, 255, 0.1)"],
-  ["opened", "charts.opened", "#15e5d4", "rgba(21, 229, 212, 0.1)"],
-  ["clicked", "charts.clicked", "#5c73ff", "rgba(92, 115, 255, 0.1)"],
-  ["submitted", "charts.submitted", "#7b5cff", "rgba(123, 92, 255, 0.1)"],
-  ["reported", "charts.reported", "#f59e0b", "rgba(245, 158, 11, 0.1)"],
-  ["failed", "charts.errored", "#ef4444", "rgba(239, 68, 68, 0.1)"],
+  ["sent", "charts.sent", "#4c79c9"],
+  ["opened", "charts.opened", "#16877a"],
+  ["clicked", "charts.clicked", "#5b4bdb"],
+  ["submitted", "charts.submitted", "#9a4da0"],
+  ["reported", "charts.reported", "#b46b19"],
+  ["failed", "charts.errored", "#c94747"],
 ] as const;
-
-interface EmailStatsChartProps {
+interface Props {
   months: OrganizationAnalyticsMonth[];
   loading?: boolean;
   variant?: "legacy" | "v1";
 }
-
 export function EmailStatsChart({
   months,
   loading,
   variant = "legacy",
-}: EmailStatsChartProps) {
+}: Props) {
   const t = useTranslation();
-  const labels = months.map((item) => {
-    const monthIndex = Number(item.month.slice(5, 7)) - 1;
-    return t(monthKeys[monthIndex] ?? "charts.jan");
-  });
-  const data = {
-    labels,
-    datasets: series.map(
-      ([field, label, borderColor, backgroundColor], index) => ({
-        label: t(label),
-        data: months.map((item) => item[field]),
-        borderColor:
-          variant === "v1"
-            ? [
-                "#5b4bdb",
-                "#16877a",
-                "#4c79c9",
-                "#9a4da0",
-                "#b46b19",
-                "#c94747",
-              ][index]
-            : borderColor,
-        backgroundColor:
-          variant === "v1"
-            ? [
-                "rgba(91,75,219,.1)",
-                "rgba(22,135,122,.1)",
-                "rgba(76,121,201,.1)",
-                "rgba(154,77,160,.1)",
-                "rgba(180,107,25,.1)",
-                "rgba(201,71,71,.1)",
-              ][index]
-            : backgroundColor,
-        tension: 0.3,
-      }),
-    ),
-  };
-
   const isV1 = variant === "v1";
-  const chartOptions = isV1
-    ? {
-        ...options,
-        plugins: {
-          ...options.plugins,
-          legend: {
-            ...options.plugins.legend,
-            labels: { ...options.plugins.legend.labels, color: "#626d80" },
-          },
-        },
-        scales: {
-          x: {
-            ...options.scales.x,
-            ticks: { color: "#626d80", font: { size: 11 } },
-            grid: { color: "rgba(98,109,128,.12)" },
-            border: { color: "rgba(98,109,128,.22)" },
-          },
-          y: {
-            ...options.scales.y,
-            ticks: { color: "#626d80", font: { size: 11 }, precision: 0 },
-            grid: { color: "rgba(98,109,128,.12)" },
-          },
-        },
-      }
-    : options;
+  const data = useMemo(
+    () =>
+      months.map((item) => ({
+        month: t(monthKeys[Number(item.month.slice(5, 7)) - 1] ?? "charts.jan"),
+        ...Object.fromEntries(series.map(([field]) => [field, item[field]])),
+      })),
+    [months, t],
+  );
+  const axis = isV1 ? "#626d80" : "#a1a1aa";
+  const grid = isV1 ? "rgba(98,109,128,.12)" : "rgba(255,255,255,.08)";
+  const title = t("charts.emailStatsLast6Months");
   return (
     <div
       className={
@@ -155,22 +72,52 @@ export function EmailStatsChart({
           isV1 ? styles.heading : "mb-4 text-sm font-semibold text-zinc-200"
         }
       >
-        {t("charts.emailStatsLast6Months")}
+        {title}
       </h3>
-      <div className={isV1 ? styles.canvas : "h-[250px]"}>
+      <div
+        className={isV1 ? styles.canvas : "h-[250px]"}
+        role="img"
+        aria-label={title}
+      >
         {loading ? (
-          isV1 ? (
-            <V1Skeleton style={{ width: "100%", height: 250 }} />
-          ) : (
-            <Skeleton width="100%" height="250px" borderRadius="0.75rem" />
-          )
+          <Skeleton style={{ width: "100%", height: 250 }} />
         ) : (
-          <Chart
-            type="line"
-            data={data}
-            options={chartOptions}
-            style={isV1 ? { height: "100%" } : undefined}
-          />
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={data}
+              margin={{ top: 8, right: 12, bottom: 0, left: -16 }}
+              accessibilityLayer
+            >
+              <CartesianGrid stroke={grid} vertical={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fill: axis, fontSize: 11 }}
+                axisLine={{ stroke: grid }}
+                tickLine={false}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: axis, fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip />
+              <Legend wrapperStyle={{ color: axis, fontSize: 11 }} />
+              {series.map(([field, label, color]) => (
+                <Line
+                  key={field}
+                  type="monotone"
+                  dataKey={field}
+                  name={t(label)}
+                  stroke={color}
+                  strokeWidth={2}
+                  dot={{ r: 2 }}
+                  activeDot={{ r: 4 }}
+                  isAnimationActive={false}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
         )}
       </div>
     </div>

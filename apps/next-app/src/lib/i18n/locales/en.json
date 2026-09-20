@@ -30,7 +30,8 @@
     "enabled": "Enabled",
     "active": "Active",
     "backToLogin": "Back to login",
-    "close": "Close"
+    "close": "Close",
+    "continue": "Continue"
   },
   "dashboard": {
     "title": "Security awareness dashboard",
@@ -115,6 +116,7 @@
     "mainNavigation": "Main navigation",
     "openSidebar": "Open navigation",
     "skipToContent": "Skip to content",
+    "switchOrganizationError": "Could not switch organization. Please try again.",
     "workspace": "Workspace"
   },
   "notFound": {
@@ -385,7 +387,25 @@
     "addedOn": "Added {date}",
     "remove": "Remove",
     "removeIgnoredNetworkTitle": "Remove ignored network",
-    "removeIgnoredNetworkConfirm": "Remove {network} from the ignored networks list?"
+    "removeIgnoredNetworkConfirm": "Remove {network} from the ignored networks list?",
+    "addMember": "Add member",
+    "addMemberHint": "Enter an email to add a new member or grant an existing account access to this organization.",
+    "addAndSend": "Add member and send invite",
+    "addMemberError": "The member could not be added. Try again.",
+    "memberExists": "A user with this email already exists.",
+    "welcomeNotQueued": "The member was added, but we could not send their setup email. Try sending it again.",
+    "retryWelcome": "Retry setup email",
+    "resendWelcomeError": "The setup email could not be queued. Try again.",
+    "validation": {
+      "nameRequired": "Name is required.",
+      "emailInvalid": "Enter a valid email address."
+    },
+    "existingMemberTitle": "Add existing account?",
+    "existingMemberDescription": "An account for {email} already exists. Do you want to give it access to this organization?",
+    "existingMemberOnlyAccess": "This only adds organization membership. It does not change the account, password, or sign-in settings.",
+    "addExistingMember": "Add to organization",
+    "addExistingError": "We could not add this account to the organization.",
+    "existingDisabled": "This account is disabled and cannot be added."
   },
   "emailTemplates": {
     "title": "Email templates",
@@ -1461,5 +1481,21 @@
     "deleteOrphans": "Delete these users too",
     "deleteOrphansHint": "Their accounts will also be permanently deleted.",
     "deleteError": "Could not delete the user."
+  },
+  "initialPassword": {
+    "badge": "Account setup",
+    "title": "Set your password",
+    "subtitle": "Secure your new account before continuing.",
+    "brandTitle": "Your secure workspace is ready.",
+    "brandDescription": "Choose a password to finish setting up your account and join your team.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "submit": "Set password and continue",
+    "submitError": "Could not set your password. Try again.",
+    "validation": {
+      "passwordTooShort": "Use at least 8 characters.",
+      "confirmRequired": "Confirm your password.",
+      "passwordMismatch": "The passwords do not match."
+    }
   }
 }

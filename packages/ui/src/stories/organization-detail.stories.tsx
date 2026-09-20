@@ -88,21 +88,39 @@ function OrganizationDetailPreview() {
       userId: "alex",
       role: "owner",
       createdAt: new Date("2025-02-10"),
-      user: { name: "Alex Morgan", email: "alex@acme.example", image: null },
+      user: {
+        name: "Alex Morgan",
+        email: "alex@acme.example",
+        image: null,
+        passwordSetupRequired: false,
+        disabledAt: null,
+      },
     },
     {
       id: "member-2",
       userId: "mira",
       role: "admin",
       createdAt: new Date("2025-05-18"),
-      user: { name: "Mira Patel", email: "mira@acme.example", image: null },
+      user: {
+        name: "Mira Patel",
+        email: "mira@acme.example",
+        image: null,
+        passwordSetupRequired: false,
+        disabledAt: null,
+      },
     },
     {
       id: "member-3",
       userId: "sam",
       role: "member",
       createdAt: new Date("2026-01-07"),
-      user: { name: "Sam Lee", email: "sam@acme.example", image: null },
+      user: {
+        name: "Sam Lee",
+        email: "sam@acme.example",
+        image: null,
+        passwordSetupRequired: true,
+        disabledAt: null,
+      },
     },
   ];
   return (
@@ -126,6 +144,7 @@ function OrganizationDetailPreview() {
       profile={<span>Alex Morgan</span>}
     >
       <OrganizationDetailView
+        onAddMember={() => undefined}
         model={{
           organization,
           canManage: true,
@@ -141,6 +160,9 @@ function OrganizationDetailPreview() {
             loading: false,
             error: null,
             onRetry: () => {},
+            canManage: true,
+            resendError: null,
+            onResendWelcome: async () => undefined,
           },
         }}
         settings={

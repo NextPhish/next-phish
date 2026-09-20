@@ -94,7 +94,7 @@ export function createPermissionProcedure(
             },
           });
 
-          if (!result) {
+          if (!result.success) {
             throw new TRPCError({
               code: "FORBIDDEN",
               message: "You do not have the required permissions",

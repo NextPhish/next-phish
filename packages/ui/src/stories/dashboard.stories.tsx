@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { OrganizationDashboardView } from "../../../backend/src/organization/types/organization.types";
-import { DashboardPresentation } from "../../../../apps/next-app/src/components/organisms/dashboard/presentation";
+import { DashboardView } from "../../../../apps/next-app/src/components/organisms/dashboard/parts/dashboard-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { AppShell, Card, CardBody, CardHeader } from "../index";
 import {
@@ -151,7 +151,7 @@ function DashboardDemo({
           },
         ]}
       >
-        <DashboardPresentation
+        <DashboardView
           organizationName="Acme Security"
           data={data}
           isLoading={state === "loading"}

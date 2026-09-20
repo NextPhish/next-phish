@@ -1,3 +1,5 @@
+import type { TaskDescription } from "@next-phish/shared";
+
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
 export type TaskColorToken = string;
 export type TaskResourceType =
@@ -15,7 +17,7 @@ export interface TaskRelationInput {
 
 export interface TaskWriteData {
   title: string;
-  description?: string;
+  description?: TaskDescription | null;
   statusId: string;
   priority: TaskPriority;
   assigneeId?: string | null;
@@ -40,7 +42,7 @@ export interface TaskView {
   id: string;
   organizationId: string;
   title: string;
-  description: string | null;
+  description: TaskDescription | null;
   priority: TaskPriority;
   dueAt: Date | null;
   completedAt: Date | null;

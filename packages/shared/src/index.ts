@@ -142,6 +142,8 @@ export {
   taskStatusColorSchema,
   taskResourceTypeSchema,
   taskRelationSchema,
+  taskDescriptionBlockSchema,
+  taskDescriptionSchema,
   taskFormSchema,
   taskStatusFormSchema,
 } from "./schemas";
@@ -149,6 +151,8 @@ export type {
   TaskFormValues,
   TaskStatusFormValues,
   TaskResourceType,
+  TaskDescription,
+  TaskDescriptionBlock,
 } from "./schemas";
 
 export {
@@ -164,6 +168,10 @@ export {
   executionQueuePayloadSchema,
 } from "./schemas";
 export { adminCreateUserSchema, welcomeUserPayloadSchema } from "./schemas";
+export {
+  organizationCreateMemberSchema,
+  type OrganizationCreateMemberInput,
+} from "./schemas";
 export type { AdminCreateUserInput, WelcomeUserPayload } from "./schemas";
 
 export type {

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik } from "formik";
 import { createOrganizationSchema } from "@next-phish/shared";
-import { OnboardingPresentation } from "../../../../apps/next-app/src/components/organisms/onboarding/presentation";
+import { OnboardingView } from "../../../../apps/next-app/src/components/organisms/onboarding/parts/onboarding-view";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
 import { toFormikValidation } from "../../../../apps/next-app/src/lib/to-formik-validation";
 it("generates slugs while preserving manual edits and validates before creating an organization", async () => {
@@ -16,7 +16,7 @@ it("generates slugs while preserving manual edits and validates before creating 
         validate={toFormikValidation(createOrganizationSchema)}
         onSubmit={submit}
       >
-        <OnboardingPresentation error="" />
+        <OnboardingView error="" />
       </Formik>
     </I18nProvider>,
   );

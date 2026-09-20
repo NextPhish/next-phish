@@ -29,11 +29,19 @@ export const demoOrganizations = [
     $me: { role: "member" },
   },
 ] as OrganizationView[];
-function Preview({ loading = false }: { loading?: boolean }) {
+function Preview({
+  loading = false,
+  canCreate = true,
+  empty = false,
+}: {
+  loading?: boolean;
+  canCreate?: boolean;
+  empty?: boolean;
+}) {
   const table = useDataTableState();
   const [deleting, setDeleting] = useState<OrganizationView | null>(null);
   const role = table.state.filters.role;
-  const rows = demoOrganizations.filter(
+  const rows = (empty ? [] : demoOrganizations).filter(
     (org) =>
       (!role || org.$me.role === role) &&
       org.name.toLowerCase().includes(table.state.search.toLowerCase()),
@@ -61,6 +69,8 @@ function Preview({ loading = false }: { loading?: boolean }) {
           {...table}
           organizations={rows}
           total={rows.length}
+          canCreate={canCreate}
+          onCreate={() => undefined}
           canDeleteOrganization={() => false}
           loading={loading}
           onRetry={() => {}}
@@ -84,3 +94,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 export const Loading: Story = { args: { loading: true } };
+export const OwnerWithNoMatches: Story = {
+  args: { canCreate: true, empty: true },
+};
+export const CannotCreate: Story = { args: { canCreate: false } };

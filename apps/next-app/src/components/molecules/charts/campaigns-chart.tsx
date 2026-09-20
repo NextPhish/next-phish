@@ -1,36 +1,18 @@
 "use client";
-
-import styles from "./chart.module.css";
-
-import { Chart } from "primereact/chart";
-import { Skeleton } from "primereact/skeleton";
-import { Skeleton as V1Skeleton } from "@next-phish/ui";
+import { useMemo } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Skeleton } from "@next-phish/ui";
 import type { OrganizationAnalyticsMonth } from "@next-phish/backend";
 import { useTranslation } from "@/src/lib/i18n";
-
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: {
-      ticks: { color: "rgba(255,255,255,0.5)", font: { size: 11 } },
-      grid: { color: "rgba(255,255,255,0.06)" },
-      border: { color: "rgba(255,255,255,0.1)" },
-    },
-    y: {
-      beginAtZero: true,
-      ticks: {
-        color: "rgba(255,255,255,0.5)",
-        font: { size: 11 },
-        precision: 0,
-      },
-      grid: { color: "rgba(255,255,255,0.06)" },
-      border: { display: false },
-    },
-  },
-};
-
+import styles from "./chart.module.css";
 const monthKeys = [
   "charts.jan",
   "charts.feb",
@@ -45,59 +27,25 @@ const monthKeys = [
   "charts.nov",
   "charts.dec",
 ] as const;
-
-interface CampaignsChartProps {
+interface Props {
   months: OrganizationAnalyticsMonth[];
   loading?: boolean;
   variant?: "legacy" | "v1";
 }
-
-export function CampaignsChart({
-  months,
-  loading,
-  variant = "legacy",
-}: CampaignsChartProps) {
+export function CampaignsChart({ months, loading, variant = "legacy" }: Props) {
   const t = useTranslation();
-  const labels = months.map((item) => {
-    const monthIndex = Number(item.month.slice(5, 7)) - 1;
-    return t(monthKeys[monthIndex] ?? "charts.jan");
-  });
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: t("charts.campaigns"),
-        data: months.map((item) => item.campaigns),
-        backgroundColor:
-          variant === "v1"
-            ? "rgba(91, 75, 219, .82)"
-            : "rgba(41, 184, 255, 0.8)",
-        borderColor: variant === "v1" ? "#5b4bdb" : "#29b8ff",
-        borderWidth: 1,
-        borderRadius: 6,
-      },
-    ],
-  };
-
   const isV1 = variant === "v1";
-  const chartOptions = isV1
-    ? {
-        ...options,
-        scales: {
-          x: {
-            ...options.scales.x,
-            ticks: { color: "#626d80", font: { size: 11 } },
-            grid: { color: "rgba(98,109,128,.12)" },
-            border: { color: "rgba(98,109,128,.22)" },
-          },
-          y: {
-            ...options.scales.y,
-            ticks: { color: "#626d80", font: { size: 11 }, precision: 0 },
-            grid: { color: "rgba(98,109,128,.12)" },
-          },
-        },
-      }
-    : options;
+  const data = useMemo(
+    () =>
+      months.map((item) => ({
+        month: t(monthKeys[Number(item.month.slice(5, 7)) - 1] ?? "charts.jan"),
+        campaigns: item.campaigns,
+      })),
+    [months, t],
+  );
+  const axis = isV1 ? "#626d80" : "#a1a1aa";
+  const grid = isV1 ? "rgba(98,109,128,.12)" : "rgba(255,255,255,.08)";
+  const title = t("charts.campaignsLast6Months");
   return (
     <div
       className={
@@ -111,22 +59,45 @@ export function CampaignsChart({
           isV1 ? styles.heading : "mb-4 text-sm font-semibold text-zinc-200"
         }
       >
-        {t("charts.campaignsLast6Months")}
+        {title}
       </h3>
-      <div className={isV1 ? styles.canvas : "h-[250px]"}>
+      <div
+        className={isV1 ? styles.canvas : "h-[250px]"}
+        role="img"
+        aria-label={title}
+      >
         {loading ? (
-          isV1 ? (
-            <V1Skeleton style={{ width: "100%", height: 250 }} />
-          ) : (
-            <Skeleton width="100%" height="250px" borderRadius="0.75rem" />
-          )
+          <Skeleton style={{ width: "100%", height: 250 }} />
         ) : (
-          <Chart
-            type="bar"
-            data={data}
-            options={chartOptions}
-            style={isV1 ? { height: "100%" } : undefined}
-          />
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
+              accessibilityLayer
+            >
+              <CartesianGrid stroke={grid} vertical={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fill: axis, fontSize: 11 }}
+                axisLine={{ stroke: grid }}
+                tickLine={false}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: axis, fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip cursor={{ fill: grid }} />
+              <Bar
+                dataKey="campaigns"
+                name={t("charts.campaigns")}
+                fill={isV1 ? "#5b4bdb" : "#29b8ff"}
+                radius={[6, 6, 0, 0]}
+                isAnimationActive={false}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         )}
       </div>
     </div>

@@ -2,6 +2,8 @@ import type { OrganizationView } from "@next-phish/backend";
 import type { DataTableState, TableStateChange } from "@next-phish/ui";
 
 export interface OrganizationListModel {
+  canCreate: boolean;
+  onCreate: () => void;
   organizations: OrganizationView[];
   total: number;
   loading: boolean;

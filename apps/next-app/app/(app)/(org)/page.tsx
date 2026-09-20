@@ -1,5 +1,5 @@
-import { DashboardContainer } from "@/src/components/organisms/dashboard";
+import { Dashboard } from "@/src/components/organisms/dashboard";
 
 export default function DashboardPage() {
-  return <DashboardContainer />;
+  return <Dashboard />;
 }

@@ -9,7 +9,9 @@ import { useTranslation } from "@/src/lib/i18n/client";
 import { trpc } from "@/src/lib/trpc";
 import type { OrganizationListModel } from "../types/organization-list.types";
 
-export function useOrganizationList(): OrganizationListModel {
+export function useOrganizationList(
+  onCreate: () => void,
+): OrganizationListModel {
   const router = useRouter();
   const t = useTranslation();
   const utils = trpc.useUtils();
@@ -72,6 +74,8 @@ export function useOrganizationList(): OrganizationListModel {
     [canDeleteOrganization, reset],
   );
   return {
+    canCreate: (owned.data?.total ?? 0) > 0,
+    onCreate,
     organizations: query.data?.organizations ?? [],
     total: query.data?.total ?? 0,
     loading: query.isLoading,

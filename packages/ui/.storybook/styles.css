@@ -7,9 +7,21 @@
 @source "../../../apps/next-app/src/components/organisms/organizations";
 @source "../../../apps/next-app/src/components/organisms/catalog";
 @source "../../../apps/next-app/src/components/molecules/catalog-card.tsx";
+@source "../../../apps/next-app/src/components/molecules/block-editor";
 
 @source "../../../apps/next-app/src/components/organisms/campaigns";
 @source "../../../apps/next-app/src/components/organisms/target-groups";
 @source "../../../apps/next-app/src/components/organisms/sending-profiles";
 @source "../../../apps/next-app/src/components/organisms/email-templates";
 @source "../../../apps/next-app/src/components/organisms/users";
+@source "../../../apps/next-app/src/components/organisms/schedules";
+@source "../../../apps/next-app/src/components/organisms/tasks";
+@source "../../../apps/next-app/src/components/organisms/app-shell";
+@source "../../../apps/next-app/src/components/organisms/organization-settings";
+@source "../../../apps/next-app/src/components/organisms/login";
+@source "../../../apps/next-app/src/components/organisms/forgot-password";
+@source "../../../apps/next-app/src/components/organisms/reset-password";
+@source "../../../apps/next-app/src/components/organisms/initial-password";
+@source "../../../apps/next-app/src/components/organisms/two-factor";
+@source "../../../apps/next-app/src/components/organisms/setup";
+@source "../../../apps/next-app/src/components/organisms/onboarding";

@@ -1,6 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
-import { PageHeader } from "@next-phish/ui";
+import { Button, PageHeader } from "@next-phish/ui";
+import { UserPlus } from "lucide-react";
 import { useTranslation } from "@/src/lib/i18n/client";
 import { OrganizationAnalytics } from "./analytics";
 import { OrganizationMembersTable } from "./members-table";
@@ -8,9 +9,13 @@ import type { OrganizationDetailModel } from "../types/organization-detail.types
 export function OrganizationDetailView({
   model,
   settings,
+  onAddMember,
+  children,
 }: {
   model: OrganizationDetailModel;
   settings?: ReactNode;
+  onAddMember: () => void;
+  children?: ReactNode;
 }) {
   const t = useTranslation();
   return (
@@ -39,9 +44,18 @@ export function OrganizationDetailView({
         />
       </section>
       <section aria-labelledby="organization-members-title">
-        <h2 id="organization-members-title">{t("organizations.members")}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="organization-members-title">{t("organizations.members")}</h2>
+          {model.canManage ? (
+            <Button size="sm" onClick={onAddMember}>
+              <UserPlus size={16} aria-hidden="true" />
+              {t("organizations.addMember")}
+            </Button>
+          ) : null}
+        </div>
         <OrganizationMembersTable model={model.members} />
       </section>
+      {children}
     </div>
   );
 }

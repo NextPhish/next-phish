@@ -86,7 +86,7 @@ Currently there are no public-facing pages that need SEO/static generation, so `
 
 Use Next.js `loading.tsx` files to show skeleton UI while server components fetch data. Next.js automatically wraps the page in `<Suspense>` when this file exists.
 
-- Use `Skeleton` from `@next-phish/ui` in migrated V1 screens, including table rows and asynchronously loaded lists. Existing PrimeReact screens may retain their skeletons until migration.
+- Use `Skeleton` from `@next-phish/ui` in migrated V1 screens, including table rows and asynchronously loaded lists. Do not introduce third-party skeleton wrappers.
 - Match the layout structure of the actual page (same dimensions, spacing)
 - Place `loading.tsx` alongside the `page.tsx` it covers
 
@@ -197,11 +197,27 @@ Keep pages server-first and `"use client"` at interactive entry points. The dire
 
 ### Styling
 
+Use the shared `Calendar`, `DatePicker`, `TimePicker`, and `DateTimePicker` from `@next-phish/ui` for calendar inputs. Calendars wrap React DayPicker; month/year selection uses themed Radix selects. Time selection uses a themed popup with separate hour/minute columns; OK commits the draft and Cancel or Escape discards it. They support English and Bulgarian through the application's locale. DatePicker values are local `YYYY-MM-DD` strings; DateTimePicker values are local `YYYY-MM-DDTHH:mm` strings. Keep conversion to UTC in the owning form's payload logic, not in the shared calendar. The existing campaign and schedule start/end fields use browser-local wall time; the separate target time zone is retained as a scheduling setting. Changing that interpretation requires a dedicated payload/defaults change and time-zone regression tests. Pass FormField accessibility attributes and preserve optional-field clearing and date constraints.
+
 Use Tailwind for ordinary layout, spacing, typography, responsive behavior, and common states. V1 screens use the tokens defined in `packages/ui/src/styles.css` under `.np-theme`; follow [brand guidelines](brand.md).
 
 Do not create CSS modules merely to alias utilities such as `flex`, `gap-4`, or `text-sm`. Colocate exceptional `<component-name>.module.css` files with their owner for custom selectors, third-party DOM integration (such as GrapesJS), or complex animations where utilities are insufficient. A part can own its own module if those styles are exclusive to it. Shared theme tokens and reusable UI behavior stay in the UI package.
 
 When converting existing CSS, preserve exact sizing, weights, breakpoints, hover/focus behavior, and scoped child selectors. Extract repeated semantic UI into shared components instead of collecting opaque class-string constants. Do not change the visual design as a side effect of reorganizing files.
+
+### Table row interactions
+
+Use the shared DataTable's opt-in `onRowActivate` for primary row navigation or expanding details. Supply `getRowActivationLabel` and, for expandable rows, `isRowExpanded`. Click, Enter, and Space activate the row; nested links, buttons, form controls, menus, and text selections must keep their independent behavior. Avoid a menu whose only action is showing or hiding row details.
+
+### Task rich-text descriptions
+
+Task descriptions are nullable JSONB documents validated by `taskDescriptionSchema`, with `version: 1` and paragraph/header/list blocks. Use the client-only Editor.js adapter; do not store HTML strings or Editor.js runtime objects. The adapter sanitizes inline markup and converts tool output into the shared document shape. Flush the editor before submitting a task so the last edit is included. An omitted update preserves the description; explicit null clears it.
+
+Render description previews from the document blocks, preserving headings, paragraphs, lists, and supported inline formatting. Sanitize stored inline markup at the rendering boundary as well as when saving. Do not initialize Editor.js just to display a preview. While submitting, disable editor interaction without enabling Editor.js read-only mode, because read-only mode prevents the final save.
+
+### Editor starter content
+
+New page and email editors use the shared starter content next to GrapesEditor. Preserve saved HTML, including an explicitly empty string, and give saved GrapesJS project data precedence. Starters use supported recipient variables such as `{{.FirstName}}` and `{{.Email}}`; email calls to action use `{{.URL}}`. Landing-page interpolation HTML-escapes recipient values after validating the campaign page and tracking reference. Exported editor HTML includes viewport metadata so responsive styles apply on mobile.
 
 ### Migration and validation
 
@@ -220,6 +236,12 @@ All client-side data fetching must go through tRPC with React Query. This provid
 - Use `trpc.<router>.<procedure>.useQuery()` for reads
 - Use `trpc.<router>.<procedure>.useMutation()` for writes
 - Invalidate queries after mutations with `utils.<router>.<procedure>.invalidate()`
+
+### Organization-scoped query cache
+
+The tRPC provider scopes its React Query client to the signed-in user and active organization. Many procedures resolve their organization from the session, so their input-derived query keys alone do not distinguish organizations. Changing the scope creates a fresh cache and remounts query consumers and subscriptions; requests from the previous scope cannot populate the new cache. Keep this boundary when adding providers. `router.refresh()` refreshes server components but does not invalidate React Query data.
+
+Organization switching must check the BetterAuth result for errors before refreshing server-rendered content. Prevent repeated submissions while switching and show a localized failure message without changing the active scope on failure.
 
 ### Custom hooks wrap tRPC queries
 

@@ -4,12 +4,14 @@ import { DropdownMenu } from "radix-ui";
 import { Plus, X } from "lucide-react";
 import { Button } from "../atoms/button";
 import { Input } from "../atoms/input";
+import { DatePicker } from "./date-picker";
 import { Select, type SelectOption } from "../atoms/select";
 export type TableFilter =
   | { field: string; label: string; type: "text" | "date" | "numeric" }
   | { field: string; label: string; type: "select"; options: SelectOption[] };
 export type FilterValues = Record<string, string | number>;
 export interface FilterBarProps {
+  locale?: "en" | "bg";
   filters: TableFilter[];
   values: FilterValues;
   onChange: (field: string, value: string | number) => void;
@@ -22,6 +24,7 @@ export interface FilterBarProps {
 }
 export function FilterBar({
   filters,
+  locale = "en",
   values,
   onChange,
   onRemove,
@@ -85,6 +88,13 @@ export function FilterBar({
                   options={filter.options}
                   value={String(values[filter.field] ?? "")}
                   placeholder={placeholder}
+                  onValueChange={(value) => onChange(filter.field, value)}
+                />
+              ) : filter.type === "date" ? (
+                <DatePicker
+                  id={`${id}-${filter.field}`}
+                  value={String(values[filter.field] ?? "")}
+                  locale={locale}
                   onValueChange={(value) => onChange(filter.field, value)}
                 />
               ) : (

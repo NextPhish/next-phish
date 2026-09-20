@@ -1,6 +1,6 @@
 # NextPhish UI — V1 foundation
 
-The selected V1 design is now a React component library. The original application still uses PrimeReact; this package is the independently reviewable foundation for gradual migration. Tracking: [issue #23](https://github.com/NextPhish/next-phish/issues/23).
+The selected V1 design is now a React component library. The application uses this package for shared controls and skeletons, Recharts for charts, and Editor.js for task descriptions. Tracking: [issue #23](https://github.com/NextPhish/next-phish/issues/23).
 
 ## Run
 
@@ -33,7 +33,7 @@ The Workspace story composes real library components using sample campaign data.
 
 - V1 tokens live in `src/styles.css`: light workspace, white surfaces, dark sidebar, indigo action color. Muted text is slightly darker than the HTML prototype to pass AA contrast on the workspace background.
 - Component selectors use the `np-` prefix. Wrap the UI in `.np-theme` and import the stylesheet once. Dialog/Select/Popover portals apply their own theme wrapper. Tokens can be overridden on `.np-theme`.
-- Tailwind v4 utilities are built by the consumer; no Tailwind Preflight is imported. The existing PrimeReact palette is not overwritten. Utility theme layers still need deliberate ordering when integrating into the current application's CSS.
+- Tailwind v4 utilities are built by the consumer; no Tailwind Preflight is imported. The existing brand utility aliases are not overwritten. Utility theme layers still need deliberate ordering when integrating into the current application's CSS.
 - Pure UI has no Next.js, tRPC, auth or database dependency. Formik and shared schemas are story-only development dependencies. React is a peer dependency.
 - The package exports TypeScript source, preserving `use client` at interactive boundaries. The consuming Next.js app should add `@next-phish/ui` to `transpilePackages` and the dependency to its manifest before adoption. Importing callbacks/column render functions still requires a client adapter.
 
@@ -102,7 +102,7 @@ The caller reconciles page index after deletion, dataset/organization replacemen
 3. Build an app-specific table adapter preserving `onSearch`, multi-sort `onSort`, `onFilter` and one-based `onPage` callbacks. TanStack pageIndex is zero-based. Add existing row action permissions and date filter mapping before replacing tables.
 4. Migrate one list and one form against real tRPC data, including loading/error/empty states and organization changes.
 5. Integrate AppShell navigation with Next Link, current-route matching, translated labels and existing organization/account controls.
-6. Migrate remaining pages, editor shells and specialized controls gradually; remove PrimeReact only when usages are gone.
+6. Keep application-specific Recharts and Editor.js integrations behind owned components; reuse shared UI primitives.
 
 See `docs/ui-library-plan.md` for the current-component audit and `docs/plugin-system-proposal.md` for the separate plugin proposal.
 

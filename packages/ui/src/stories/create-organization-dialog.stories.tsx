@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Formik } from "formik";
 import { createOrganizationSchema } from "@next-phish/shared";
 import { Button, Dialog } from "../index";
-import { OnboardingPresentation } from "../../../../apps/next-app/src/components/organisms/onboarding/presentation";
+import { OnboardingView } from "../../../../apps/next-app/src/components/organisms/onboarding/parts/onboarding-view";
 import {
   I18nProvider,
   useTranslation,
@@ -29,7 +29,7 @@ function PreviewDialog() {
         }
       >
         {({ status }) => (
-          <OnboardingPresentation
+          <OnboardingView
             error={status ?? ""}
             onCancel={() => setOpen(false)}
           />

@@ -1,4 +1,4 @@
-import { SettingsContainer } from "@/src/components/organisms/settings";
+import { GlobalSettings } from "@/src/components/organisms/settings";
 import { getTranslator } from "@/src/lib/i18n/server";
 import { PageHeader } from "@next-phish/ui";
 
@@ -13,7 +13,7 @@ export default async function SettingsPage() {
         title={t("settings.applicationTitle")}
         description={t("settings.applicationDescription")}
       />
-      <SettingsContainer />
+      <GlobalSettings />
     </div>
   );
 }

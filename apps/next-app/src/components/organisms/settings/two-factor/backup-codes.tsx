@@ -3,7 +3,6 @@
 import { Download } from "lucide-react";
 import { Button } from "@next-phish/ui";
 import { useTranslation, type TranslationFunction } from "../../../../lib/i18n";
-import styles from "../profile-settings.module.css";
 
 function downloadBackupCodes(codes: string[], t: TranslationFunction) {
   const content = [
@@ -28,12 +27,12 @@ function downloadBackupCodes(codes: string[], t: TranslationFunction) {
 export function BackupCodes({ codes }: { codes: string[] }) {
   const t = useTranslation();
   return (
-    <div className={styles.backupPanel}>
+    <div className="grid gap-3 rounded-[10px] border border-[var(--np-border)] p-4 [&_strong]:block [&_strong]:text-sm [&_strong]:font-[650] [&_p]:mt-1 [&_p]:text-xs [&_p]:leading-6 [&_p]:text-[var(--np-muted)]">
       <div>
         <strong>{t("settings.backupCodes")}</strong>
         <p>{t("settings.backupCodesHint")}</p>
       </div>
-      <div className={styles.codeGrid}>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-[7px] rounded-lg bg-[var(--np-tint)] p-3 [&_code]:text-xs [&_code]:tracking-[0.08em] [&_code]:text-[var(--np-ink)]">
         {codes.map((code) => (
           <code key={code}>{code}</code>
         ))}

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Formik } from "formik";
 import type { IgnoredNetworkInput } from "@next-phish/shared";
 import { I18nProvider } from "../../../../apps/next-app/src/lib/i18n/client";
-import { GlobalIgnoredNetworksPresentation } from "../../../../apps/next-app/src/components/organisms/settings/global-ignored-networks-presentation";
+import { GlobalIgnoredNetworksView } from "../../../../apps/next-app/src/components/organisms/settings/global-ignored-networks/parts/global-ignored-networks-view";
 import { PageHeader } from "../index";
 
 const networks = [
@@ -45,7 +45,7 @@ function Preview({
           initialTouched={state === "errors" ? { network: true } : undefined}
           onSubmit={() => undefined}
         >
-          <GlobalIgnoredNetworksPresentation
+          <GlobalIgnoredNetworksView
             networks={networks}
             title="Global ignored IP addresses and networks"
             hint="Events from these IP addresses or CIDR networks are ignored across every organization."

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataTable, useDataTableState, type ColumnDef } from "../index";
@@ -28,6 +28,44 @@ function Demo({ server = false }: { server?: boolean }) {
   );
 }
 describe("DataTable", () => {
+  it("activates rows with pointer and keyboard without hijacking controls", async () => {
+    const user = userEvent.setup();
+    const onActivate = vi.fn();
+    function ActivationDemo() {
+      const model = useDataTableState();
+      return (
+        <DataTable
+          {...model}
+          searchable={false}
+          data={[rows[0]]}
+          columns={[
+            ...columns,
+            {
+              id: "actions",
+              header: "Actions",
+              cell: () => <button type="button">Edit</button>,
+            },
+          ]}
+          getRowId={(row) => row.id}
+          caption="Records"
+          onRowActivate={onActivate}
+          getRowActivationLabel={(row) => `Open ${row.name}`}
+          isRowExpanded={() => false}
+        />
+      );
+    }
+    render(<ActivationDemo />);
+    const row = screen.getByRole("row", { name: "Open Zulu" });
+    expect(row).toHaveAttribute("aria-expanded", "false");
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    expect(onActivate).not.toHaveBeenCalled();
+    await user.click(row);
+    expect(onActivate).toHaveBeenCalledTimes(1);
+    row.focus();
+    await user.keyboard("{Enter}");
+    await user.keyboard(" ");
+    expect(onActivate).toHaveBeenCalledTimes(3);
+  });
   it("marks the actions header and cells as the sticky column", () => {
     function ActionsDemo() {
       const model = useDataTableState();

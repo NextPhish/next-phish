@@ -1,4 +1,4 @@
-import { ScheduleDetailSkeleton } from "@/src/components/organisms/schedules/schedule-detail-skeleton";
+import { ScheduleDetailSkeleton } from "@/src/components/organisms/schedules";
 import { getTranslator } from "@/src/lib/i18n/server";
 
 export default async function Loading() {

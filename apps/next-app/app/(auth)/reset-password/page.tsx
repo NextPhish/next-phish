@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { AuthLayout, FormMessage } from "@next-phish/ui";
-import { ResetPasswordContainer } from "@/src/components/organisms/reset-password";
+import { ResetPassword } from "@/src/components/organisms/reset-password";
 import { getTranslator } from "@/src/lib/i18n/server";
-import styles from "@/app/(auth)/login/login.module.css";
 
 export default async function ResetPasswordPage({
   searchParams,
@@ -32,12 +31,15 @@ export default async function ResetPasswordPage({
       }
     >
       {email ? (
-        <ResetPasswordContainer email={email} />
+        <ResetPassword email={email} />
       ) : (
         <FormMessage
           variant="error"
           action={
-            <Link href="/forgot-password" className={styles.authLink}>
+            <Link
+              href="/forgot-password"
+              className="font-semibold text-[var(--np-primary)] hover:text-[var(--np-primary-hover)]"
+            >
               {t("resetPassword.goToForgotPassword")}
             </Link>
           }
