@@ -6,16 +6,26 @@ This internal runbook describes the current worker implementation. Read the [exe
 
 PostgreSQL stores execution state and the transactional outbox. Redis stores BullMQ jobs, periodic schedulers, distributed rate counters and provider circuit state. The worker process must be running; keeping the web application open does not run the scheduler.
 
-The [worker bootstrap](../apps/worker/src/index.ts) validates the message-ID domain and public content URL, then upserts four periodic jobs: schedule polling, outbox publishing, delivery feeding and history maintenance. A startup failure sets a nonzero exit code. Check the `Execution workers started` log and service supervision rather than assuming that a running web server means delivery is healthy. SIGTERM/SIGINT close workers, queues and the Redis connection.
+The [worker bootstrap](../apps/worker/src/application.ts) validates the message-ID domain and public content URL, then upserts four periodic jobs: schedule polling, outbox publishing, delivery feeding and history maintenance. Configuration and public host validation run before Redis connections or job processing start. A startup failure closes initialized resources and sets a nonzero exit code. Check the `Execution workers started` log and service supervision rather than assuming that a running web server means delivery is healthy. SIGTERM/SIGINT drain workers before closing queues, Redis and the database connection.
 
 The outbox publisher itself is driven by BullMQ. During a Redis outage, PostgreSQL can retain committed pending work, but publishing and Redis-based periodic jobs cannot progress. Recovery also depends on Redis persistence for jobs already acknowledged as published; the outbox is not a backup of the entire Redis queue.
 
 ## Configuration reference
 
-These are code defaults, not recommended throughput targets. Restart the worker after changing its environment. Keep limits compatible with the mail provider and deployment capacity.
+These are code defaults, not recommended throughput targets. Restart the worker after changing its environment. Keep limits compatible with the mail provider and deployment capacity. Worker numeric settings must be positive safe integers; invalid values fail startup. `REDIS_PORT` must be at most 65,535 and `OUTBOX_CLAIM_BATCH` at most 500. Concurrency is per process, so multiple replicas multiply the number of simultaneous jobs.
 
 | Environment variable                | Default                        | Meaning                                                            |
 | ----------------------------------- | ------------------------------ | ------------------------------------------------------------------ |
+| `LOG_LEVEL`                         | `info`                         | Pino level: fatal, error, warn, info, debug, trace or silent       |
+| `USER_NOTIFICATIONS_CONCURRENCY`    | `5`                            | Concurrent welcome-email jobs per process                          |
+| `JOBS_CONCURRENCY`                  | `5`                            | Concurrent site-import jobs per process                            |
+| `IMPORTS_CONCURRENCY`               | `3`                            | Concurrent target-group imports per process                        |
+| `SCHEDULE_EXECUTION_CONCURRENCY`    | `1`                            | Concurrent schedule polls per process                              |
+| `DELIVERY_FEEDER_CONCURRENCY`       | `1`                            | Concurrent feeder jobs per process                                 |
+| `DELIVERY_EVENTS_CONCURRENCY`       | `5`                            | Concurrent delivery-event jobs per process                         |
+| `TRACKING_EVENTS_CONCURRENCY`       | `10`                           | Concurrent tracking-event jobs per process                         |
+| `OUTBOX_CONCURRENCY`                | `1`                            | Concurrent outbox publish/maintenance jobs per process             |
+| `OUTBOX_CLAIM_BATCH`                | `100`                          | Outbox rows claimed per publisher job, maximum 500                 |
 | `DELIVERY_ENABLED`                  | Enabled unless exactly `false` | Global delivery claim gate; also check organization/campaign flags |
 | `SCHEDULE_POLL_INTERVAL_MS`         | `10000`                        | Periodic schedule claim and expired-lease recovery                 |
 | `SCHEDULE_CLAIM_BATCH`              | `50`                           | Requested number of due schedules per claim                        |
@@ -37,11 +47,17 @@ These are code defaults, not recommended throughput targets. Restart the worker 
 | `DELIVERY_ATTEMPT_RETENTION_DAYS`   | `30`                           | Completed attempt retention                                        |
 | `OUTBOX_RETENTION_DAYS`             | `7`                            | Published outbox and processed tracking-inbox retention            |
 
-Source: [worker](../apps/worker/src/index.ts), [processor](../packages/backend/src/delivery/services/delivery-processor.service.ts), [repository](../packages/backend/src/delivery/repositories/delivery.repository.ts).
+Source: [worker configuration](../apps/worker/src/config.ts), [processor](../packages/backend/src/delivery/services/delivery-processor.service.ts), [repository](../packages/backend/src/delivery/repositories/delivery.repository.ts).
 
-Not every tuning value is an environment variable. Outbox publishing currently claims 100 rows, reclaims claims older than five minutes, and delays failed publication by 30 seconds. Recipient dispatch leases last two minutes. BullMQ common job options allow five executions with exponential backoff starting at five seconds. Completed jobs retain up to 5,000 entries for up to one day; failed jobs retain up to 10,000 entries for up to seven days. Job-ID deduplication is consequently bounded by retained queue state.
+Not every tuning value is an environment variable. Outbox publishing reclaims claims older than five minutes and delays failed publication by 30 seconds. Recipient dispatch leases last two minutes. BullMQ common job options allow five executions with exponential backoff starting at five seconds. Completed jobs retain up to 5,000 entries for up to one day; failed jobs retain up to 10,000 entries for up to seven days. Job-ID deduplication is consequently bounded by retained queue state.
 
 Distributed counters use Redis Lua `INCR`/`PEXPIRE`, not a sliding window. Provider scope is the provider type, so unrelated profiles using that type share its limit/circuit. Profile scope prefers `sourceSendingProfileId`, so run snapshots share the source profile's limit. All three counters are consumed sequentially, even if an earlier scope is exhausted. Three throttle results within the default 60-second observation window open the provider circuit for 60 seconds. A success clears the throttle counter, not the existing open-circuit key. See [rate limiter](../packages/backend/src/delivery/services/distributed-rate-limiter.service.ts).
+
+## Worker structure and logs
+
+The entry point only starts the application and handles process signals. [Application lifecycle](../apps/worker/src/application.ts), [queue definitions](../apps/worker/src/queues.ts), [periodic schedulers](../apps/worker/src/schedulers.ts) and [worker registration](../apps/worker/src/workers/register-workers.ts) own runtime wiring. Processors are grouped by domain: imports, scheduling, delivery, tracking, notifications and outbox. The [outbox route table](../apps/worker/src/processors/outbox.ts) pairs each topic with its queue and job name; unknown topics fail explicitly and are recorded for retry.
+
+Pino writes structured JSON to stdout. Startup, readiness and shutdown are logged at `info`; failed jobs, worker/queue/Redis errors and failed outbox publications at `error`; stalled jobs at `warn`. Set `LOG_LEVEL=debug` to include job start/completion and successful outbox publication. Worker records include `queue`, with `jobId`, `jobName` and `attemptsMade` for failed jobs. Outbox records include `outboxId`, `topic` and a publisher identifier unique to the process instance. Processors do not log job payloads or results, and the logger redacts common sensitive fields. Error messages and stacks remain available for diagnosis; avoid putting recipient details or credentials into thrown errors.
 
 ## Execution-health metrics
 

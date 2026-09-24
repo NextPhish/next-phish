@@ -73,7 +73,15 @@ next-phish/
 │   │   └── package.json
 │   │
 │   └── worker/                      # BullMQ background job processor
-│       ├── src/index.ts
+│       ├── src/
+│       │   ├── index.ts            # Entry point and process signals
+│       │   ├── application.ts      # Startup and graceful shutdown
+│       │   ├── config.ts           # Validated worker environment settings
+│       │   ├── logger.ts           # Structured Pino logging
+│       │   ├── queues.ts           # Queue clients and shared job options
+│       │   ├── schedulers.ts       # Periodic job registration
+│       │   ├── workers/            # Worker factory, logging and registration
+│       │   └── processors/         # Handlers grouped by domain
 │       ├── tsconfig.json
 │       ├── Dockerfile
 │       └── package.json

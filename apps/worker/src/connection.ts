@@ -1,6 +1,14 @@
 import { Redis } from "ioredis";
+import type { Logger } from "pino";
+import type { WorkerConfig } from "./config";
 
-const host = process.env.REDIS_HOST || "localhost";
-const port = Number(process.env.REDIS_PORT) || 6379;
-
-export const connection = new Redis({ host, port, maxRetriesPerRequest: null });
+export function createConnection(
+  config: WorkerConfig["redis"],
+  logger: Logger,
+) {
+  const connection = new Redis({ ...config, maxRetriesPerRequest: null });
+  connection.on("error", (err) =>
+    logger.error({ err }, "Redis connection error"),
+  );
+  return connection;
+}
