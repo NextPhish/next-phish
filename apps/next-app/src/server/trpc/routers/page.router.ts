@@ -1,0 +1,160 @@
+import { Container } from "@/src/server/container";
+import {
+  MessageBus,
+  GetPagesQuery,
+  GetPageByIdQuery,
+  CreatePageCommand,
+  UpdatePageCommand,
+  DeletePageCommand,
+  CreateSiteImportCommand,
+  GetSiteImportByJobIdQuery,
+  ListSiteImportsQuery,
+  GetJobByIdQuery,
+  GetPagesSchema,
+  GetPageByIdSchema,
+  CreatePageCommandSchema,
+  UpdatePageCommandSchema,
+  DeletePageCommandSchema,
+  ImportPageFromUrlSchema,
+  CatalogPreviewService,
+  UploadCatalogPreviewSchema,
+  GetSiteImportByJobIdSchema,
+  ListSiteImportsSchema,
+} from "@next-phish/backend";
+import { createPermissionProcedure, router } from "../procedures";
+import { jobQueue } from "../../queue";
+import { toRouterPermissions } from "@next-phish/shared";
+
+const bus = Container.get(MessageBus);
+
+const readProcedure = createPermissionProcedure(
+  toRouterPermissions("pages", "read"),
+);
+
+const writeProcedure = createPermissionProcedure(
+  toRouterPermissions("pages", "write"),
+);
+
+export const pageRouter = router({
+  list: readProcedure.input(GetPagesSchema).query(async ({ ctx, input }) => {
+    const handler = Container.get(GetPagesQuery);
+    return bus.query(handler, {
+      ...input,
+      organizationId: ctx.activeOrganizationId,
+    });
+  }),
+
+  getById: readProcedure
+    .input(GetPageByIdSchema)
+    .query(async ({ ctx, input }) => {
+      const handler = Container.get(GetPageByIdQuery);
+      return bus.query(handler, {
+        id: input.id,
+        organizationId: ctx.activeOrganizationId,
+      });
+    }),
+
+  create: writeProcedure
+    .input(CreatePageCommandSchema)
+    .mutation(async ({ ctx, input }) => {
+      const handler = Container.get(CreatePageCommand);
+      return bus.dispatch(handler, {
+        ...input,
+        organizationId: ctx.activeOrganizationId,
+        createdById: ctx.userId,
+      });
+    }),
+
+  update: writeProcedure
+    .input(UpdatePageCommandSchema)
+    .mutation(async ({ ctx, input }) => {
+      const handler = Container.get(UpdatePageCommand);
+      return bus.dispatch(handler, {
+        id: input.id,
+        organizationId: ctx.activeOrganizationId,
+        data: {
+          name: input.name,
+          path: input.path ?? null,
+          type: input.type,
+          html: input.html,
+          design: input.design,
+          status: input.status,
+          redirectUrl: input.redirectUrl ?? null,
+          redirectPageId: input.redirectPageId ?? null,
+        },
+      });
+    }),
+
+  uploadPreview: writeProcedure
+    .input(UploadCatalogPreviewSchema)
+    .mutation(({ ctx, input }) =>
+      Container.get(CatalogPreviewService).upload({
+        ...input,
+        resourceType: "PAGE",
+        organizationId: ctx.activeOrganizationId,
+        uploadedById: ctx.userId,
+      }),
+    ),
+
+  delete: writeProcedure
+    .input(DeletePageCommandSchema)
+    .mutation(async ({ ctx, input }) => {
+      const handler = Container.get(DeletePageCommand);
+      return bus.dispatch(handler, {
+        id: input.id,
+        organizationId: ctx.activeOrganizationId,
+      });
+    }),
+
+  importFromUrl: writeProcedure
+    .input(ImportPageFromUrlSchema)
+    .mutation(async ({ ctx, input }) => {
+      const handler = Container.get(CreateSiteImportCommand);
+      const result = await bus.dispatch(handler, {
+        url: input.url,
+        includeAssets: input.includeAssets,
+        organizationId: ctx.activeOrganizationId,
+        createdById: ctx.userId,
+      });
+
+      await jobQueue.add(
+        "site_import",
+        { jobId: result.jobId },
+        {
+          attempts: 1,
+          removeOnComplete: { age: 3600 },
+          removeOnFail: { age: 86400 },
+        },
+      );
+
+      return result;
+    }),
+
+  importStatus: readProcedure
+    .input(GetSiteImportByJobIdSchema)
+    .query(async ({ input }) => {
+      const jobHandler = Container.get(GetJobByIdQuery);
+      const siteImportHandler = Container.get(GetSiteImportByJobIdQuery);
+
+      const [job, siteImport] = await Promise.all([
+        bus.query(jobHandler, { id: input.jobId }),
+        bus.query(siteImportHandler, { jobId: input.jobId }),
+      ]);
+
+      return {
+        job,
+        siteImport,
+      };
+    }),
+
+  listImports: readProcedure
+    .input(ListSiteImportsSchema)
+    .query(async ({ ctx, input }) => {
+      const handler = Container.get(ListSiteImportsQuery);
+      return bus.query(handler, {
+        organizationId: ctx.activeOrganizationId,
+        search: input?.search,
+        limit: input?.limit,
+      });
+    }),
+});

@@ -1,15 +1,24 @@
+import type { ICommandHandler } from "../../message-bus";
 import { CampaignRepository } from "../repositories";
 
-export class MaterializeOccurrenceCommand {
+type MaterializeOccurrenceInput = {
+  scheduleId: string;
+  sourceCampaignId: string;
+  occurrenceAt: Date;
+  organizationId: string;
+  createdById: string;
+};
+type MaterializeOccurrenceResult = Awaited<
+  ReturnType<CampaignRepository["materializeOccurrence"]>
+>;
+
+export class MaterializeOccurrenceCommand implements ICommandHandler<
+  MaterializeOccurrenceInput,
+  MaterializeOccurrenceResult
+> {
   constructor(private readonly repository: CampaignRepository) {}
 
-  execute(data: {
-    scheduleId: string;
-    sourceCampaignId: string;
-    occurrenceAt: Date;
-    organizationId: string;
-    createdById: string;
-  }) {
+  execute(data: MaterializeOccurrenceInput) {
     return this.repository.materializeOccurrence(
       data.scheduleId,
       data.sourceCampaignId,

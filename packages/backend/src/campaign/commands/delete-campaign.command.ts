@@ -1,9 +1,18 @@
+import type { ICommandHandler } from "../../message-bus";
 import { CampaignRepository } from "../repositories";
 
-export class DeleteCampaignCommand {
+type DeleteCampaignInput = { id: string; organizationId: string };
+type DeleteCampaignResult = Awaited<
+  ReturnType<CampaignRepository["deleteCampaign"]>
+>;
+
+export class DeleteCampaignCommand implements ICommandHandler<
+  DeleteCampaignInput,
+  DeleteCampaignResult
+> {
   constructor(private readonly repository: CampaignRepository) {}
 
-  execute(data: { id: string; organizationId: string }) {
+  execute(data: DeleteCampaignInput) {
     return this.repository.deleteCampaign(data.id, data.organizationId);
   }
 }

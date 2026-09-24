@@ -1,11 +1,9 @@
 import { initializeContainer } from "@next-phish/backend";
-import { connection } from "./connection";
+import type { Redis } from "ioredis";
 
-const encryptionKey = process.env.PAGE_SUBMISSION_ENCRYPTION_KEY;
-if (!encryptionKey) {
-  throw new Error(
-    "PAGE_SUBMISSION_ENCRYPTION_KEY environment variable is not set.",
-  );
+export function initializeWorkerContainer(
+  connection: Redis,
+  encryptionKey: string,
+) {
+  initializeContainer({ encryptionKey, redis: connection });
 }
-
-initializeContainer({ encryptionKey, redis: connection });

@@ -16,7 +16,7 @@ await build({
   target: "node24",
   format: "cjs",
   sourcemap: true,
-  // Prisma loads a generated native client; BullMQ loads Lua files from its package.
-  external: ["@prisma/client", "bullmq"],
+  // These packages load native clients, Lua files or logging workers at runtime.
+  external: ["@prisma/client", "bullmq", "pino"],
   logLevel: "info",
 });

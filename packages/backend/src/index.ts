@@ -79,11 +79,25 @@ export {
   GetUserOrganizationsSchema,
   CreateOrganizationCommandSchema,
   GetOrganizationMembersSchema,
+  OrganizationIdSchema,
+  OrganizationMemberEmailSchema,
+  ResendOrganizationMemberWelcomeSchema,
+  UpdateOrganizationInputSchema,
+  OrganizationDeliveryEnabledSchema,
+  OrganizationIgnoredNetworkSchema,
+  DeleteOrganizationInputSchema,
 } from "./organization";
 export type {
   GetUserOrganizationsInput,
   CreateOrganizationCommandInput,
   GetOrganizationMembersInput,
+  OrganizationIdInput,
+  OrganizationMemberEmailInput,
+  ResendOrganizationMemberWelcomeInput,
+  UpdateOrganizationInput,
+  OrganizationDeliveryEnabledInput,
+  OrganizationIgnoredNetworkInput,
+  DeleteOrganizationInput,
 } from "./organization";
 export { registerOrganizationServices } from "./organization";
 
@@ -207,10 +221,12 @@ export type {
 export {
   CreateSiteImportSchema,
   GetSiteImportByJobIdSchema,
+  ListSiteImportsSchema,
 } from "./site-import";
 export type {
   CreateSiteImportInput,
   GetSiteImportByJobIdInput,
+  ListSiteImportsInput,
 } from "./site-import";
 export { registerSiteImportServices } from "./site-import";
 
@@ -220,8 +236,15 @@ export {
   RevokeOrgApiKeysCommand,
   registerApiKeyServices,
   registerApiKeyAuth,
+  CreateApiKeyInputSchema,
+  DeleteApiKeyInputSchema,
 } from "./api-key";
-export type { CreateApiKeyData, RevokeOrgApiKeysData } from "./api-key";
+export type {
+  CreateApiKeyData,
+  RevokeOrgApiKeysData,
+  CreateApiKeyInput,
+  DeleteApiKeyInput,
+} from "./api-key";
 
 export { R2Client } from "./storage/r2-client";
 

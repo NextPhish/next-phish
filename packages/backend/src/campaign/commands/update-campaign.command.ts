@@ -1,14 +1,23 @@
+import type { ICommandHandler } from "../../message-bus";
 import { CampaignRepository } from "../repositories";
 import type { CampaignDefinitionInput } from "../validations";
 
-export class UpdateCampaignCommand {
+type UpdateCampaignInput = {
+  id: string;
+  organizationId: string;
+  data: CampaignDefinitionInput;
+};
+type UpdateCampaignResult = Awaited<
+  ReturnType<CampaignRepository["updateCampaign"]>
+>;
+
+export class UpdateCampaignCommand implements ICommandHandler<
+  UpdateCampaignInput,
+  UpdateCampaignResult
+> {
   constructor(private readonly repository: CampaignRepository) {}
 
-  execute(data: {
-    id: string;
-    organizationId: string;
-    data: CampaignDefinitionInput;
-  }) {
+  execute(data: UpdateCampaignInput) {
     return this.repository.updateCampaign(
       data.id,
       data.organizationId,
