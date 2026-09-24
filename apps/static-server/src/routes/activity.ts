@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { Container, TrackingService } from "@next-phish/backend";
-import { dedupe, enqueueTrackingEvent } from "./tracking-request";
+import { dedupe, enqueueTrackingEvent } from "../lib/tracking-request";
 
 const activity = new Hono();
 const pixel = Buffer.from("R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=", "base64");

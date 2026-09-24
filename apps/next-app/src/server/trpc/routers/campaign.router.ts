@@ -1,5 +1,4 @@
 import { Container } from "@/src/server/container";
-import { z } from "zod";
 import {
   MessageBus,
   ListCampaignsQuery,
@@ -32,9 +31,13 @@ import {
   CreateScheduleSchema,
   UpdateScheduleSchema,
   DeliveryRepository,
+  SetCampaignDeliveryEnabledSchema,
+  CampaignExecutionSummarySchema,
+  ListCampaignRecipientsSchema,
+  ListCampaignEventsSchema,
 } from "@next-phish/backend";
 import { toRouterPermissions } from "@next-phish/shared";
-import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../procedures";
 
 const bus = Container.get(MessageBus);
 const readProcedure = createPermissionProcedure(
@@ -192,9 +195,7 @@ export const campaignRouter = router({
     ),
 
   setDeliveryEnabled: writeProcedure
-    .input(
-      z.object({ campaignId: z.string().min(1), deliveryEnabled: z.boolean() }),
-    )
+    .input(SetCampaignDeliveryEnabledSchema)
     .mutation(({ ctx, input }) =>
       Container.get(DeliveryRepository).setCampaignDeliveryEnabled(
         ctx.activeOrganizationId,
@@ -210,7 +211,7 @@ export const campaignRouter = router({
   ),
 
   executionSummary: readProcedure
-    .input(z.object({ campaignId: z.string().min(1) }))
+    .input(CampaignExecutionSummarySchema)
     .query(({ ctx, input }) =>
       Container.get(DeliveryRepository).getCampaignExecutionSummary(
         ctx.activeOrganizationId,
@@ -218,13 +219,7 @@ export const campaignRouter = router({
       ),
     ),
   listRecipients: readProcedure
-    .input(
-      z.object({
-        campaignId: z.string().min(1),
-        limit: z.number().int().min(1).max(200).default(50),
-        offset: z.number().int().min(0).default(0),
-      }),
-    )
+    .input(ListCampaignRecipientsSchema)
     .query(({ ctx, input }) =>
       Container.get(DeliveryRepository).listCampaignRecipients({
         ...input,
@@ -232,14 +227,7 @@ export const campaignRouter = router({
       }),
     ),
   listCampaignEvents: readProcedure
-    .input(
-      z.object({
-        campaignId: z.string().min(1),
-        campaignRecipientId: z.string().min(1).optional(),
-        limit: z.number().int().min(1).max(200).default(50),
-        offset: z.number().int().min(0).default(0),
-      }),
-    )
+    .input(ListCampaignEventsSchema)
     .query(({ ctx, input }) =>
       Container.get(DeliveryRepository).listCampaignEvents({
         ...input,
@@ -247,14 +235,7 @@ export const campaignRouter = router({
       }),
     ),
   listDeliveryEvents: readProcedure
-    .input(
-      z.object({
-        campaignId: z.string().min(1),
-        campaignRecipientId: z.string().min(1).optional(),
-        limit: z.number().int().min(1).max(200).default(50),
-        offset: z.number().int().min(0).default(0),
-      }),
-    )
+    .input(ListCampaignEventsSchema)
     .query(({ ctx, input }) =>
       Container.get(DeliveryRepository).listDeliveryEvents({
         ...input,

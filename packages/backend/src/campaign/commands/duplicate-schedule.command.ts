@@ -1,9 +1,22 @@
+import type { ICommandHandler } from "../../message-bus";
 import { CampaignRepository } from "../repositories";
 
-export class DuplicateScheduleCommand {
+type DuplicateScheduleInput = {
+  id: string;
+  organizationId: string;
+  createdById: string;
+};
+type DuplicateScheduleResult = Awaited<
+  ReturnType<CampaignRepository["duplicateSchedule"]>
+>;
+
+export class DuplicateScheduleCommand implements ICommandHandler<
+  DuplicateScheduleInput,
+  DuplicateScheduleResult
+> {
   constructor(private readonly repository: CampaignRepository) {}
 
-  execute(data: { id: string; organizationId: string; createdById: string }) {
+  execute(data: DuplicateScheduleInput) {
     return this.repository.duplicateSchedule(
       data.id,
       data.organizationId,

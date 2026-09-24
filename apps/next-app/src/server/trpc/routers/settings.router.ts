@@ -1,11 +1,11 @@
-import { z } from "zod";
 import { ignoredNetworkSchema } from "@next-phish/shared";
 import {
   Container,
   DeliveryRepository,
+  IgnoredNetworkIdSchema,
   normalizeNetwork,
 } from "@next-phish/backend";
-import { adminProcedure, router } from "../../trpc/procedures";
+import { adminProcedure, router } from "../procedures";
 
 export const settingsRouter = router({
   listIgnoredNetworks: adminProcedure.query(() =>
@@ -25,7 +25,7 @@ export const settingsRouter = router({
     ),
 
   deleteIgnoredNetwork: adminProcedure
-    .input(z.object({ id: z.string().min(1) }))
+    .input(IgnoredNetworkIdSchema)
     .mutation(({ ctx, input }) =>
       Container.get(DeliveryRepository).deleteIgnoredNetwork(
         input.id,

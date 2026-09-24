@@ -24,7 +24,7 @@ import {
   authenticatedProcedure,
   publicProcedure,
   router,
-} from "../../trpc/procedures";
+} from "../procedures";
 
 const bus = Container.get(MessageBus);
 

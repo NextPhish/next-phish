@@ -280,4 +280,6 @@ organization/
 - **Service** — transforms raw data to view types (e.g., `$me` membership)
 - **Query** — orchestrates repository + service, registered via TypeDI
 - **Command** — write operations, registered via TypeDI
-- **tRPC router** — calls queries/commands via message bus
+- **tRPC router** — lives in `apps/next-app/src/server/trpc/routers/<domain>.router.ts` and calls queries/commands via message bus. Import named input schemas from the backend domain validations; keep form and worker payload schemas in `packages/shared`.
+
+Every command and query handler explicitly implements the existing `ICommandHandler<TData, TResult>` or `IQueryHandler<TData, TResult>` from `packages/backend/src/message-bus`. Both require `execute(data): Promise<TResult>`. Reuse schema-inferred inputs and domain result types; the message bus retains typed dispatch/query inference.

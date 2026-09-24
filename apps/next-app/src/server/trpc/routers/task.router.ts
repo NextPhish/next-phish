@@ -24,7 +24,7 @@ import {
   DeleteTaskStatusSchema,
 } from "@next-phish/backend";
 import { toRouterPermissions } from "@next-phish/shared";
-import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../procedures";
 
 const bus = Container.get(MessageBus);
 const read = createPermissionProcedure(toRouterPermissions("tasks", "read"));

@@ -1,6 +1,5 @@
 import { Container } from "@/src/server/container";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 import {
   MessageBus,
   GetUserOrganizationsQuery,
@@ -15,16 +14,22 @@ import {
   GetUserOrganizationsSchema,
   CreateOrganizationCommandSchema,
   GetOrganizationMembersSchema,
+  OrganizationIdSchema,
+  OrganizationMemberEmailSchema,
+  ResendOrganizationMemberWelcomeSchema,
+  UpdateOrganizationInputSchema,
+  OrganizationDeliveryEnabledSchema,
+  OrganizationIgnoredNetworkSchema,
+  IgnoredNetworkIdSchema,
+  DeleteOrganizationInputSchema,
   DeliveryRepository,
   UserRepository,
   normalizeNetwork,
 } from "@next-phish/backend";
-import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../procedures";
 import {
-  ignoredNetworkSchema,
   organizationCreateMemberSchema,
   toRouterPermissions,
-  updateOrganizationSchema,
 } from "@next-phish/shared";
 import { userNotificationQueue } from "@/src/server/queue";
 import { db } from "@next-phish/database";
@@ -58,33 +63,27 @@ export const organizationRouter = router({
       });
     }),
 
-  getById: readProcedure
-    .input(z.object({ organizationId: z.string().min(1) }))
-    .query(async ({ ctx }) => {
-      const handler = Container.get(GetOrganizationByIdQuery);
-      return bus.query(handler, {
-        id: ctx.activeOrganizationId,
-        userId: ctx.userId,
-      });
-    }),
+  getById: readProcedure.input(OrganizationIdSchema).query(async ({ ctx }) => {
+    const handler = Container.get(GetOrganizationByIdQuery);
+    return bus.query(handler, {
+      id: ctx.activeOrganizationId,
+      userId: ctx.userId,
+    });
+  }),
 
-  analytics: readProcedure
-    .input(z.object({ organizationId: z.string().min(1) }))
-    .query(({ ctx }) => {
-      const handler = Container.get(GetOrganizationAnalyticsQuery);
-      return bus.query(handler, {
-        organizationId: ctx.activeOrganizationId,
-      });
-    }),
+  analytics: readProcedure.input(OrganizationIdSchema).query(({ ctx }) => {
+    const handler = Container.get(GetOrganizationAnalyticsQuery);
+    return bus.query(handler, {
+      organizationId: ctx.activeOrganizationId,
+    });
+  }),
 
-  dashboard: readProcedure
-    .input(z.object({ organizationId: z.string().min(1) }))
-    .query(({ ctx }) => {
-      const handler = Container.get(GetOrganizationDashboardQuery);
-      return bus.query(handler, {
-        organizationId: ctx.activeOrganizationId,
-      });
-    }),
+  dashboard: readProcedure.input(OrganizationIdSchema).query(({ ctx }) => {
+    const handler = Container.get(GetOrganizationDashboardQuery);
+    return bus.query(handler, {
+      organizationId: ctx.activeOrganizationId,
+    });
+  }),
 
   listMembers: readProcedure
     .input(GetOrganizationMembersSchema)
@@ -152,16 +151,7 @@ export const organizationRouter = router({
     }),
 
   lookupMemberEmail: createMemberProcedure
-    .input(
-      z.object({
-        organizationId: z.string().min(1),
-        email: z
-          .string()
-          .trim()
-          .email()
-          .transform((value) => value.toLowerCase()),
-      }),
-    )
+    .input(OrganizationMemberEmailSchema)
     .mutation(async ({ ctx, input }) => {
       const user = await db.user.findUnique({
         where: { email: input.email },
@@ -186,16 +176,7 @@ export const organizationRouter = router({
     }),
 
   addExistingMember: createMemberProcedure
-    .input(
-      z.object({
-        organizationId: z.string().min(1),
-        email: z
-          .string()
-          .trim()
-          .email()
-          .transform((value) => value.toLowerCase()),
-      }),
-    )
+    .input(OrganizationMemberEmailSchema)
     .mutation(async ({ ctx, input }) => {
       const user = await db.user.findUnique({
         where: { email: input.email },
@@ -254,12 +235,7 @@ export const organizationRouter = router({
     }),
 
   resendMemberWelcome: createMemberProcedure
-    .input(
-      z.object({
-        organizationId: z.string().min(1),
-        userId: z.string().min(1),
-      }),
-    )
+    .input(ResendOrganizationMemberWelcomeSchema)
     .mutation(async ({ ctx, input }) => {
       const member = await db.member.findUnique({
         where: {
@@ -316,9 +292,7 @@ export const organizationRouter = router({
     }),
 
   update: writeProcedure
-    .input(
-      updateOrganizationSchema.extend({ organizationId: z.string().min(1) }),
-    )
+    .input(UpdateOrganizationInputSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(UpdateOrganizationCommand);
       return bus.dispatch(handler, {
@@ -330,7 +304,7 @@ export const organizationRouter = router({
     }),
 
   setDeliveryEnabled: writeProcedure
-    .input(z.object({ deliveryEnabled: z.boolean() }))
+    .input(OrganizationDeliveryEnabledSchema)
     .mutation(({ ctx, input }) =>
       Container.get(DeliveryRepository).setOrganizationDeliveryEnabled(
         ctx.activeOrganizationId,
@@ -345,7 +319,7 @@ export const organizationRouter = router({
   ),
 
   createIgnoredNetwork: writeProcedure
-    .input(ignoredNetworkSchema.extend({ organizationId: z.string().min(1) }))
+    .input(OrganizationIgnoredNetworkSchema)
     .mutation(({ ctx, input }) => {
       const normalized = normalizeNetwork(input.network).canonical;
       return Container.get(DeliveryRepository).createIgnoredNetwork({
@@ -364,7 +338,7 @@ export const organizationRouter = router({
   ),
 
   deleteIgnoredNetwork: writeProcedure
-    .input(z.object({ id: z.string().min(1) }))
+    .input(IgnoredNetworkIdSchema)
     .mutation(({ ctx, input }) =>
       Container.get(DeliveryRepository).deleteIgnoredNetwork(
         input.id,
@@ -374,7 +348,7 @@ export const organizationRouter = router({
     ),
 
   delete: writeProcedure
-    .input(z.object({ organizationId: z.string() }))
+    .input(DeleteOrganizationInputSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(DeleteOrganizationCommand);
       return bus.dispatch(handler, {

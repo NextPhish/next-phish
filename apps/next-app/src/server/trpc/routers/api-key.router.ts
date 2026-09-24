@@ -1,27 +1,18 @@
-import { z } from "zod";
 import { auth } from "@/src/server/auth";
 import {
   Container,
   MessageBus,
   CreateApiKeyCommand,
+  CreateApiKeyInputSchema,
+  DeleteApiKeyInputSchema,
 } from "@next-phish/backend";
-import { protectedProcedure, router } from "../../trpc/procedures";
+import { protectedProcedure, router } from "../procedures";
 
 const bus = Container.get(MessageBus);
 
 export const apiKeyRouter = router({
   create: protectedProcedure
-    .input(
-      z.object({
-        name: z.string().max(32).optional(),
-        organizationIds: z.array(z.string()).optional(),
-        expiresInDays: z.number().int().min(1).max(365).optional(),
-        permissions: z.any().optional(),
-        rateLimitEnabled: z.boolean().optional(),
-        rateLimitMax: z.number().int().min(1).optional(),
-        rateLimitTimeWindow: z.number().int().min(1000).optional(),
-      }),
-    )
+    .input(CreateApiKeyInputSchema)
     .mutation(async ({ ctx, input }) => {
       const command = Container.get(CreateApiKeyCommand);
       return bus.dispatch(command, {
@@ -50,11 +41,7 @@ export const apiKeyRouter = router({
   }),
 
   delete: protectedProcedure
-    .input(
-      z.object({
-        keyId: z.string(),
-      }),
-    )
+    .input(DeleteApiKeyInputSchema)
     .mutation(async ({ ctx, input }) => {
       const result = await auth.api.deleteApiKey({
         body: {

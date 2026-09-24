@@ -26,7 +26,7 @@ import {
   createPermissionProcedure,
   protectedProcedure,
   router,
-} from "../../trpc/procedures";
+} from "../procedures";
 import { importQueue } from "../../queue";
 import { toRouterPermissions } from "@next-phish/shared";
 

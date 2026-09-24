@@ -310,5 +310,24 @@ export const MaterializeOccurrenceSchema = z.object({
 
 export const CampaignLifecycleSchema = z.object({ id: z.string().min(1) });
 
+export const SetCampaignDeliveryEnabledSchema = z.object({
+  campaignId: z.string().min(1),
+  deliveryEnabled: z.boolean(),
+});
+
+export const CampaignExecutionSummarySchema = z.object({
+  campaignId: z.string().min(1),
+});
+
+export const ListCampaignRecipientsSchema = z.object({
+  campaignId: z.string().min(1),
+  limit: z.number().int().min(1).max(200).default(50),
+  offset: z.number().int().min(0).default(0),
+});
+
+export const ListCampaignEventsSchema = ListCampaignRecipientsSchema.extend({
+  campaignRecipientId: z.string().min(1).optional(),
+});
+
 export type CampaignDefinitionInput = z.infer<typeof CreateCampaignSchema>;
 export type ScheduleDefinitionInput = z.infer<typeof CreateScheduleSchema>;

@@ -1,16 +1,16 @@
 import { router } from "./procedures";
-import { userRouter } from "../modules/user/user.router";
-import { organizationRouter } from "../modules/organization/organization.router";
-import { emailTemplateRouter } from "../modules/email-template/email-template.router";
-import { fileRouter } from "../modules/file/file.router";
-import { pageRouter } from "../modules/page/page.router";
-import { jobRouter } from "../modules/job/job.router";
-import { apiKeyRouter } from "../modules/api-key/api-key.router";
-import { targetGroupRouter } from "../modules/target-group/target-group.router";
-import { mailSendingRouter } from "../modules/mail-sending/mail-sending.router";
-import { campaignRouter } from "../modules/campaign/campaign.router";
-import { taskRouter } from "../modules/task/task.router";
-import { settingsRouter } from "../modules/settings/settings.router";
+import { userRouter } from "./routers/user.router";
+import { organizationRouter } from "./routers/organization.router";
+import { emailTemplateRouter } from "./routers/email-template.router";
+import { fileRouter } from "./routers/file.router";
+import { pageRouter } from "./routers/page.router";
+import { jobRouter } from "./routers/job.router";
+import { apiKeyRouter } from "./routers/api-key.router";
+import { targetGroupRouter } from "./routers/target-group.router";
+import { mailSendingRouter } from "./routers/mail-sending.router";
+import { campaignRouter } from "./routers/campaign.router";
+import { taskRouter } from "./routers/task.router";
+import { settingsRouter } from "./routers/settings.router";
 
 export const appRouter = router({
   user: userRouter,

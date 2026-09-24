@@ -17,7 +17,7 @@ import {
   SendTestEmailSchema,
   VerifyConnectionSchema,
 } from "@next-phish/backend";
-import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../procedures";
 import { toRouterPermissions } from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);

@@ -10,6 +10,8 @@ export {
   OutboxStatus,
 } from "./execution.enums";
 export { DeliveryRepository } from "./repositories/delivery.repository";
+export { IgnoredNetworkIdSchema } from "./validations";
+export type { IgnoredNetworkIdInput } from "./validations";
 export { OutboxRepository } from "./repositories/outbox.repository";
 export { ScheduleExecutionRepository } from "./repositories/schedule-execution.repository";
 export {

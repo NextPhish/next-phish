@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { Container } from "@/src/server/container";
 import {
   MessageBus,
@@ -19,8 +18,10 @@ import {
   ImportPageFromUrlSchema,
   CatalogPreviewService,
   UploadCatalogPreviewSchema,
+  GetSiteImportByJobIdSchema,
+  ListSiteImportsSchema,
 } from "@next-phish/backend";
-import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../procedures";
 import { jobQueue } from "../../queue";
 import { toRouterPermissions } from "@next-phish/shared";
 
@@ -130,7 +131,7 @@ export const pageRouter = router({
     }),
 
   importStatus: readProcedure
-    .input(z.object({ jobId: z.string() }))
+    .input(GetSiteImportByJobIdSchema)
     .query(async ({ input }) => {
       const jobHandler = Container.get(GetJobByIdQuery);
       const siteImportHandler = Container.get(GetSiteImportByJobIdQuery);
@@ -147,14 +148,7 @@ export const pageRouter = router({
     }),
 
   listImports: readProcedure
-    .input(
-      z
-        .object({
-          search: z.string().optional(),
-          limit: z.number().min(1).max(50).default(20),
-        })
-        .optional(),
-    )
+    .input(ListSiteImportsSchema)
     .query(async ({ ctx, input }) => {
       const handler = Container.get(ListSiteImportsQuery);
       return bus.query(handler, {

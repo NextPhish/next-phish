@@ -1,9 +1,18 @@
+import type { ICommandHandler } from "../../message-bus";
 import { CampaignRepository } from "../repositories";
 
-export class CancelScheduleCommand {
+type CancelScheduleInput = { id: string; organizationId: string };
+type CancelScheduleResult = Awaited<
+  ReturnType<CampaignRepository["cancelSchedule"]>
+>;
+
+export class CancelScheduleCommand implements ICommandHandler<
+  CancelScheduleInput,
+  CancelScheduleResult
+> {
   constructor(private readonly repository: CampaignRepository) {}
 
-  execute(data: { id: string; organizationId: string }) {
+  execute(data: CancelScheduleInput) {
     return this.repository.cancelSchedule(data.id, data.organizationId);
   }
 }

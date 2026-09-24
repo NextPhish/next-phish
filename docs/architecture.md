@@ -38,18 +38,10 @@ next-phish/
 │   │   │   │   ├── queue.ts         # BullMQ connection + queue/worker factories
 │   │   │   │   ├── container.ts     # TypeDI global container setup
 │   │   │   │   ├── trpc/
-│   │   │   │   │   ├── router.ts    # Root tRPC router (merges modules)
+│   │   │   │   │   ├── router.ts    # Root tRPC router
 │   │   │   │   │   ├── context.ts   # tRPC context (injects auth session)
-│   │   │   │   │   └── procedures.ts # publicProcedure, protectedProcedure
-│   │   │   │   ├── modules/         # Domain modules (DDD)
-│   │   │   │   │   └── <domain>/    # e.g. auth, user, campaign
-│   │   │   │   │       ├── enums/   # Zod enums / TS const enums
-│   │   │   │   │       ├── types/   # Domain-specific TS types
-│   │   │   │   │       ├── services/ # @Service() business logic
-│   │   │   │   │       ├── commands/ # Write operations (Zod-validated input)
-│   │   │   │   │       ├── queries/  # Read operations (Zod-validated input)
-│   │   │   │   │       ├── repositories/ # Prisma data access layer
-│   │   │   │   │       └── transformers/ # class-transformer DTOs
+│   │   │   │   │   ├── procedures.ts # Auth and permission middleware
+│   │   │   │   │   └── routers/     # One <domain>.router.ts adapter per domain
 │   │   │   │   └── lib/             # Shared server utilities
 │   │   │   ├── components/          # Atomic design system
 │   │   │   │   ├── atoms/           # Smallest UI primitives
@@ -87,6 +79,15 @@ next-phish/
 │       └── package.json
 │
 ├── packages/
+│   ├── backend/                     # Shared server domain modules
+│   │   └── src/<domain>/
+│   │       ├── commands/            # ICommandHandler write operations
+│   │       ├── queries/             # IQueryHandler read operations
+│   │       ├── repositories/        # Prisma data access
+│   │       ├── services/            # Domain logic
+│   │       ├── validations/         # Named server input schemas
+│   │       └── types/               # Domain types
+│   │
 │   ├── database/                    # Prisma schema + generated client
 │   │   ├── prisma/schema.prisma     # Database models
 │   │   ├── src/client.ts            # PrismaClient singleton
@@ -125,9 +126,12 @@ next-phish/
 ### Dependency flow
 
 ```
+  apps/next-app  ──►  packages/backend
   apps/next-app  ──►  packages/database
   apps/next-app  ──►  packages/shared
+  apps/static-server ──►  packages/backend
   apps/static-server ──►  packages/database
+  apps/worker    ──►  packages/backend
   apps/worker    ──►  packages/database
   apps/worker    ──►  packages/shared
 ```
@@ -168,6 +172,7 @@ All common operations run from the project root via `turbo`. Examples:
 - `publicProcedure` — no auth required.
 - `protectedProcedure` — requires valid BetterAuth session (injected via context).
 - BetterAuth routes live at `/api/auth/*` as a single catch-all handler.
+- Domain routers live directly in `apps/next-app/src/server/trpc/routers/`. They adapt authenticated context to backend calls; domain commands, queries and validation schemas live in `packages/backend/src/<domain>/`. Do not recreate app-level domain folders around a single router.
 - The client tRPC provider isolates React Query caches by signed-in user and active organization. Switching either scope creates a fresh query client and remounts consumers/subscriptions, including procedures whose organization is inferred from the session. Previous-scope queries are cancelled and their cache is discarded.
 
 ### Database: Prisma
@@ -180,7 +185,7 @@ All common operations run from the project root via `turbo`. Examples:
 
 - Every command, query, and tRPC procedure input is validated with Zod.
 - Types are inferred from Zod schemas (no manual type duplication).
-- Shared Zod schemas live in `packages/shared` and are consumed by tRPC procedures and workers.
+- Schemas shared with client forms or workers live in `packages/shared`. Server operation schemas live in backend domain `validations/` and are exported through `@next-phish/backend`; routers reference named schemas instead of defining or extending them inline.
 
 ### Dependency Injection: TypeDI
 

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { z } from "zod";
 
 const mocks = vi.hoisted(() => ({
   permission: true,
@@ -40,7 +39,11 @@ vi.mock("@/src/server/trpc/context", () => ({
     organizationId ?? "org-1",
 }));
 
-vi.mock("@next-phish/backend", () => {
+vi.mock("@next-phish/backend", async () => {
+  const organizationSchemas =
+    await import("../../../../packages/backend/src/organization/validations");
+  const deliverySchemas =
+    await import("../../../../packages/backend/src/delivery/validations");
   class MessageBus {}
   class OrganizationRepository {}
   class UserRepository {}
@@ -55,6 +58,8 @@ vi.mock("@next-phish/backend", () => {
   class DeleteOrganizationCommand {}
   class UpdateOrganizationCommand {}
   return {
+    ...organizationSchemas,
+    ...deliverySchemas,
     MessageBus,
     OrganizationRepository,
     UserRepository,
@@ -68,9 +73,6 @@ vi.mock("@next-phish/backend", () => {
     CreateUserCommand,
     DeleteOrganizationCommand,
     UpdateOrganizationCommand,
-    GetUserOrganizationsSchema: z.object({}).passthrough(),
-    CreateOrganizationCommandSchema: z.object({}).passthrough(),
-    GetOrganizationMembersSchema: z.object({}).passthrough(),
     normalizeNetwork: (value: string) => value,
   };
 });
@@ -108,7 +110,7 @@ vi.mock("../../../../packages/database/src/client", () => ({
   },
 }));
 
-import { organizationRouter } from "../../../../apps/next-app/src/server/modules/organization/organization.router";
+import { organizationRouter } from "../../../../apps/next-app/src/server/trpc/routers/organization.router";
 
 function caller() {
   return organizationRouter.createCaller({
